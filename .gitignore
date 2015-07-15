@@ -1,12 +1,17 @@
 .gradle
 build/
 
+#Ignore libs
+libs/
+
 #Settings
 src/main/resources/client_secret.json
 
 # Intellij 
 .idea
 JDrive.iml
+JDrive.ipr
+JDrive.iws
 
 # Ignore Gradle GUI config
 gradle-app.setting

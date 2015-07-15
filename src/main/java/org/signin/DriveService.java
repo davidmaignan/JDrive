@@ -91,8 +91,8 @@ public class DriveService {
         Credential credential = new AuthorizationCodeInstalledApp(
                 flow, new LocalServerReceiver()).authorize("user");
 
-        System.out.println("Credentials saved to " + DATA_STORE_DIR.getAbsolutePath());
-        
+//        System.out.println("Credentials saved to " + DATA_STORE_DIR.getAbsolutePath());
+
         return credential;
     }
 
@@ -107,5 +107,4 @@ public class DriveService {
                 .setApplicationName(APPLICATION_NAME)
                 .build();
     }
-
 }

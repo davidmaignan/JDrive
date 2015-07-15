@@ -1,58 +1,109 @@
 package org.main;
 
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
-import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
-import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.util.store.FileDataStoreFactory;
-
-import com.google.api.services.drive.DriveScopes;
-import com.google.api.services.drive.model.*;
 import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.Drive.Children;
+import com.google.api.services.drive.model.ChildList;
+import com.google.api.services.drive.model.ChildReference;
+import com.google.api.services.drive.model.File;
+import com.google.api.services.drive.model.FileList;
+import org.api.file.FileService;
+import org.model.TreeNode;
 import org.signin.DriveService;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Arrays;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 
 /**
  * JDriveMain class
- *
+ * <p/>
  * David Maignan <davidmaignan@gmail.com>
  */
 public class JDriveMain {
 
     /**
      * Main
+     *
      * @param args
      * @throws IOException
      * @throws Throwable
      */
     public static void main(String[] args) throws IOException, Throwable {
+
         // Build a new authorized API client service.
         DriveService driveService = new DriveService();
-        Drive service = driveService.getDrive();
+        Drive service             = driveService.getDrive();
+        FileService fileService   = new FileService(service);
 
-        // Print the names and IDs for up to 10 files.
-        FileList result = service.files().list()
-                .setMaxResults(10)
-                .execute();
-        List<File> files = result.getItems();
-        if (files == null || files.size() == 0) {
-            System.out.println("No files found.");
-        } else {
-            System.out.println("Files:");
-            for (File file : files) {
-                System.out.printf("%s (%s)\n", file.getTitle(), file.getId());
+        File file = service.files().get("root").execute();
+
+        System.out.println("Title: " + file.getTitle());
+        System.out.println("Description: " + file.getDescription());
+
+//        Children.List request = service.children().list("root");
+//        ChildList children = request.execute();
+//        String id = children.getItems().get(1).getId();
+//        File file1 = fileService.getFile(id);
+//        System.out.println(file1);
+
+        List<File> result = new ArrayList<>();
+
+        Drive.Files.List request = service.files().list().setMaxResults(50);
+
+        do {
+            try {
+                FileList files = request.execute();
+
+                result.addAll(files.getItems());
+
+                System.out.println(result.size());
+
+                request.setPageToken(files.getNextPageToken());
+            } catch (IOException e) {
+                System.out.println("An error occurred: " + e);
+                request.setPageToken(null);
             }
+        } while (request.getPageToken() != null &&
+                request.getPageToken().length() > 0 && result.size() < 100);
+
+        for (File f : result) {
+            System.out.println(f);
+//            if(f.getMimeType().equals("application/vnd.google-apps.folder")) {
+//                System.out.format("Folder: %s\n", f.getTitle());
+//            } else {
+//                System.out.format("File: %s\n", f.getTitle());
+//            }
         }
+
+//        do {
+//            try {
+//
+//
+//                for (ChildReference child : children.getItems()) {
+//                    System.out.format("File Id: %s\n", child);
+//                }
+//                request.setPageToken(children.getNextPageToken());
+//            } catch (IOException e) {
+//                System.out.println("An error occurred: " + e);
+//                request.setPageToken(null);
+//            }
+//        } while (request.getPageToken() != null &&
+//                request.getPageToken().length() > 0);
+
+//        FileList result = service.files().list()
+//                .setMaxResults(10)
+//                .execute();
+//
+//        List<File> files = result.getItems();
+//        if (files == null || files.size() == 0) {
+//            System.out.println("No files found.");
+//        } else {
+//            for (File file : files) {
+//                System.out.printf("%s (%s)\n", file.getTitle(), file.getId());
+//            }
+//        }
     }
 }
