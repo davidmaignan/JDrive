@@ -1,6 +1,9 @@
 .gradle
 build/
 
+#Settings
+src/main/resources/client_secret.json
+
 # Intellij 
 .idea
 JDrive.iml
