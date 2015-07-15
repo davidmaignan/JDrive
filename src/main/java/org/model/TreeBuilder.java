@@ -59,8 +59,8 @@ public class TreeBuilder {
             root.setId(node.getParentId());
 
             result = true;
-
-        } else if (root.getId().equals(node.getParentId())){
+            
+        } else if (node.getParentId() != null && root.getId() != null && root.getId().equals(node.getParentId())){
             root.addChild(node);
 
             result = true;
@@ -88,7 +88,10 @@ public class TreeBuilder {
      * @param node
      */
     public static void printTree(TreeNode node) {
+        System.out.println(node);
+
         List<TreeNode> children = node.getChildren();
+
         if(! children.isEmpty()) {
             for(TreeNode child : children){
                 printTree(child);

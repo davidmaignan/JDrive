@@ -35,7 +35,7 @@ public class TreeNode implements Iterable<TreeNode>{
         this.data        = file;
         this.id          = file.getId();
         this.parentId    = file.getParents().get(0).getId();
-        this.isFolder    = false;
+        this.isFolder    = true;
         this.isRoot      = false;
         this.isSuperRoot = false;
         this.title       = this.data.getTitle();
@@ -110,7 +110,12 @@ public class TreeNode implements Iterable<TreeNode>{
 
     @Override
     public String toString() {
-        return String.format("TreeNode[ id: %10s, parentid %20s, children: %d\n", this.id, this.parentId, this.children.size());
+        return String.format(
+                "TreeNode[ title: %10s, isFolder: %5b, parent %10s, children: %d\n",
+                this.title,
+                this.isFolder,
+                (this.parent != null) ? this.parent.getTitle() : null,
+                this.children.size());
     }
 
     public void setId(String id) {
