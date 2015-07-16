@@ -1,21 +1,15 @@
 package org.main;
 
 import com.google.api.services.drive.Drive;
-import com.google.api.services.drive.Drive.Children;
-import com.google.api.services.drive.model.ChildList;
-import com.google.api.services.drive.model.ChildReference;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 import org.api.file.FileService;
 import org.model.TreeBuilder;
-import org.model.TreeNode;
 import org.signin.DriveService;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeMap;
-import java.util.TreeSet;
 
 
 /**
@@ -41,6 +35,7 @@ public class JDriveMain {
 
         List<File> result = new ArrayList<>();
 
+
         Drive.Files.List request = service.files().list().setMaxResults(1000);
 
         do {
@@ -55,7 +50,7 @@ public class JDriveMain {
                 System.out.println("An error occurred: " + e);
                 request.setPageToken(null);
             }
-        } while (request.getPageToken() != null && request.getPageToken().length() > 0);
+        } while (request.getPageToken() != null && request.getPageToken().length() > 0 && result.size() < 20);
 
         System.out.println(result.size());
 
