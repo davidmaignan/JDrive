@@ -3,6 +3,8 @@ package org.model;
 import java.util.*;
 import java.util.function.Consumer;
 import com.google.api.services.drive.model.File;
+import com.google.api.services.drive.model.ParentReference;
+import com.google.api.services.drive.model.User;
 
 /**
  *  Tree structure to represent the Drive file structure
@@ -21,32 +23,43 @@ public class TreeNode implements Iterable<TreeNode>{
     private boolean isFolder;
     private boolean isRoot;
     private boolean isSuperRoot;
+    private boolean isAuthenticatedUser;
 
+    /**
+     * No args constructor
+     */
     public TreeNode(){
         super();
-        this.title       = "root";
-        this.isFolder    = true;
-        this.isSuperRoot = true;
-        this.isRoot      = false;
-        children         = new ArrayList<>();
+        this.title               = "root";
+        this.isFolder            = true;
+        this.isSuperRoot         = true;
+        this.isRoot              = false;
+        this.isAuthenticatedUser = true;
+        this.children            = new ArrayList<>();
     }
 
+    /**
+     * Constructor with file argument
+     *
+     * @param file
+     */
     public TreeNode(File file) {
-        this.data        = file;
-        this.id          = file.getId();
-        this.parentId    = file.getParents().get(0).getId();
-        this.isFolder    = true;
-        this.isRoot      = false;
-        this.isSuperRoot = false;
-        this.title       = this.data.getTitle();
-        children         = new ArrayList<>();
+        this.data                = file;
+        this.id                  = file.getId();
+        this.parentId            = this.getParentReferenceId();
+        this.isFolder            = true;
+        this.isRoot              = false;
+        this.isSuperRoot         = false;
+        this.title               = this.data.getTitle();
+        this.isAuthenticatedUser = this.getOwnerShip();
+        this.children            = new ArrayList<>();
 
         if ( ! file.getMimeType().equals(FOLDER_STRING)) {
             isFolder = false;
         }
 
-        if(file.getParents().get(0).getIsRoot()) {
-            this.isRoot = true;
+        if(this.parentId != null) {
+            this.isRoot = this.getParentReference().getIsRoot();
         }
     }
 
@@ -108,14 +121,8 @@ public class TreeNode implements Iterable<TreeNode>{
         return isSuperRoot;
     }
 
-    @Override
-    public String toString() {
-        return String.format(
-                "TreeNode[ title: %10s, isFolder: %5b, parent %10s, children: %d\n",
-                this.title,
-                this.isFolder,
-                (this.parent != null) ? this.parent.getTitle() : null,
-                this.children.size());
+    public boolean isAuthenticatedUser() {
+        return isAuthenticatedUser;
     }
 
     public void setId(String id) {
@@ -131,6 +138,16 @@ public class TreeNode implements Iterable<TreeNode>{
     }
 
     @Override
+    public String toString() {
+        return String.format(
+                "TreeNode[ title: %10s, isFolder: %5b, parent %10s, children: %d\n",
+                this.title,
+                this.isFolder,
+                (this.parent != null) ? this.parent.getTitle() : null,
+                this.children.size());
+    }
+
+    @Override
     public Iterator<TreeNode> iterator() {
         return null;
     }
@@ -142,5 +159,77 @@ public class TreeNode implements Iterable<TreeNode>{
     @Override
     public Spliterator<TreeNode> spliterator() {
         return null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TreeNode treeNode = (TreeNode) o;
+
+        if (!id.equals(treeNode.id)) return false;
+        if (!parentId.equals(treeNode.parentId)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id.hashCode();
+        result = 31 * result + parentId.hashCode();
+        return result;
+    }
+
+    /**
+     * Get first parent reference
+     *
+     * @return ParentReference
+     */
+    private ParentReference getParentReference() {
+        if (data.getParents().size() > 0) {
+            return data.getParents().get(0);
+        }
+
+        return null;
+    }
+
+    /**
+     * Get first parent id
+     *
+     * @return String
+     */
+    private String getParentReferenceId(){
+        if(this.getParentReference() != null) {
+            return this.getParentReference().getId();
+        }
+
+        return null;
+    }
+
+    /**
+     * Get owner of the file
+     *
+     * @return User
+     */
+    private User getOwner(){
+        if(data.getOwners().size() > 0) {
+            return data.getOwners().get(0);
+        }
+
+        return null;
+    }
+
+    /**
+     * Get if file is own by authenticated user
+     *
+     * @return boolean
+     */
+    private boolean getOwnerShip(){
+        if (this.getOwner() != null) {
+            return this.getOwner().getIsAuthenticatedUser();
+        }
+
+        return false;
     }
 }

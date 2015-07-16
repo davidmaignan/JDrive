@@ -21,8 +21,10 @@ public class TreeBuilder {
 
         this.fileList           = list;
         List<TreeNode> nodeList = this.getNodeList(list);
+        boolean exit            = false;
+        int total               = list.size();
 
-        while (! nodeList.isEmpty()) {
+        while (! nodeList.isEmpty() && ! exit) {
             ArrayList<TreeNode> tmp = new ArrayList<>();
 
             for (TreeNode node : nodeList) {
@@ -31,7 +33,15 @@ public class TreeBuilder {
                 }
             }
 
+            if (tmp.size() == 0)
+                exit = true;
+
             nodeList.removeAll(tmp);
+
+            //No file is at the root level (for the first loop)
+            if (total == list.size()) {
+                exit = true;
+            }
         }
     }
 
@@ -54,13 +64,19 @@ public class TreeBuilder {
     private boolean insertNode(TreeNode root, TreeNode node) {
         Boolean result = false;
 
-        if (node.isRoot()) {
+        if (! node.isAuthenticatedUser()) {
+            //@todo shared with me files/folder
+            result = true;
+
+        } else if (node.isRoot()) {
             root.addChild(node);
             root.setId(node.getParentId());
 
             result = true;
             
-        } else if (node.getParentId() != null && root.getId() != null && root.getId().equals(node.getParentId())){
+        } else if (node.getParentId() != null
+                && root.getId() != null
+                && root.getId().equals(node.getParentId())){
             root.addChild(node);
 
             result = true;

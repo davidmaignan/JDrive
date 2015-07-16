@@ -3,6 +3,7 @@ package org.model;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.ParentReference;
+import com.google.api.services.drive.model.User;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -29,7 +30,22 @@ public class TreeBuilderTest {
         return parentReference;
     }
 
-    @Test
+    private ArrayList<User> getOwnerList(String displayName, boolean isAuthenticatedUser) {
+        ArrayList<User> ownerList = new ArrayList<>();
+        ownerList.add(this.getOwner(displayName, isAuthenticatedUser));
+
+        return ownerList;
+    }
+
+    private User getOwner(String displayName, boolean isAuthenticatedUser) {
+        User owner = new User();
+        owner.setDisplayName(displayName);
+        owner.setIsAuthenticatedUser(isAuthenticatedUser);
+
+        return owner;
+    }
+
+    @Test(timeout = 1000)
     public void testGetRoot() throws Exception {
         List<File> liste    = new ArrayList<>();
         TreeBuilder treeBuilder = new TreeBuilder(liste);
@@ -39,7 +55,7 @@ public class TreeBuilderTest {
         assertEquals(null, root.getId());
     }
 
-    @Test
+    @Test(timeout = 1000)
     public void testDirectoryStructure() throws Exception {
 
         ArrayList<File>listFile = new ArrayList<>();
@@ -55,6 +71,8 @@ public class TreeBuilderTest {
                 "0AHRgC7jH8BP_Uk9PVA", true
         ));
 
+        folder1.setOwners(this.getOwnerList("David Maignan", true));
+
         listFile.add(folder1);
 
         File file1 = new File();
@@ -66,6 +84,8 @@ public class TreeBuilderTest {
                 "0B3mMPOF_fWirfk9xWW5iX09fWkdwR3I4dnV5cnV3Y1l4NDNkVUd6TzJfdGJHRVFSc2ctdkE",
                 false
         ));
+
+        file1.setOwners(this.getOwnerList("David Maignan", true));
 
         listFile.add(file1);
 
@@ -79,6 +99,8 @@ public class TreeBuilderTest {
                 "0B3mMPOF_fWirfk9xWW5iX09fWkdwR3I4dnV5cnV3Y1l4NDNkVUd6TzJfdGJHRVFSc2ctdkE", false
         ));
 
+        folder2.setOwners(this.getOwnerList("David Maignan", true));
+
         listFile.add(folder2);
 
         File file2 = new File();
@@ -90,6 +112,8 @@ public class TreeBuilderTest {
                 "0B3mMPOF_fWirfnc5QXhhR2l4SXMyeVBraGRoZVYtdVVZVEt3SnFZcVZEU2wwQ0FsSGQtZUU",
                 false
         ));
+
+        file2.setOwners(this.getOwnerList("David Maignan", true));
 
         listFile.add(file2);
 
@@ -109,9 +133,42 @@ public class TreeBuilderTest {
         assertEquals("file2", expected2Folder.getChildren().get(0).getTitle());
     }
 
-    /**
-     *
-     * @param node
-     */
+    @Test(timeout = 10000)
+    public void testOwnerShip(){
+        ArrayList<File>listFile = new ArrayList<>();
 
+        File file1 = new File();
+        file1.setTitle("file1");
+        file1.setId("1K2T_qDWBhlyk_OVL9Q6JYmQZVcIo-Y9HSKz54RAMPhM");
+        file1.setMimeType("application/vnd.google-apps.document");
+
+        file1.setParents(this.getParentReferenceList(
+                "0AHRgC7jH8BP_Uk9PVA",
+                true
+        ));
+
+        file1.setOwners(this.getOwnerList("David Maignan", true));
+
+        listFile.add(file1);
+
+
+        File file2 = new File();
+        file2.setTitle("file2");
+        file2.setId("0B3mMPOF_fWirfk9xWW5iX09fWkdwR3I4dnV5cnV3Y1l4NDNkVUd6TzJfdGJHRVFSc2ctdkE");
+        file2.setMimeType("application/vnd.google-apps.folder");
+
+        file2.setParents(this.getParentReferenceList(
+                "0AHRgC7jH8BP_Uk9PVA",
+                true
+        ));
+
+        file2.setOwners(this.getOwnerList("David Maignan", false));
+
+        listFile.add(file2);
+
+        TreeBuilder treeBuilder = new TreeBuilder(listFile);
+        TreeNode root = treeBuilder.getRoot();
+
+        assertEquals(1, root.getChildren().size());
+    }
 }
