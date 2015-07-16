@@ -18,7 +18,7 @@ public class ReaderTest {
     public void testPropertyExist() throws Exception{
         Reader configReader = new Reader();
 
-        assertEquals("JDrive", configReader.getProperty("rootFolder"));
+        assertEquals("/Users/david/JDrive", configReader.getProperty("rootFolder"));
     }
 
     @Test(timeout = 1000, expected = Exception.class)

@@ -1,8 +1,8 @@
 package org.config;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Properties;
 
 /**
@@ -17,7 +17,9 @@ public class Reader {
 
     public Reader() throws IOException, FileNotFoundException{
         // Load client secrets.
-        InputStream inputStream = this.getClass().getResourceAsStream(propertyFile);
+
+
+        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("config.properties");
         propertyList = new Properties();
 
         if (inputStream == null) {

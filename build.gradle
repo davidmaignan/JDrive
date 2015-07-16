@@ -51,6 +51,13 @@ dependencies {
     compile     'com.google.api-client:google-api-client:1.20.0'
     compile     'com.google.oauth-client:google-oauth-client-jetty:1.20.0'
     compile     'com.google.apis:google-api-services-drive:v2-rev170-1.20.0'
-    testCompile 'junit:junit:4.12'
+    compile     'com.google.jimfs:jimfs:1.0'
+    compile     'junit:junit:4.12'
     compile     fileTree( dir: 'libs', include: '*.jar')
+}
+
+sourceSets {
+    main {
+        output.resourcesDir = "build/resources/"
+    }
 }
