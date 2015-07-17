@@ -4,8 +4,6 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.ParentReference;
 import com.google.api.services.drive.model.User;
-import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import java.util.List;
 
@@ -48,7 +46,7 @@ public class TreeBuilderTest {
     @Test(timeout = 1000)
     public void testGetRoot() throws Exception {
         List<File> liste    = new ArrayList<>();
-        TreeBuilder treeBuilder = new TreeBuilder(liste);
+        TreeBuilder treeBuilder = new TreeBuilder("root", liste);
 
         TreeNode root = treeBuilder.getRoot();
         assertTrue(root.isSuperRoot());
@@ -117,7 +115,7 @@ public class TreeBuilderTest {
 
         listFile.add(file2);
 
-        TreeBuilder treeBuilder = new TreeBuilder(listFile);
+        TreeBuilder treeBuilder = new TreeBuilder("root", listFile);
         TreeNode root = treeBuilder.getRoot();
 
         assertEquals("0AHRgC7jH8BP_Uk9PVA", root.getId());
@@ -166,9 +164,49 @@ public class TreeBuilderTest {
 
         listFile.add(file2);
 
-        TreeBuilder treeBuilder = new TreeBuilder(listFile);
+        TreeBuilder treeBuilder = new TreeBuilder("root", listFile);
         TreeNode root = treeBuilder.getRoot();
 
         assertEquals(1, root.getChildren().size());
     }
+
+    @Test(timeout = 1000)
+    public void getFilePath(){
+        ArrayList<File>listFile = new ArrayList<>();
+
+        com.google.api.services.drive.model.File folder1 = new File();
+
+        folder1.setTitle("folder1");
+        folder1.setId("0B3mMPOF_fWirfk9xWW5iX09fWkdwR3I4dnV5cnV3Y1l4NDNkVUd6TzJfdGJHRVFSc2ctdkE");
+        folder1.setMimeType("application/vnd.google-apps.folder");
+        folder1.setCreatedDate(new DateTime("2015-01-07T15:14:10.751Z"));
+
+        folder1.setParents(this.getParentReferenceList(
+                "0AHRgC7jH8BP_Uk9PVA", true
+        ));
+
+        folder1.setOwners(this.getOwnerList("David Maignan", true));
+
+        listFile.add(folder1);
+
+        com.google.api.services.drive.model.File file1 = new com.google.api.services.drive.model.File();
+        file1.setTitle("file1");
+        file1.setId("1K2T_qDWBhlyk_OVL9Q6JYmQZVcIo-Y9HSKz54RAMPhM");
+        file1.setMimeType("application/vnd.google-apps.document");
+
+        file1.setParents(this.getParentReferenceList(
+                "0B3mMPOF_fWirfk9xWW5iX09fWkdwR3I4dnV5cnV3Y1l4NDNkVUd6TzJfdGJHRVFSc2ctdkE",
+                false
+        ));
+
+        file1.setOwners(this.getOwnerList("David Maignan", true));
+
+        listFile.add(file1);
+
+        TreeBuilder treeBuilder = new TreeBuilder("/Users/david/JDrive", listFile);
+        TreeNode root = treeBuilder.getRoot();
+
+        assertEquals("/Users/david/JDrive/folder1/file1", root.getChildren().get(1).getAbsolutePath());
+    }
+
 }

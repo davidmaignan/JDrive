@@ -16,8 +16,8 @@ public class TreeBuilder {
 
     private TreeNode root;
 
-    public TreeBuilder(List<File> list) {
-        root = new TreeNode();
+    public TreeBuilder(String rootFolder, List<File> list) {
+        root = new TreeNode(rootFolder);
 
         this.fileList           = list;
         List<TreeNode> nodeList = this.getNodeList(list);
