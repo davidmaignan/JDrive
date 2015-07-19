@@ -1,13 +1,18 @@
 package org.model;
 
 import com.google.api.services.drive.Drive;
+import org.model.types.MimeType;
 
+import javax.swing.*;
 import java.io.*;
 import java.util.List;
 
 /**
- * JDrive
- * Created by David Maignan <davidmaignan@gmail.com> on 15-07-16.
+ * Tree writer.
+ *
+ * Write a tree of file
+ *
+ * David Maignan <davidmaignan@gmail.com>
  */
 public class TreeWriter {
 
@@ -33,12 +38,16 @@ public class TreeWriter {
         int r, numberOfBytesCopied = 0;
         if (node.isFolder()) {
             file.mkdir();
+        } else if(MimeType.all().contains(node.getData().getMimeType())){
+            File ouputFile = new File(node.getAbsolutePath());
+            PrintWriter writer = new PrintWriter(ouputFile);
+            writer.write("Data to open file in on drive website");
+            writer.close();
         } else {
             FileOutputStream fos      = new FileOutputStream(node.getAbsolutePath());
             InputStream inputStream   = this.downloadFile(driveService, node.getData());
             OutputStream outputStream = new FileOutputStream(file);
 
-            if(inputStream != null) {
                 while ((r = inputStream.read()) != -1) {
                     outputStream.write((byte) r);
                     numberOfBytesCopied++;
@@ -46,10 +55,6 @@ public class TreeWriter {
 
                 inputStream.close();
                 outputStream.close();
-            } else{
-                System.out.println(node.getTitle());
-            }
-
 
         }
 

@@ -161,6 +161,10 @@ public class TreeNode implements Iterable<TreeNode>{
         return parentId;
     }
 
+    public String getMimeType() {
+        return data.getMimeType();
+    }
+
     @Override
     public String toString() {
         return String.format(
