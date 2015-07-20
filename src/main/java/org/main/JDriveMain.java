@@ -7,18 +7,18 @@ import com.google.api.services.drive.model.FileList;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import org.api.file.FileService;
+import org.apache.log4j.BasicConfigurator;
 import org.config.Reader;
 import org.model.TreeBuilder;
 import org.model.TreeModule;
-import org.model.TreeNode;
 import org.model.TreeWriter;
+import org.mortbay.log.Slf4jLog;
 import org.signin.DriveService;
-import org.writer.FileModule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
-
 
 /**
  * JDriveMain class
@@ -35,6 +35,11 @@ public class JDriveMain {
      * @throws Throwable
      */
     public static void main(String[] args) throws IOException, Throwable {
+        BasicConfigurator.configure();
+        Logger logger = LoggerFactory.getLogger(JDriveMain.class);
+        logger.info("Hello World");
+
+        System.exit(0);
 
         ArrayList<AbstractModule> moduleList = new ArrayList<>();
         moduleList.add(new TreeModule());
