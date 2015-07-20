@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.ParentReference;
 import com.google.api.services.drive.model.User;
+import org.model.types.MimeType;
 
 /**
  *  Tree structure to represent the Drive file structure
@@ -12,8 +13,6 @@ import com.google.api.services.drive.model.User;
  * Created by David Maignan <davidmaignan@gmail.com> on 15-07-15.
  */
 public class TreeNode implements Iterable<TreeNode>{
-
-    private final String FOLDER_STRING = "application/vnd.google-apps.folder";
     private File data;
     private String id;
     private String parentId;
@@ -36,6 +35,8 @@ public class TreeNode implements Iterable<TreeNode>{
         this.isRoot              = false;
         this.isAuthenticatedUser = true;
         this.children            = new ArrayList<>();
+        this.data                = new File();
+        data.setMimeType(MimeType.FOLDER);
     }
 
     /**
@@ -54,7 +55,7 @@ public class TreeNode implements Iterable<TreeNode>{
         this.isAuthenticatedUser = this.getOwnerShip();
         this.children            = new ArrayList<>();
 
-        if ( ! file.getMimeType().equals(FOLDER_STRING)) {
+        if ( ! file.getMimeType().equals(MimeType.FOLDER)) {
             isFolder = false;
         }
 

@@ -1,7 +1,10 @@
 package org.writer;
 
+import com.google.inject.Guice;
 import org.model.TreeNode;
 import org.model.types.MimeType;
+
+import java.io.File;
 
 /**
  * WriterFactory
@@ -17,14 +20,13 @@ public class WriterFactory {
      * @return WriterInterface
      * @throws Exception
      */
-    public static WriterInterface get(TreeNode node) throws Exception{
-
+    public static WriterInterface get(TreeNode node){
         if(node.getMimeType().equals(MimeType.FOLDER)) {
-            return new FolderWriter(node);
+            return new FolderWriter();
         } else if (node.getMimeType().equals(MimeType.DOCUMENT)) {
-            return new DocumentWriter(node);
+            return new DocumentWriter();
         } else {
-            throw new Exception("Unknown mime type writer" + node.getMimeType());
+            return Guice.createInjector(new FileModule()).getInstance(FileWriter.class);
         }
     }
 }

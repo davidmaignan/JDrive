@@ -4,6 +4,7 @@ import org.model.TreeNode;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 
 /**
@@ -15,22 +16,20 @@ public class DocumentWriter implements WriterInterface {
     private File file;
     private PrintWriter output;
 
-    /**
-     * Constructor 1 args
-     *
-     * @param node
-     */
-    public DocumentWriter(TreeNode node) throws FileNotFoundException {
-        this.node = node;
-        file      = new File(node.getAbsolutePath());
-        output    = new PrintWriter(file);
-    }
 
     @Override
-    public boolean write() {
-        output.write("File info to open in GDrive");
-        output.close();
+    public boolean write(TreeNode node) {
+        try{
+            this.node = node;
+            file      = new File(node.getAbsolutePath());
+            output    = new PrintWriter(file);
+            output.write("File info to open in GDrive");
+            output.close();
+        } catch (IOException e) {
 
-        return false;
+            return false;
+        }
+
+        return true;
     }
 }

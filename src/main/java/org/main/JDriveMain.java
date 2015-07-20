@@ -1,24 +1,22 @@
 package org.main;
 
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-import com.google.api.client.http.FileContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpResponse;
 
-import com.google.api.services.drive.model.ParentReference;
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import org.api.file.FileService;
 import org.config.Reader;
 import org.model.TreeBuilder;
+import org.model.TreeModule;
 import org.model.TreeNode;
 import org.model.TreeWriter;
 import org.signin.DriveService;
+import org.writer.FileModule;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.*;
 
 
@@ -38,10 +36,15 @@ public class JDriveMain {
      */
     public static void main(String[] args) throws IOException, Throwable {
 
+        ArrayList<AbstractModule> moduleList = new ArrayList<>();
+        moduleList.add(new TreeModule());
+
+        Injector injector       = Guice.createInjector(moduleList);
+        TreeBuilder treeBuilder = injector.getInstance(TreeBuilder.class);
+
         // Build a new authorized API client service.
         DriveService driveService = new DriveService();
         Drive service             = driveService.getDrive();
-        FileService fileService   = new FileService(service);
 
         List<File> result = new ArrayList<>();
 
@@ -61,17 +64,11 @@ public class JDriveMain {
             }
         } while (request.getPageToken() != null && request.getPageToken().length() > 0);
 
-        //Init config
-        Reader configReader = new Reader();
 
-        TreeBuilder treeBuilder = new TreeBuilder(configReader.getProperty("rootFolder"), result);
-
+        treeBuilder.build(result);
         TreeBuilder.printTree(treeBuilder.getRoot());
 
-        TreeNode root = treeBuilder.getRoot();
-
-        TreeWriter treeWriter = new TreeWriter(root, service);
-        treeWriter.write();
+        Boolean writeSuccess =  new TreeWriter().writeTree(treeBuilder.getRoot());
     }
 
     private static Reader setConfiguration() throws IOException{
