@@ -1,10 +1,8 @@
 package org.writer;
 
 import com.google.inject.Guice;
-import org.model.TreeNode;
+import org.model.tree.TreeNode;
 import org.model.types.MimeType;
-
-import java.io.File;
 
 /**
  * WriterFactory

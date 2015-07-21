@@ -1,9 +1,8 @@
 package org.writer;
 
-import org.model.TreeNode;
+import org.model.tree.TreeNode;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 

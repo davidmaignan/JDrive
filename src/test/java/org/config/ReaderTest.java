@@ -1,11 +1,12 @@
 package org.config;
 
 import org.junit.Test;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
- * Test property reader
+ * Reader Unit test
+ *
+ * David Maignan <davidmaignan@gmail.com>
  */
 public class ReaderTest {
 

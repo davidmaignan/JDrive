@@ -9,10 +9,9 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.apache.log4j.BasicConfigurator;
 import org.config.Reader;
-import org.model.TreeBuilder;
-import org.model.TreeModule;
-import org.model.TreeWriter;
-import org.mortbay.log.Slf4jLog;
+import org.model.tree.TreeBuilder;
+import org.model.tree.TreeModule;
+import org.model.tree.TreeWriter;
 import org.signin.DriveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,8 +37,6 @@ public class JDriveMain {
         BasicConfigurator.configure();
         Logger logger = LoggerFactory.getLogger(JDriveMain.class);
         logger.info("Hello World");
-
-        System.exit(0);
 
         ArrayList<AbstractModule> moduleList = new ArrayList<>();
         moduleList.add(new TreeModule());

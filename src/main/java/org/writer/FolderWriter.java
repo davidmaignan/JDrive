@@ -1,9 +1,8 @@
 package org.writer;
 
-import org.model.TreeNode;
+import org.model.tree.TreeNode;
 
 import java.io.File;
-import java.io.IOException;
 
 /**
  * Folder writer

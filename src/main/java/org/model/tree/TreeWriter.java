@@ -1,4 +1,4 @@
-package org.model;
+package org.model.tree;
 
 import org.writer.WriterFactory;
 import java.io.IOException;

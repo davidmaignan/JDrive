@@ -1,4 +1,4 @@
-package org.model;
+package org.model.tree;
 
 import java.util.*;
 import java.util.function.Consumer;

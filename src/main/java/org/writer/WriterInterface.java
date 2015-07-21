@@ -1,9 +1,6 @@
 package org.writer;
 
-import org.model.TreeNode;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import org.model.tree.TreeNode;
 
 /**
  * Writer interface

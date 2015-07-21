@@ -1,4 +1,4 @@
-package org.model;
+package org.model.tree;
 
 import com.google.inject.AbstractModule;
 import org.config.Reader;

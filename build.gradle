@@ -35,6 +35,9 @@ apply plugin: 'java'
 apply plugin: 'application'
 apply plugin: 'idea'
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 mainClassName = 'org.main.JDriveMain'
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
@@ -57,6 +60,8 @@ dependencies {
     compile     'log4j:log4j:1.2.17'
     compile     'junit:junit:4.12'
     compile     fileTree( dir: 'libs', include: '*.jar')
+    testCompile group: 'junit', name: 'junit', version: '4.+'
+    testCompile 'org.mockito:mockito-all:1.10.19'
 }
 
 sourceSets {
@@ -64,3 +69,46 @@ sourceSets {
         output.resourcesDir = "build/resources/"
     }
 }
+
+task hello {
+    doLast {
+        println 'Hello world!'
+        Logger slf4jLogger = LoggerFactory.getLogger('some-logger')
+        slf4jLogger.info('An info log message logged using SLF4j')
+    }
+}
+
+test {
+    println "Test task"
+    // enable TestNG support (default is JUnit)
+    useJUnit()
+
+//    // set a system property for the test JVM(s)
+//    systemProperty 'some.prop', 'value'
+//
+//    // explicitly include or exclude tests
+//    include 'org/foo/**'
+//    exclude 'org/boo/**'
+
+    // show standard out and standard error of the test JVM(s) on the console
+    testLogging.showStandardStreams = true
+
+    // set heap size for the test JVM(s)
+    minHeapSize = "128m"
+    maxHeapSize = "512m"
+
+    // set JVM arguments for the test JVM(s)
+    // jvmArgs '-XX:MaxPermSize=256m'
+
+    // listen to events in the test execution lifecycle
+    beforeTest { descriptor ->
+        logger.lifecycle("Running test: " + descriptor)
+    }
+
+    // listen to standard out and standard error of the test JVM(s)
+    onOutput { descriptor, event ->
+        logger.lifecycle("Test: " + descriptor + " produced standard out/err: " + event.message )
+    }
+}
+
+

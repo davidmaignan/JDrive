@@ -1,4 +1,4 @@
-package org.model;
+package org.model.tree;
 
 import com.google.api.services.drive.model.File;
 import com.google.inject.Inject;
