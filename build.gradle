@@ -55,6 +55,8 @@ dependencies {
     compile     'com.google.oauth-client:google-oauth-client-jetty:1.20.0'
     compile     'com.google.apis:google-api-services-drive:v2-rev170-1.20.0'
     compile     'javax.inject:javax.inject:1'
+    compile     'com.google.inject:guice:4.0'
+    compile     'aopalliance:aopalliance:1.0'
     compile     'com.google.inject:guice-parent:4.0'
     compile     'org.slf4j:slf4j-log4j12:1.7.12'
     compile     'log4j:log4j:1.2.17'
@@ -67,14 +69,6 @@ dependencies {
 sourceSets {
     main {
         output.resourcesDir = "build/resources/"
-    }
-}
-
-task hello {
-    doLast {
-        println 'Hello world!'
-        Logger slf4jLogger = LoggerFactory.getLogger('some-logger')
-        slf4jLogger.info('An info log message logged using SLF4j')
     }
 }
 
