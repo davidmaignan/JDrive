@@ -1,4 +1,4 @@
-package org.model;
+package model;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.model.File;
@@ -7,6 +7,9 @@ import com.google.api.services.drive.model.User;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.model.TreeBuilder;
+import org.model.TreeNode;
+
 import java.util.List;
 
 import java.util.ArrayList;
