@@ -1,7 +1,7 @@
 # JDrive
-|[![Build status][Master image]][Master]|
+
+## CI Build Status (Master branch)
+[![Build Status](https://travis-ci.org/davidmaignan/JDrive.svg?branch=master)](https://travis-ci.org/davidmaignan/JDrive)
 
 ## Mount your google drive on any platform
-
-[Master]: https://travis-ci.org/davidmaignan/JDrive
-[Maste imager]: https://travis-ci.org/davidmaignan/JDrive.svg?branch=master
+JDrive is application so you can mount your google drive on any platform that support Java.
