@@ -1,7 +1,6 @@
 package org.model.tree;
 
 import java.util.*;
-import java.util.function.Consumer;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.ParentReference;
 import com.google.api.services.drive.model.User;
@@ -12,7 +11,8 @@ import org.model.types.MimeType;
  *
  * Created by David Maignan <davidmaignan@gmail.com> on 15-07-15.
  */
-public class TreeNode implements Iterable<TreeNode>{
+
+public class TreeNode {
     private File data;
     private String id;
     private String parentId;
@@ -175,20 +175,6 @@ public class TreeNode implements Iterable<TreeNode>{
                 this.isFolder,
                 (this.parent != null) ? this.parent.getTitle() : null,
                 this.children.size());
-    }
-
-    @Override
-    public Iterator<TreeNode> iterator() {
-        return null;
-    }
-
-    @Override
-    public void forEach(Consumer<? super TreeNode> action) {
-    }
-
-    @Override
-    public Spliterator<TreeNode> spliterator() {
-        return null;
     }
 
     @Override
