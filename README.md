@@ -1,5 +1,5 @@
 # JDrive
-[![Build status][Master image]][Master]
+|[![Build status][Master image]][Master]|
 
 ## Mount your google drive on any platform
 
