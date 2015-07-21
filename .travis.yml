@@ -1,4 +1,4 @@
-language:
+language: java
 gradle clean
 gradle assemble
 gradle test
