@@ -4,19 +4,29 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.ParentReference;
 import com.google.api.services.drive.model.User;
+import com.google.inject.*;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.model.TreeBuilder;
-import org.model.TreeNode;
-
-import java.util.List;
-
+import org.model.tree.TreeBuilder;
+import org.model.tree.TreeModule;
+import org.model.tree.TreeNode;
 import java.util.ArrayList;
 
 import static org.junit.Assert.*;
 
 public class TreeBuilderTest {
+
+    private TreeBuilder treeBuilder;
+
+    @Before
+    public void setUp(){
+        ArrayList<AbstractModule> moduleList = new ArrayList<>();
+        moduleList.add(new TreeModule());
+
+        //@todo Mock reader object injected
+        Injector injector = Guice.createInjector(moduleList);
+        treeBuilder = injector.getInstance(TreeBuilder.class);
+    }
 
     private ArrayList<ParentReference> getParentReferenceList(String id, boolean bool){
         ArrayList<ParentReference> parentList = new ArrayList<>();
@@ -50,12 +60,8 @@ public class TreeBuilderTest {
 
     @Test(timeout = 1000)
     public void testGetRoot() throws Exception {
-        List<File> liste    = new ArrayList<>();
-        TreeBuilder treeBuilder = new TreeBuilder(liste);
-
-        TreeNode root = treeBuilder.getRoot();
-        assertTrue(root.isSuperRoot());
-        assertEquals(null, root.getId());
+        assertTrue(treeBuilder.getRoot().isSuperRoot());
+        assertEquals(null, treeBuilder.getRoot().getId());
     }
 
     @Test(timeout = 1000)
@@ -120,7 +126,8 @@ public class TreeBuilderTest {
 
         listFile.add(file2);
 
-        TreeBuilder treeBuilder = new TreeBuilder(listFile);
+        treeBuilder.build(listFile);
+
         TreeNode root = treeBuilder.getRoot();
 
         assertEquals("0AHRgC7jH8BP_Uk9PVA", root.getId());
@@ -137,7 +144,7 @@ public class TreeBuilderTest {
     }
 
     @Test(timeout = 10000)
-    public void testOwnerShip(){
+    public void testOwnerShip() throws Exception{
         ArrayList<File>listFile = new ArrayList<>();
 
         File file1 = new File();
@@ -169,9 +176,48 @@ public class TreeBuilderTest {
 
         listFile.add(file2);
 
-        TreeBuilder treeBuilder = new TreeBuilder(listFile);
+        treeBuilder.build(listFile);
         TreeNode root = treeBuilder.getRoot();
 
         assertEquals(1, root.getChildren().size());
+    }
+
+    @Test(timeout = 1000)
+    public void getFilePath() throws Exception{
+        ArrayList<File>listFile = new ArrayList<>();
+
+        com.google.api.services.drive.model.File folder1 = new File();
+
+        folder1.setTitle("folder1");
+        folder1.setId("0B3mMPOF_fWirfk9xWW5iX09fWkdwR3I4dnV5cnV3Y1l4NDNkVUd6TzJfdGJHRVFSc2ctdkE");
+        folder1.setMimeType("application/vnd.google-apps.folder");
+        folder1.setCreatedDate(new DateTime("2015-01-07T15:14:10.751Z"));
+
+        folder1.setParents(this.getParentReferenceList(
+                "0AHRgC7jH8BP_Uk9PVA", true
+        ));
+
+        folder1.setOwners(this.getOwnerList("David Maignan", true));
+
+        listFile.add(folder1);
+
+        com.google.api.services.drive.model.File file1 = new com.google.api.services.drive.model.File();
+        file1.setTitle("file1");
+        file1.setId("1K2T_qDWBhlyk_OVL9Q6JYmQZVcIo-Y9HSKz54RAMPhM");
+        file1.setMimeType("application/vnd.google-apps.document");
+
+        file1.setParents(this.getParentReferenceList(
+                "0B3mMPOF_fWirfk9xWW5iX09fWkdwR3I4dnV5cnV3Y1l4NDNkVUd6TzJfdGJHRVFSc2ctdkE",
+                false
+        ));
+
+        file1.setOwners(this.getOwnerList("David Maignan", true));
+
+        listFile.add(file1);
+
+        treeBuilder.build(listFile);
+        TreeNode root = treeBuilder.getRoot();
+
+        assertEquals("/Users/david/JDrive/folder1/file1", root.getChildren().get(0).getChildren().get(0).getAbsolutePath());
     }
 }

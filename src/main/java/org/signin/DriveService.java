@@ -58,7 +58,7 @@ public class DriveService {
 
 
     /** Global instance of the scopes required by this quickstart. */
-    private static final List<String> SCOPES = Arrays.asList(DriveScopes.DRIVE_METADATA_READONLY);
+    private static final List<String> SCOPES = Arrays.asList(DriveScopes.DRIVE);
 
     /**
      * Constructor
@@ -90,8 +90,6 @@ public class DriveService {
 
         Credential credential = new AuthorizationCodeInstalledApp(
                 flow, new LocalServerReceiver()).authorize("user");
-
-//        System.out.println("Credentials saved to " + DATA_STORE_DIR.getAbsolutePath());
 
         return credential;
     }

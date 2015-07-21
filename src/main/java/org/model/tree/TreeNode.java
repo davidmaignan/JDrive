@@ -1,18 +1,18 @@
-package org.model;
+package org.model.tree;
 
 import java.util.*;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.ParentReference;
 import com.google.api.services.drive.model.User;
+import org.model.types.MimeType;
 
 /**
  *  Tree structure to represent the Drive file structure
  *
  * Created by David Maignan <davidmaignan@gmail.com> on 15-07-15.
  */
-public class TreeNode {
 
-    private final String FOLDER_STRING = "application/vnd.google-apps.folder";
+public class TreeNode {
     private File data;
     private String id;
     private String parentId;
@@ -27,14 +27,16 @@ public class TreeNode {
     /**
      * No args constructor
      */
-    public TreeNode(){
+    public TreeNode(String rootFolder){
         super();
-        this.title               = "root";
+        this.title               = rootFolder;
         this.isFolder            = true;
         this.isSuperRoot         = true;
         this.isRoot              = false;
         this.isAuthenticatedUser = true;
         this.children            = new ArrayList<>();
+        this.data                = new File();
+        data.setMimeType(MimeType.FOLDER);
     }
 
     /**
@@ -53,7 +55,7 @@ public class TreeNode {
         this.isAuthenticatedUser = this.getOwnerShip();
         this.children            = new ArrayList<>();
 
-        if ( ! file.getMimeType().equals(FOLDER_STRING)) {
+        if ( ! file.getMimeType().equals(MimeType.FOLDER)) {
             isFolder = false;
         }
 
@@ -61,7 +63,6 @@ public class TreeNode {
             this.isRoot = this.getParentReference().getIsRoot();
         }
     }
-
 
     /**
      * Add child
@@ -83,6 +84,30 @@ public class TreeNode {
     public void addChild(TreeNode node) {
         children.add(node);
         node.setParent(this);
+    }
+
+    public String getAbsolutePath(){
+        StringBuilder path = new StringBuilder();
+
+        return getAbsolutePath(this, path).toString().substring(1);
+    }
+
+    /**
+     * Read recursively to root node and returned absolute path
+     * @param node
+     * @param path
+     *
+     * @return
+     */
+    private StringBuilder getAbsolutePath(TreeNode node, StringBuilder path) {
+        if(! node.isSuperRoot()) {
+            getAbsolutePath(node.getParent(), path);
+        }
+
+        path.append("/");
+        path.append(node.getTitle());
+
+        return path;
     }
 
     /**
@@ -137,11 +162,16 @@ public class TreeNode {
         return parentId;
     }
 
+    public String getMimeType() {
+        return data.getMimeType();
+    }
+
     @Override
     public String toString() {
         return String.format(
-                "TreeNode[ title: %10s, isFolder: %5b, parent %10s, children: %d\n",
+                "TreeNode[ title: %10s, id: %25s isFolder: %5b, parent %10s, children: %d\n",
                 this.title,
+                this.id,
                 this.isFolder,
                 (this.parent != null) ? this.parent.getTitle() : null,
                 this.children.size());

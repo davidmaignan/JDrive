@@ -1,23 +1,31 @@
-package org.model;
+package org.model.tree;
 
 import com.google.api.services.drive.model.File;
+import com.google.inject.Inject;
+import org.config.Reader;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * TreeBuilder: construct a Tree representing the
- * Drive file directory structure
+ * Tree File structure of the Google Drive
  *
- * Created by David Maignan <davidmaignan@gmail.com> on 15-07-15.
+ * David Maignan <davidmaignan@gmail.com>
  */
 public class TreeBuilder {
-
     private List<File> fileList;
 
     private TreeNode root;
 
-    public TreeBuilder(List<File> list) {
-        root = new TreeNode();
+    private final Reader configReader;
+
+    @Inject
+    public TreeBuilder(Reader configReader) throws Exception {
+        this.configReader = configReader;
+        root              = new TreeNode(this.configReader.getProperty("rootFolder"));
+    }
+
+    public TreeNode build(List<File> list) {
 
         this.fileList           = list;
         List<TreeNode> nodeList = this.getNodeList(list);
@@ -38,60 +46,17 @@ public class TreeBuilder {
 
             nodeList.removeAll(tmp);
 
-            //No file is at the root level (for the first loop)
+            //If no file is at the root level
             if (total == list.size()) {
                 exit = true;
             }
         }
-    }
 
-    private List<TreeNode> getNodeList(List<File> list){
-        List<TreeNode> nodeList = new ArrayList<>();
-
-        for (File file : fileList) {
-            nodeList.add(new TreeNode(file));
-        }
-
-        return nodeList;
+        return root;
     }
 
     /**
-     * Insert node recursively in a tree
-     * @param root
-     * @param node
-     * @return boolean
-     */
-    private boolean insertNode(TreeNode root, TreeNode node) {
-        Boolean result = false;
-
-        if (! node.isAuthenticatedUser()) {
-            //@todo shared with me files/folder
-            result = true;
-
-        } else if (node.isRoot()) {
-            root.addChild(node);
-            root.setId(node.getParentId());
-
-            result = true;
-            
-        } else if (node.getParentId() != null
-                && root.getId() != null
-                && root.getId().equals(node.getParentId())){
-            root.addChild(node);
-
-            result = true;
-
-        } else if (root.getChildren().size() > 0) {
-            for(TreeNode n : root.getChildren()) {
-                result = insertNode(n, node) || result;
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Get root for the tree
+     * Get root node
      *
      * @return TreeNode
      */
@@ -113,5 +78,50 @@ public class TreeBuilder {
                 printTree(child);
             }
         }
+    }
+
+    /**
+     * Insert node recursively in a tree
+     * @param root
+     * @param node
+     * @return boolean
+     */
+    private boolean insertNode(TreeNode root, TreeNode node) {
+        Boolean result = false;
+
+        if (! node.isAuthenticatedUser()) {
+            //@todo shared with me files/folder
+            result = true;
+
+        } else if (node.isRoot()) {
+            root.addChild(node);
+            root.setId(node.getParentId());
+
+            result = true;
+
+        } else if (node.getParentId() != null
+                && root.getId() != null
+                && root.getId().equals(node.getParentId())){
+            root.addChild(node);
+
+            result = true;
+
+        } else if (root.getChildren().size() > 0) {
+            for(TreeNode n : root.getChildren()) {
+                result = insertNode(n, node) || result;
+            }
+        }
+
+        return result;
+    }
+
+    private List<TreeNode> getNodeList(List<File> list) {
+        List<TreeNode> nodeList = new ArrayList<>();
+
+        for (File file : fileList) {
+            nodeList.add(new TreeNode(file));
+        }
+
+        return nodeList;
     }
 }
