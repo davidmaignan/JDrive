@@ -1,5 +1,7 @@
 # JDrive
+[![Build status][Master image]][Master]
 
-https://travis-ci.org/davidmaignan/JDrive.svg?branch=master
+## Mount your google drive on any platform
 
-## Get google drive on any platform
+[Master]: https://travis-ci.org/davidmaignan/JDrive
+[Maste imager]: https://travis-ci.org/davidmaignan/JDrive.svg?branch=master
