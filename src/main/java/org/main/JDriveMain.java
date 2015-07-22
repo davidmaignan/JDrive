@@ -6,11 +6,10 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.config.Reader;
-import org.drive.ChangeService;
-import org.drive.FileService;
+import org.api.ChangeService;
+import org.api.FileService;
 import org.model.tree.TreeBuilder;
 import org.model.tree.TreeModule;
-import org.model.tree.TreeWriter;
 
 import java.io.IOException;
 import java.util.*;
@@ -37,13 +36,34 @@ public class JDriveMain {
         TreeBuilder treeBuilder = injector.getInstance(TreeBuilder.class);
         FileService fileService = injector.getInstance(FileService.class);
 
+        Reader configReader = new Reader();
+
+        Long lastChangeId = Long.getLong(configReader.getProperty("lastChangeId"));
+
         ChangeService changeService = injector.getInstance(ChangeService.class);
+        List<Change> changeList = changeService.getAll(lastChangeId);
 
-        List<Change> changeList = changeService.getAll(null);
+        Set<String> fileIdList = new HashSet<>();
 
-        System.out.println(changeList);
+        for (Change change : changeList){
+            fileIdList.add(change.getFileId());
+            lastChangeId = (lastChangeId == null)? change.getId() : Math.max(lastChangeId, change.getId());
+        }
+
+        //Update last change id
+        configReader.writeProperty("lastChangeId", String.valueOf(lastChangeId));
+
+        //Update modified files
+        for(String fileId : fileIdList){
+            File file = fileService.getFile(fileId);
+        }
+
+
+
 
 //        List<File> result = fileService.getAll();
+//
+//        System.out.println(result);
 //
 //        treeBuilder.build(result);
 //        TreeBuilder.printTree(treeBuilder.getRoot());

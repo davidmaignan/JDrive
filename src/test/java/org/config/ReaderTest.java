@@ -22,10 +22,10 @@ public class ReaderTest {
         assertEquals("/Users/david/JDrive", configReader.getProperty("rootFolder"));
     }
 
-    @Test(timeout = 1000, expected = Exception.class)
+    @Test(timeout = 1000)
     public void testNoPropertyFound() throws Exception {
         Reader configReader = new Reader();
 
-        configReader.getProperty("mockProperty");
+        assertEquals(null, configReader.getProperty("mockProperty"));
     }
 }

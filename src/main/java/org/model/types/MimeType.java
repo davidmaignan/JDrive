@@ -1,7 +1,7 @@
 package org.model.types;
 
 /**
- * Google drive mime types
+ * Google api mime types
  *
  * David Maignan <davidmaignan@gmail.com> on 15-07-19.
  */

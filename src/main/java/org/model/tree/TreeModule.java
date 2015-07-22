@@ -1,6 +1,7 @@
 package org.model.tree;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
 import org.config.Reader;
 
 /**
@@ -14,4 +15,9 @@ public class TreeModule extends AbstractModule{
     protected void configure() {
 
     }
+
+//    @Provides
+//    String provideRootFolder(Reader configReader) {
+//        return configReader.getRootFolder();
+//    }
 }

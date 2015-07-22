@@ -1,4 +1,4 @@
-package org.drive;
+package org.api;
 
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.Change;

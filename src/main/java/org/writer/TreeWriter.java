@@ -1,5 +1,6 @@
-package org.model.tree;
+package org.writer;
 
+import org.model.tree.TreeNode;
 import org.writer.WriterFactory;
 import java.io.IOException;
 import java.util.List;
@@ -10,9 +11,6 @@ import java.util.List;
  * David Maignan <davidmaignan@gmail.com>
  */
 public class TreeWriter {
-    public TreeWriter() {
-    }
-
     public boolean write(TreeNode root) throws IOException {
         return writeTree(root);
     }

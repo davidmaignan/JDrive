@@ -1,4 +1,4 @@
-package org.drive;
+package org.api;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -95,7 +95,7 @@ public class DriveService {
     }
 
     /**
-     * Get drive
+     * Get api
      *
      * @return Drive
      */

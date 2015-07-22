@@ -12,13 +12,13 @@ import java.util.Properties;
  * David Maignan <davidmaignan@gmail.com>
  */
 public class Reader {
-    private String propertyFile = "/config.properties";
+    private String propertyFile = "config.properties";
     private Properties propertyList;
 
     public Reader() throws IOException, FileNotFoundException{
         // Load client secrets.
 
-        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("config.properties");
+        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(propertyFile);
         propertyList = new Properties();
 
         if (inputStream == null) {
@@ -28,23 +28,26 @@ public class Reader {
         propertyList.load(inputStream);
     }
 
+    public String getRootFolder(){
+        return this.getProperty("rootFolder");
+    }
+
     /**
      * Get property by name
      *
      * @param name
      * @return
-     * @throws Exception
      */
-    public String getProperty(String name) throws Exception{
+    public String getProperty(String name){
         if(propertyList.containsKey(name)) {
             return propertyList.getProperty(name);
         }
 
-        throw new Exception("No property " + name + " in the configuration");
+        return null;
     }
 
     /**
-     * Set property
+     * Set String property
      *
      * @param name
      * @param value
@@ -54,15 +57,39 @@ public class Reader {
     }
 
     /**
-     * Write property to the configuration
+     * Set Long property
+     *
+     * @param name
+     * @param value
+     */
+    public void putProperty(String name, Long value){
+        propertyList.put(name, value);
+    }
+
+    /**
+     * Write String property to the configuration
      * @param name
      * @param value
      * @throws FileNotFoundException
      */
-    public void writeProperty(String name, String value) throws FileNotFoundException {
+    public void writeProperty(String name, String value) throws FileNotFoundException{
         this.putProperty(name, value);
+        this.write();
+    }
 
-        URL configURL = this.getClass().getClassLoader().getResource("config.properties");
+    /**
+     * Write Long property to the configuration
+     * @param name
+     * @param value
+     * @throws FileNotFoundException
+     */
+    public void writeProperty(String name, Long value) throws FileNotFoundException {
+        this.putProperty(name, value);
+        this.write();
+    }
+
+    private void write() throws FileNotFoundException{
+        URL configURL = this.getClass().getClassLoader().getResource(propertyFile);
 
         PrintWriter writer = new PrintWriter(configURL.getFile());
 
