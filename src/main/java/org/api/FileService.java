@@ -45,7 +45,8 @@ public class FileService {
                 request.setPageToken(files.getNextPageToken());
 
             } catch (IOException e) {
-                System.out.println("An error occurred: " + e);
+                Logger logger = LoggerFactory.getLogger(this.getClass().getName());
+                logger.error("Error: e %s", e.toString());
                 request.setPageToken(null);
             }
         } while (request.getPageToken() != null && request.getPageToken().length() > 0);
