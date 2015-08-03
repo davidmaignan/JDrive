@@ -2,7 +2,7 @@ package org.model.tree;
 
 import com.google.api.services.drive.model.File;
 import com.google.inject.Inject;
-import org.config.Reader;
+import org.configuration.Configuration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,12 +17,12 @@ public class TreeBuilder {
 
     private TreeNode root;
 
-    private final Reader configReader;
+    private final Configuration configConfiguration;
 
     @Inject
-    public TreeBuilder(Reader configReader) throws Exception {
-        this.configReader = configReader;
-        root              = new TreeNode(this.configReader.getProperty("rootFolder"));
+    public TreeBuilder(Configuration configConfiguration) throws Exception {
+        this.configConfiguration = configConfiguration;
+        root              = new TreeNode(this.configConfiguration.getProperty("rootFolder"));
     }
 
     /**

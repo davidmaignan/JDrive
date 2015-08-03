@@ -1,18 +1,13 @@
 package org.main;
 
-import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.File;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import org.config.Reader;
-import org.api.ChangeService;
+import org.configuration.Configuration;
 import org.api.FileService;
-import org.drive.FileSearch;
 import org.model.tree.TreeBuilder;
 import org.model.tree.TreeModule;
-import org.model.types.MimeType;
-import org.writer.FileWriter;
 import org.writer.TreeWriter;
 
 import java.io.IOException;
@@ -40,7 +35,7 @@ public class JDriveMain {
         TreeBuilder treeBuilder = injector.getInstance(TreeBuilder.class);
         FileService fileService = injector.getInstance(FileService.class);
 
-//        Reader configReader = new Reader();
+//        Configuration configReader = new Configuration();
 //        Long lastChangeId = Long.getLong(configReader.getProperty("lastChangeId"));
 //        ChangeService changeService = injector.getInstance(ChangeService.class);
 //        List<Change> changeList = changeService.getAll(null);
@@ -84,9 +79,9 @@ public class JDriveMain {
 //        monitorService.start();
     }
 
-    private static Reader setConfiguration() throws IOException{
-        Reader configReader = new Reader();
+    private static Configuration setConfiguration() throws IOException{
+        Configuration configConfiguration = new Configuration();
 
-        return configReader;
+        return configConfiguration;
     }
 }

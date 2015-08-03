@@ -1,7 +1,7 @@
 package org.monitor;
 
 import com.google.inject.Inject;
-import org.config.Reader;
+import org.configuration.Configuration;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -15,17 +15,17 @@ import static java.nio.file.StandardWatchEventKinds.*;
  */
 public class MonitorService {
 
-    private final Reader configReader;
+    private final Configuration configConfiguration;
 
     @Inject
-    public MonitorService(Reader configReader) {
-        this.configReader = configReader;
+    public MonitorService(Configuration configConfiguration) {
+        this.configConfiguration = configConfiguration;
     }
 
     public void start() throws Exception {
         try {
             WatchService watcher = FileSystems.getDefault().newWatchService();
-            Path dir = Paths.get(configReader.getProperty("rootFolder"));
+            Path dir = Paths.get(configConfiguration.getProperty("rootFolder"));
             dir.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
 
             System.out.println("Watch Service registered for dir: " + dir.getFileName());

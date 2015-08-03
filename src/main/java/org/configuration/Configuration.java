@@ -1,21 +1,19 @@
-package org.config;
+package org.configuration;
 
 import java.io.*;
 import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Properties;
 
 /**
- * Reader to load the properties
+ * Configuration to load the properties
  *
  * David Maignan <davidmaignan@gmail.com>
  */
-public class Reader {
+public class Configuration {
     private String propertyFile = "config.properties";
     private Properties propertyList;
 
-    public Reader() throws IOException, FileNotFoundException{
+    public Configuration() throws IOException{
         // Load client secrets.
 
         InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(propertyFile);

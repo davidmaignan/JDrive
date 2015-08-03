@@ -1,10 +1,7 @@
 package org.drive;
 
 import com.google.inject.Inject;
-import org.config.Reader;
-
-import java.nio.file.FileSystem;
-import java.nio.file.Files;
+import org.configuration.Configuration;
 
 /**
  * Local file
@@ -15,8 +12,8 @@ public class FileSearch {
     private String root;
 
     @Inject
-    public FileSearch(Reader configReader){
-        root = configReader.getRootFolder();
+    public FileSearch(Configuration configConfiguration){
+        root = configConfiguration.getRootFolder();
     }
 
 
