@@ -8,8 +8,12 @@ import com.google.inject.Injector;
 import org.config.Reader;
 import org.api.ChangeService;
 import org.api.FileService;
+import org.drive.FileSearch;
 import org.model.tree.TreeBuilder;
 import org.model.tree.TreeModule;
+import org.model.types.MimeType;
+import org.writer.FileWriter;
+import org.writer.TreeWriter;
 
 import java.io.IOException;
 import java.util.*;
@@ -36,40 +40,46 @@ public class JDriveMain {
         TreeBuilder treeBuilder = injector.getInstance(TreeBuilder.class);
         FileService fileService = injector.getInstance(FileService.class);
 
-        Reader configReader = new Reader();
-
-        Long lastChangeId = Long.getLong(configReader.getProperty("lastChangeId"));
-
-        ChangeService changeService = injector.getInstance(ChangeService.class);
-        List<Change> changeList = changeService.getAll(lastChangeId);
-
-        Set<String> fileIdList = new HashSet<>();
-
-        for (Change change : changeList){
-            fileIdList.add(change.getFileId());
-            lastChangeId = (lastChangeId == null)? change.getId() : Math.max(lastChangeId, change.getId());
-        }
-
-        //Update last change id
-        configReader.writeProperty("lastChangeId", String.valueOf(lastChangeId));
-
-        //Update modified files
-        for(String fileId : fileIdList){
-            File file = fileService.getFile(fileId);
-        }
-
-
-
-
-//        List<File> result = fileService.getAll();
+//        Reader configReader = new Reader();
+//        Long lastChangeId = Long.getLong(configReader.getProperty("lastChangeId"));
+//        ChangeService changeService = injector.getInstance(ChangeService.class);
+//        List<Change> changeList = changeService.getAll(null);
 //
-//        System.out.println(result);
+//        Set<String> fileIdList = new HashSet<>();
 //
-//        treeBuilder.build(result);
-//        TreeBuilder.printTree(treeBuilder.getRoot());
+//        for (Change change : changeList){
+//            fileIdList.add(change.getFileId());
+//            lastChangeId = (lastChangeId == null)? change.getId() : Math.max(lastChangeId, change.getId());
+//        }
 //
-//        Boolean writeSuccess = new TreeWriter().writeTree(treeBuilder.getRoot());
+//        //Update last change id
+//        configReader.writeProperty("lastChangeId", String.valueOf(lastChangeId));
+//
+//        FileSearch fs = injector.getInstance(FileSearch.class);
+//        FileWriter fileWriter = injector.getInstance(FileWriter.class);
+//
+//        //Update modified files
+//        for(String fileId : fileIdList){
+//            File file = fileService.getFile(fileId);
+//            if (file == null) {
+//                System.out.println(fileId + " is null");
+//                break;
+//            }
+//
+//            String fullPath = fs.getAbsolutePath(file.getTitle());
+//
+//            fileWriter.write(fullPath, file);
+//            System.out.println("I just rewrote:  " + file.getTitle() + " @ " + fs.getAbsolutePath(file.getTitle()));
+//
+//        }
 
+
+        List<File> result = fileService.getAll();
+        treeBuilder.build(result);
+        TreeBuilder.printTree(treeBuilder.getRoot());
+        Boolean writeSuccess = injector.getInstance(TreeWriter.class).writeTree(treeBuilder.getRoot());
+//
+        //Monitor service
 //        MonitorService monitorService = injector.getInstance(MonitorService.class);
 //        monitorService.start();
     }

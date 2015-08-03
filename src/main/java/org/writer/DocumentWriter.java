@@ -22,13 +22,24 @@ public class DocumentWriter implements WriterInterface {
             this.node = node;
             file      = new File(node.getAbsolutePath());
             output    = new PrintWriter(file);
-            output.write("File info to open in GDrive");
+            output.write(this.setContent(node));
             output.close();
         } catch (IOException e) {
-
             return false;
         }
 
         return true;
+    }
+
+    private String setContent(TreeNode node) {
+        return String.format("" +
+                "{\"url\": \"https://docs.google.com/open?id=%s\", " +
+                "\"doc_id\": \"%s\", \"email\": " +
+                "\"%s\", \"resource_id\": \"document:%s\"})",
+                node.getId(),
+                node.getId(),
+                node.getData().getOwners().get(0).getEmailAddress(),
+                node.getId()
+        );
     }
 }

@@ -44,6 +44,8 @@ public class FileService {
 
                 request.setPageToken(files.getNextPageToken());
 
+                System.out.println(result.size());
+
             } catch (IOException e) {
                 Logger logger = LoggerFactory.getLogger(this.getClass().getName());
                 logger.error("Error: e %s", e.toString());

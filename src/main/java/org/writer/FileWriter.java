@@ -1,5 +1,6 @@
 package org.writer;
 
+import com.google.api.services.drive.model.*;
 import com.google.inject.Inject;
 import org.model.tree.TreeNode;
 import org.api.DriveService;
@@ -26,6 +27,36 @@ public class FileWriter implements WriterInterface {
             FileOutputStream fos      = new FileOutputStream(node.getAbsolutePath());
             InputStream inputStream   = this.downloadFile(driveService, node.getData());
             OutputStream outputStream = new FileOutputStream(node.getAbsolutePath());
+
+            if (inputStream == null) {
+                return false;
+            }
+
+            int numberOfBytesCopied = 0;
+            int r;
+
+            while ((r = inputStream.read()) != -1) {
+                outputStream.write((byte) r);
+                numberOfBytesCopied++;
+            }
+
+            inputStream.close();
+            outputStream.close();
+
+            return true;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public boolean write(String path, com.google.api.services.drive.model.File file) {
+        try {
+            FileOutputStream fos      = new FileOutputStream(path);
+            InputStream inputStream   = this.downloadFile(driveService, file);
+            OutputStream outputStream = new FileOutputStream(path);
 
             if (inputStream == null) {
                 return false;

@@ -25,15 +25,18 @@ public class TreeBuilder {
         root              = new TreeNode(this.configReader.getProperty("rootFolder"));
     }
 
+    /**
+     * Build tree from a liste of files
+     * @param list
+     * @return
+     */
     public TreeNode build(List<File> list) {
-
         this.fileList           = list;
         List<TreeNode> nodeList = this.getNodeList(list);
-        boolean exit            = false;
-        int total               = list.size();
 
-        while (! nodeList.isEmpty() && ! exit) {
+        while (! nodeList.isEmpty()) {
             ArrayList<TreeNode> tmp = new ArrayList<>();
+            System.out.println(list.size());
 
             for (TreeNode node : nodeList) {
                 if (insertNode(root, node)) {
@@ -41,15 +44,7 @@ public class TreeBuilder {
                 }
             }
 
-            if (tmp.size() == 0)
-                exit = true;
-
             nodeList.removeAll(tmp);
-
-            //If no file is at the root level
-            if (total == list.size()) {
-                exit = true;
-            }
         }
 
         return root;
@@ -115,6 +110,12 @@ public class TreeBuilder {
         return result;
     }
 
+    /**
+     * Get node list
+     * @param list
+     *
+     * @return List<TreeNode>
+     */
     private List<TreeNode> getNodeList(List<File> list) {
         List<TreeNode> nodeList = new ArrayList<>();
 
