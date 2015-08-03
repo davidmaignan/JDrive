@@ -2,6 +2,7 @@ package org.configuration;
 
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Configuration Unit test
@@ -16,7 +17,7 @@ public class ConfigurationTest {
     }
 
     @Test(timeout = 1000)
-    public void testPropertyExist() throws Exception{
+    public void testJDrivePathExists() throws Exception{
         Configuration configConfiguration = new Configuration();
 
         assertEquals("/Users/david/JDrive", configConfiguration.getProperty("rootFolder"));
@@ -30,9 +31,23 @@ public class ConfigurationTest {
     }
 
     @Test(timeout = 1000)
-    public void testDBName() throws Exception {
+    public void testDBNameExists() throws Exception {
         Configuration configConfiguration = new Configuration();
 
         assertEquals("JDrive", configConfiguration.getProperty("dbName"));
+    }
+
+    @Test(timeout = 1000)
+    public void getDBUsername() throws Exception{
+        Configuration configConfiguration = new Configuration();
+
+        assertNotNull(configConfiguration.getProperty("dbUsername"));
+    }
+
+    @Test(timeout = 1000)
+    public void getDBPassword() throws Exception{
+        Configuration configConfiguration = new Configuration();
+
+        assertNotNull(configConfiguration.getProperty("dbPassword"));
     }
 }
