@@ -4,6 +4,9 @@ build/
 #Ignore libs
 libs/
 
+#db
+db/
+
 #Settings
 src/main/resources/client_secret.json
 
