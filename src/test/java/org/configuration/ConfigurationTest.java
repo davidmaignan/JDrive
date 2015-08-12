@@ -36,18 +36,4 @@ public class ConfigurationTest {
 
         assertEquals("JDrive", configConfiguration.getProperty("dbName"));
     }
-
-    @Test(timeout = 1000)
-    public void getDBUsername() throws Exception{
-        Configuration configConfiguration = new Configuration();
-
-        assertNotNull(configConfiguration.getProperty("dbUsername"));
-    }
-
-    @Test(timeout = 1000)
-    public void getDBPassword() throws Exception{
-        Configuration configConfiguration = new Configuration();
-
-        assertNotNull(configConfiguration.getProperty("dbPassword"));
-    }
 }

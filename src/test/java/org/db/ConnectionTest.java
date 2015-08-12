@@ -4,6 +4,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
+import com.tinkerpop.blueprints.impls.orient.OrientGraph;
+import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -33,11 +35,10 @@ public class ConnectionTest {
     }
 
     @Test
-    @Ignore
     public void testGetConnection(){
-        ODatabaseDocumentTx dbConnection = connection.getConnection();
-        assertTrue(dbConnection instanceof ODatabaseDocumentTx);
+        OrientGraph dbConnection = connection.getConnection();
+        assertTrue(dbConnection instanceof OrientGraph);
 
-        dbConnection.close();
+//        dbConnection.close();
     }
 }

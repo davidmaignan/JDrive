@@ -1,6 +1,8 @@
 package org.model.tree;
 
 import java.util.*;
+
+import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.ParentReference;
 import com.google.api.services.drive.model.User;
@@ -23,6 +25,7 @@ public class TreeNode {
     private boolean isRoot;
     private boolean isSuperRoot;
     private boolean isAuthenticatedUser;
+    private DateTime modifiedDate;
 
     /**
      * No args constructor
@@ -54,6 +57,7 @@ public class TreeNode {
         this.title               = this.data.getTitle();
         this.isAuthenticatedUser = this.getOwnerShip();
         this.children            = new ArrayList<>();
+        this.modifiedDate        = this.data.getModifiedDate();
 
         if ( ! file.getMimeType().equals(MimeType.FOLDER)) {
             isFolder = false;
@@ -164,6 +168,10 @@ public class TreeNode {
 
     public String getMimeType() {
         return data.getMimeType();
+    }
+
+    public DateTime getModifiedDate() {
+        return modifiedDate;
     }
 
     @Override

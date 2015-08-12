@@ -1,8 +1,8 @@
 package org.db;
 
 import com.google.inject.Inject;
-import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
-import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
+import com.tinkerpop.blueprints.impls.orient.OrientGraph;
+import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
 import org.api.DriveService;
 import org.configuration.Configuration;
 
@@ -24,9 +24,8 @@ public class Connection {
      *
      * @return ODatabaseDocumentTx
      */
-    public ODatabaseDocumentTx getConnection() {
-        return new ODatabaseDocumentTx(this.getDBPath())
-                .open(this.getUsername(), this.getPassword());
+    public OrientGraph getConnection() {
+        return new OrientGraph("plocal:./db");
     }
 
     /**
@@ -35,7 +34,7 @@ public class Connection {
      * @return String
      */
     private String getDBPath(){
-        return String.format("remote:localhost/%s", this.getDBName());
+        return String.format("plocal:/tmp/db/%s", this.getDBName());
     }
 
     /**

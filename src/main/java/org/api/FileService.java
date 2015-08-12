@@ -37,14 +37,10 @@ public class FileService {
 
         do {
             try {
-
                 FileList files = request.execute();
 
                 result.addAll(files.getItems());
-
                 request.setPageToken(files.getNextPageToken());
-
-                System.out.println(result.size());
 
             } catch (IOException e) {
                 Logger logger = LoggerFactory.getLogger(this.getClass().getName());
