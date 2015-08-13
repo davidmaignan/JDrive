@@ -36,7 +36,6 @@ public class TreeBuilder {
 
         while (! nodeList.isEmpty()) {
             ArrayList<TreeNode> tmp = new ArrayList<>();
-            System.out.println(list.size());
 
             for (TreeNode node : nodeList) {
                 if (insertNode(root, node)) {

@@ -62,7 +62,6 @@ public class DatabaseService {
         vertex.setProperty("identifier", node.getId());
         vertex.setProperty("title", node.getTitle());
         vertex.setProperty("absolutePath", node.getAbsolutePath());
-        logger.warn(node.getAbsolutePath());
         if(node.getModifiedDate() != null) {
             vertex.setProperty("modifiedDate", node.getModifiedDate());
         }
@@ -100,10 +99,6 @@ public class DatabaseService {
     private String getFullPathRecursive(Vertex vertex) {
         String path = vertex.getProperty("title");
         Iterable<Edge> edgeList = vertex.getEdges(Direction.OUT);
-
-        if(edgeList.iterator().hasNext()) {
-            logger.warn(edgeList.iterator().next().getVertex(Direction.OUT).getProperty("title").toString());
-        }
 
         return path;
     }
