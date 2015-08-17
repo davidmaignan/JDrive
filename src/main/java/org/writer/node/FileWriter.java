@@ -1,6 +1,5 @@
-package org.writer;
+package org.writer.node;
 
-import com.google.api.services.drive.model.*;
 import com.google.inject.Inject;
 import org.model.tree.TreeNode;
 import org.api.DriveService;
@@ -12,7 +11,7 @@ import java.io.*;
  *
  * David Maignan <davidmaignan@gmail.com>
  */
-public class FileWriter implements WriterInterface {
+public class FileWriter implements NodeWriterInterface {
     private TreeNode node;
     private final DriveService driveService;
 

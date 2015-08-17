@@ -1,4 +1,4 @@
-package org.writer;
+package org.writer.node;
 
 import org.model.tree.TreeNode;
 
@@ -9,7 +9,7 @@ import java.io.File;
  *
  * David Maignan <davidmaignan@gmail.com>
  */
-public class FolderWriter implements WriterInterface {
+public class FolderWriter implements NodeWriterInterface {
     private TreeNode node;
     private File file;
 

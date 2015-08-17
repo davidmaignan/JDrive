@@ -1,4 +1,4 @@
-package org.writer;
+package org.writer.node;
 
 import org.model.tree.TreeNode;
 
@@ -10,7 +10,7 @@ import java.io.PrintWriter;
  * JDrive
  * Created by David Maignan <davidmaignan@gmail.com> on 15-07-19.
  */
-public class DocumentWriter implements WriterInterface {
+public class DocumentWriter implements NodeWriterInterface {
     private TreeNode node;
     private File file;
     private PrintWriter output;

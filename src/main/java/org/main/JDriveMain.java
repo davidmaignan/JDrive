@@ -28,6 +28,12 @@ import java.util.*;
  */
 public class JDriveMain {
 
+    private static Injector injector;
+    private static TreeBuilder treeBuilder;
+    private static FileService fileService;
+    private static UpdateService updateService;
+    private static DatabaseService dbService;
+
     /**
      * Main
      *
@@ -36,72 +42,73 @@ public class JDriveMain {
      * @throws Throwable
      */
     public static void main(String[] args) throws IOException, Throwable {
-        Logger logger = LoggerFactory.getLogger(JDriveMain.class);
-        logger.error("test logger");
+        initJDrive();
+        initServices();
 
+//        boolean setUpSuccess = false;
+//        try {
+//            setUpSuccess = setUpJDrive();
+//        } catch (Exception exception) {
+//            System.out.println("Set up failed" + exception.toString());
+//        }
+
+        try {
+            setUpChanges();
+        } catch (Exception exception) {
+            System.out.println("Set up changes failed" + exception.toString());
+        }
+
+    }
+
+    private static void initJDrive() {
         ArrayList<AbstractModule> moduleList = new ArrayList<>();
         moduleList.add(new TreeModule());
 
-        Injector injector           = Guice.createInjector(moduleList);
-        TreeBuilder treeBuilder     = injector.getInstance(TreeBuilder.class);
-        FileService fileService     = injector.getInstance(FileService.class);
-        UpdateService updateService = injector.getInstance(UpdateService.class);
-        DatabaseService dbService   = injector.getInstance(DatabaseService.class);
+        injector = Guice.createInjector(moduleList);
+    }
 
-//        dbService.debug();
+    private static void initServices() {
+        treeBuilder   = injector.getInstance(TreeBuilder.class);
+        fileService   = injector.getInstance(FileService.class);
+        updateService = injector.getInstance(UpdateService.class);
+        dbService     = injector.getInstance(DatabaseService.class);
+    }
 
-//
-//        //Update last change id
-//        configReader.writeProperty("lastChangeId", String.valueOf(lastChangeId));
-//
-//        FileSearch fs = injector.getInstance(FileSearch.class);
-//        FileWriter fileWriter = injector.getInstance(FileWriter.class);
-//
-//        //Update modified files
-//        for(String fileId : fileIdList){
-//            File file = fileService.getFile(fileId);
-//            if (file == null) {
-//                System.out.println(fileId + " is null");
-//                break;
-//            }
-//
-//            String fullPath = fs.getAbsolutePath(file.getTitle());
-//
-//            fileWriter.write(fullPath, file);
-//            System.out.println("I just rewrote:  " + file.getTitle() + " @ " + fs.getAbsolutePath(file.getTitle()));
-//
-//        }
-
+    private static boolean setUpJDrive() throws IOException, Exception{
         List<File> result = fileService.getAll();
         treeBuilder.build(result);
-//        TreeBuilder.printTree(treeBuilder.getRoot());
+        TreeBuilder.printTree(treeBuilder.getRoot());
         Boolean writeSuccess = injector.getInstance(TreeWriter.class).writeTree(treeBuilder.getRoot());
 
         if (writeSuccess) {
             dbService.save(treeBuilder.getRoot());
         }
 
+        return writeSuccess;
+    }
+
+    private static void setUpMonitor(){
+//        MonitorService monitorService = injector.getInstance(MonitorService.class);
+//        monitorService.start();
+    }
+
+    private static void setUpChanges() throws IOException, Exception{
         Configuration configReader = new Configuration();
         Long lastChangeId = Long.getLong(configReader.getProperty("lastChangeId"));
-
-        System.out.println("Last change id: " + lastChangeId);
 
         ChangeService changeService = injector.getInstance(ChangeService.class);
         List<Change> changeList = changeService.getAll(null);
 
-        Set<String> fileIdList = new HashSet<>();
+//        System.out.println(changeList);
 
+        Set<String> fileIdList = new HashSet<>();
+//
         for (Change change : changeList){
             fileIdList.add(change.getFileId());
             lastChangeId = (lastChangeId == null)? change.getId() : Math.max(lastChangeId, change.getId());
 
             updateService.update(change);
         }
-
-//
-        //Monitor service
-//        MonitorService monitorService = injector.getInstance(MonitorService.class);
-//        monitorService.start();
     }
 
     private static Configuration setConfiguration() throws IOException{
