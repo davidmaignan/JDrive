@@ -14,6 +14,9 @@ import java.util.Iterator;
 /**
  * Database service
  *
+ * Create and save vertex corresponding to a node from the google drive
+ * in Orient DB
+ *
  * David Maignan <davidmaignan@gmail.com>
  */
 public class DatabaseService {
@@ -25,6 +28,11 @@ public class DatabaseService {
         this.graph = connection.getConnection();
     }
 
+    /**
+     * Save a tree of nodes in the db
+     *
+     * @param node
+     */
     public void save(TreeNode node) {
         try {
             Vertex vertex = graph.addVertex(null);
@@ -42,14 +50,30 @@ public class DatabaseService {
             System.out.println(exception);
             graph.rollback();
         }
-
     }
 
+    /**
+     * Update vertex properties.
+     *
+     * //@todo check if better way to update properties for a vertex
+     *
+     * @param vertex
+     */
+    public void save(Vertex vertex) {
+        graph.removeVertex(vertex);
+        graph.addVertex(vertex);
+        graph.commit();
+    }
+
+    /**
+     * Recursively save a tree of nodes
+     *
+     * @param parent Vertex
+     * @param node TreeNode
+     */
     private void save(Vertex parent, TreeNode node) {
         Vertex childV = graph.addVertex(null);
         setVertex(childV, node);
-
-        graph.addEdge(null, parent, childV, "test");
 
         if(node.getChildren().size() > 0) {
             for (TreeNode child : node.getChildren()) {
@@ -58,48 +82,45 @@ public class DatabaseService {
         }
     }
 
+    /**
+     * Set vertex properties
+     *
+     * @param vertex Vertex
+     * @param node TreeNode
+     */
     private void setVertex(Vertex vertex, TreeNode node){
-        vertex.setProperty("identifier", node.getId());
-        vertex.setProperty("title", node.getTitle());
-        vertex.setProperty("absolutePath", node.getAbsolutePath());
-        if(node.getModifiedDate() != null) {
-            vertex.setProperty("modifiedDate", node.getModifiedDate());
-        }
+        vertex.setProperty(Fields.ID, node.getId());
+        vertex.setProperty(Fields.TITLE, node.getTitle());
+        vertex.setProperty(Fields.PATH, node.getAbsolutePath());
+        vertex.setProperty(Fields.FILE, node.getData());
+        vertex.setProperty(Fields.MIME_TYPE, node.getMimeType());
 
+        if(node.getModifiedDate() != null) {
+            vertex.setProperty(Fields.MODIFIED_DATE, node.getModifiedDate());
+        }
     }
 
+    /**
+     * Debug method
+     */
     public void debug(){
         for (Vertex v : graph.getVertices()) {
-            System.out.println(v.getProperty("identifier") + " : " + v.getProperty("title") + " - " + v.getProperty("modifiedDate"));
+            //System.out.println(v.getProperty("identifier") + " : " + v.getProperty("title") + " - " + v.getProperty("modifiedDate"));
         }
     }
 
+    /**
+     * Get vertex by identifier
+     *
+     * @param id String
+     *
+     * @return Vertex|null
+     */
     public Vertex getVertex(String id) {
-        for(Vertex v : graph.getVertices("identifier", id)) {
+        for(Vertex v : graph.getVertices(Fields.ID, id)) {
             return v;
         }
 
         return  null;
-    }
-
-    public String getFullPath(Vertex vertex) {
-        String path;
-        Iterable<Edge> edgeList = vertex.getEdges(Direction.OUT);
-
-        path = vertex.getProperty("title").toString();
-
-        if (edgeList.iterator().hasNext()) {
-           Vertex v = edgeList.iterator().next().getVertex(Direction.OUT);
-           path = getFullPathRecursive(v) + "/" + path;
-        }
-
-        return path;
-    }
-
-    private String getFullPathRecursive(Vertex vertex) {
-        String path = vertex.getProperty("title");
-        Iterable<Edge> edgeList = vertex.getEdges(Direction.OUT);
-
-        return path;
     }
 }

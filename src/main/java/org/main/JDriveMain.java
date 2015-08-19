@@ -1,21 +1,18 @@
 package org.main;
 
-import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.File;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.tinkerpop.blueprints.Vertex;
-import org.api.ChangeService;
+import org.api.change.ChangeService;
 import org.api.UpdateService;
 import org.configuration.Configuration;
 import org.api.FileService;
 import org.db.DatabaseService;
+import org.io.ChangeExecutor;
 import org.model.tree.TreeBuilder;
 import org.model.tree.TreeModule;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.writer.TreeWriter;
 
 import java.io.IOException;
@@ -33,11 +30,12 @@ public class JDriveMain {
     private static FileService fileService;
     private static UpdateService updateService;
     private static DatabaseService dbService;
+    private static ChangeExecutor changeExecutor;
 
     /**
      * Main
      *
-     * @param args
+     * @param args String[]
      * @throws IOException
      * @throws Throwable
      */
@@ -45,16 +43,17 @@ public class JDriveMain {
         initJDrive();
         initServices();
 
-//        boolean setUpSuccess = false;
-//        try {
-//            setUpSuccess = setUpJDrive();
-//        } catch (Exception exception) {
-//            System.out.println("Set up failed" + exception.toString());
-//        }
+        boolean setUpSuccess = false;
+        try {
+            setUpSuccess = setUpJDrive();
+        } catch (Exception exception) {
+            System.out.println("Set up failed" + exception.toString());
+        }
 
         try {
             setUpChanges();
         } catch (Exception exception) {
+            exception.printStackTrace();
             System.out.println("Set up changes failed" + exception.toString());
         }
 
@@ -72,6 +71,7 @@ public class JDriveMain {
         fileService   = injector.getInstance(FileService.class);
         updateService = injector.getInstance(UpdateService.class);
         dbService     = injector.getInstance(DatabaseService.class);
+        changeExecutor = injector.getInstance(ChangeExecutor.class);
     }
 
     private static boolean setUpJDrive() throws IOException, Exception{
@@ -96,19 +96,34 @@ public class JDriveMain {
         Configuration configReader = new Configuration();
         Long lastChangeId = Long.getLong(configReader.getProperty("lastChangeId"));
 
+//        System.out.println(lastChangeId);
+
         ChangeService changeService = injector.getInstance(ChangeService.class);
         List<Change> changeList = changeService.getAll(null);
 
 //        System.out.println(changeList);
 
         Set<String> fileIdList = new HashSet<>();
-//
+
+        /**
+         * Changes:
+         *   - file or folder
+         *   - delete or update (mv or content only)
+         */
         for (Change change : changeList){
             fileIdList.add(change.getFileId());
             lastChangeId = (lastChangeId == null)? change.getId() : Math.max(lastChangeId, change.getId());
 
-            updateService.update(change);
+//            System.out.println(change);
+
+            changeExecutor.addChange(updateService.update(change));
         }
+
+        changeExecutor.clean();
+
+        System.out.println(changeExecutor.size());
+
+        configReader.writeProperty("lastChangeId", lastChangeId);
     }
 
     private static Configuration setConfiguration() throws IOException{

@@ -1,6 +1,7 @@
 package org.writer.node;
 
 import org.model.tree.TreeNode;
+import org.writer.WriterInterface;
 
 import java.io.File;
 
@@ -9,13 +10,16 @@ import java.io.File;
  *
  * David Maignan <davidmaignan@gmail.com>
  */
-public class FolderWriter implements NodeWriterInterface {
+public class FolderWriter implements WriterInterface {
     private TreeNode node;
     private File file;
 
-    @Override
-    public boolean write(TreeNode node) {
+    public FolderWriter(TreeNode node) {
         this.node = node;
+    }
+
+    @Override
+    public boolean write() {
         file = new File(node.getAbsolutePath());
 
         return file.mkdir();

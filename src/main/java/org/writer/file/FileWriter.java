@@ -1,36 +1,45 @@
-package org.writer.node;
+package org.writer.file;
 
+import com.google.api.services.drive.model.File;
 import com.google.inject.Inject;
-import org.model.tree.TreeNode;
+import com.tinkerpop.blueprints.Vertex;
 import org.api.DriveService;
+import org.api.FileService;
+import org.db.Fields;
+import org.model.tree.TreeNode;
 import org.writer.WriterInterface;
 
-import java.io.*;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
- * Write a file from a treeNode
+ * Write a file from a vertex
  *
  * David Maignan <davidmaignan@gmail.com>
  */
 public class FileWriter implements WriterInterface {
-    private TreeNode node;
+    private Vertex vertex;
     private final DriveService driveService;
+    private final FileService fileService;
 
     @Inject
-    public FileWriter(DriveService driveService) {
+    public FileWriter(DriveService driveService, FileService fileService) {
         this.driveService = driveService;
+        this.fileService  = fileService;
     }
 
-    public void setNode(TreeNode node){
-        this.node = node;
+    public void setVertex(Vertex vertex){
+        this.vertex = vertex;
     }
 
     @Override
     public boolean write() {
         try {
-            FileOutputStream fos      = new FileOutputStream(node.getAbsolutePath());
-            InputStream inputStream   = this.downloadFile(driveService, node.getData());
-            OutputStream outputStream = new FileOutputStream(node.getAbsolutePath());
+            FileOutputStream fos      = new FileOutputStream(vertex.getProperty(Fields.PATH).toString());
+            InputStream inputStream   = this.downloadFile(driveService, this.getFile(vertex.getProperty(Fields.ID).toString()));
+            OutputStream outputStream = new FileOutputStream(vertex.getProperty(Fields.PATH).toString());
 
             if (inputStream == null) {
                 return false;
@@ -56,34 +65,8 @@ public class FileWriter implements WriterInterface {
         return false;
     }
 
-    public boolean write(String path, com.google.api.services.drive.model.File file) {
-        try {
-            FileOutputStream fos      = new FileOutputStream(path);
-            InputStream inputStream   = this.downloadFile(driveService, file);
-            OutputStream outputStream = new FileOutputStream(path);
-
-            if (inputStream == null) {
-                return false;
-            }
-
-            int numberOfBytesCopied = 0;
-            int r;
-
-            while ((r = inputStream.read()) != -1) {
-                outputStream.write((byte) r);
-                numberOfBytesCopied++;
-            }
-
-            inputStream.close();
-            outputStream.close();
-
-            return true;
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return false;
+    private File getFile(String id) {
+        return this.fileService.getFile(id);
     }
 
     private InputStream downloadFile(DriveService service, com.google.api.services.drive.model.File file) throws IOException {
@@ -92,7 +75,6 @@ public class FileWriter implements WriterInterface {
                 return driveService.getDrive().files().get(file.getId()).executeMediaAsInputStream();
             } catch (IOException e) {
                 // An error occurred.
-                System.out.println("error");
                 e.printStackTrace();
                 return null;
             }

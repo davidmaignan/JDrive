@@ -1,7 +1,6 @@
 package org.writer;
 
 import org.model.tree.TreeNode;
-import org.writer.WriterFactory;
 import java.io.IOException;
 import java.util.List;
 
@@ -11,7 +10,7 @@ import java.util.List;
  * David Maignan <davidmaignan@gmail.com>
  */
 public class TreeWriter {
-    public boolean write(TreeNode root) throws IOException {
+    public boolean write(TreeNode root) throws IOException, Exception {
         return writeTree(root);
     }
 
@@ -20,9 +19,9 @@ public class TreeWriter {
      *
      * @param node
      */
-    public boolean writeTree(TreeNode node) throws IOException, NullPointerException {
+    public boolean writeTree(TreeNode node) throws IOException, NullPointerException, Exception {
         boolean result = true;
-        if (! WriterFactory.get(node).write(node)) {
+        if (! FactoryProducer.getFactory("NODE").getWriter(node).write()) {
             result = false;
         }
 

@@ -1,9 +1,10 @@
-package org.api;
+package org.api.change;
 
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.ChangeList;
 import com.google.inject.Inject;
+import org.api.DriveService;
 
 import java.io.IOException;
 import java.util.List;

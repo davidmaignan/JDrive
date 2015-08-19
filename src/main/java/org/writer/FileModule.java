@@ -1,6 +1,7 @@
 package org.writer;
 
 import com.google.inject.AbstractModule;
+import org.writer.node.FileWriter;
 
 /**
  * Writer Module

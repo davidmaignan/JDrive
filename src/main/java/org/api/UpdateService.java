@@ -4,17 +4,25 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.File;
+import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.tinkerpop.blueprints.Vertex;
 import org.db.DatabaseService;
+import org.db.Fields;
+import org.io.ChangeInterface;
+import org.io.DeleteService;
+import org.io.MoveService;
 import org.model.tree.TreeNode;
+import org.model.types.MimeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.writer.FactoryProducer;
+import org.writer.FileModule;
 
 /**
  * Update service
  *
- * Update file locally after recieving changes notification from Drive
+ * Update file locally after getting changes notification from Drive API
  *
  * David Maignan <davidmaignan@gmail.com>
  */
@@ -32,36 +40,67 @@ public class UpdateService {
         this.fileService = fileService;
     }
 
-    public void update(Change change){
+    public ChangeInterface update(Change change) throws Exception {
+        boolean success = false;
         Vertex vertex = dbService.getVertex(change.getFileId());
 
         if (vertex != null) {
-            Long vertexDT = ((DateTime)vertex.getProperty("modifiedDate")).getValue();
+//            System.out.println(vertex.getProperty(Fields.FILE));
+            Long vertexDT = ((DateTime)vertex.getProperty(Fields.MODIFIED_DATE)).getValue();
             Long changeDT = change.getModificationDate().getValue();
-            String absolutePath = vertex.getProperty("AbsolutePath");
+            String absolutePath = vertex.getProperty(Fields.PATH);
 
-            if(absolutePath != null) {
-                logger.warn(absolutePath.toString());
-            }
+//            System.out.println("id: " + change.getFileId());
+//            System.out.println("path: " + absolutePath);
+//            System.out.println(changeDT + " : " + vertexDT);
 
-//            logger.warn(vertexDT + ": " + changeDT);
+            /*
+             Probleme: change can 3 types
+              - change of content: just reload the content
+              - change of location: need to find the new parent.
+                - if found then move file to new location
+                - if not found (parent is new as well - need to find recursively until we found a known parent)
+              - change of both: need to determine parent then reload content
+             */
 
             if(changeDT > vertexDT) {
-                update(vertex);
+
+                if( ! change.getFile().getMimeType().equals(MimeType.FOLDER)) {
+                    File file = fileService.getFile(vertex.getProperty(Fields.ID).toString());
+
+                    boolean result = FactoryProducer.getFactory("FILE").getWriter(vertex).write();
+
+                    if (result) {
+                        System.out.println(change.getFileId() + " updated");
+                        vertex.setProperty(Fields.MODIFIED_DATE, file.getModifiedDate());
+                        dbService.save(vertex);
+                    } else {
+                        vertex.setProperty(Fields.MODIFIED_DATE, change.getFile().getModifiedDate());
+                        dbService.save(vertex);
+                    }
+
+//                    System.out.println(String.format("%s: %b", change.getFileId(), result));
+                }
+
+                ChangeInterface service;
+
+//                System.out.println(file.getParents());
+//                System.out.println(((File)vertex.getProperty(Fields.FILE)).getParents());
+
+//                if(change.getFile().getParents().get(0) != vertexFile.getParents().get(0)) {
+//                    service = Guice.createInjector(new FileModule()).getInstance(MoveService.class);
+//                    service.setChange(change);
+//                    return service;
+//                }
+
+                if (change.getDeleted()) {
+                    service = Guice.createInjector(new FileModule()).getInstance(DeleteService.class);
+                    service.setChange(change);
+                    return service;
+                }
             }
         }
+
+        return null;
     }
-
-    private boolean update(Vertex vertex) {
-        File file = fileService.getFile(vertex.getProperty("identifier").toString());
-
-        if(file == null) {
-            return false;
-        }
-
-        //logger.warn(dbService.getFullPath(vertex));
-
-        return true;
-    }
-
 }

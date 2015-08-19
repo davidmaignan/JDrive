@@ -82,7 +82,7 @@ public class Configuration {
      * @throws FileNotFoundException
      */
     public void writeProperty(String name, Long value) throws FileNotFoundException {
-        this.putProperty(name, value);
+        this.putProperty(name, String.valueOf(value));
         this.write();
     }
 
