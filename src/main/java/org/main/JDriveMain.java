@@ -43,12 +43,12 @@ public class JDriveMain {
         initJDrive();
         initServices();
 
-        boolean setUpSuccess = false;
-        try {
-            setUpSuccess = setUpJDrive();
-        } catch (Exception exception) {
-            System.out.println("Set up failed" + exception.toString());
-        }
+//        boolean setUpSuccess = false;
+//        try {
+//            setUpSuccess = setUpJDrive();
+//        } catch (Exception exception) {
+//            System.out.println("Set up failed" + exception.toString());
+//        }
 
         try {
             setUpChanges();
@@ -72,6 +72,9 @@ public class JDriveMain {
         updateService = injector.getInstance(UpdateService.class);
         dbService     = injector.getInstance(DatabaseService.class);
         changeExecutor = injector.getInstance(ChangeExecutor.class);
+
+        dbService.createTreeNodeType();
+        dbService.createParentType();
     }
 
     private static boolean setUpJDrive() throws IOException, Exception{
@@ -96,12 +99,8 @@ public class JDriveMain {
         Configuration configReader = new Configuration();
         Long lastChangeId = Long.getLong(configReader.getProperty("lastChangeId"));
 
-//        System.out.println(lastChangeId);
-
         ChangeService changeService = injector.getInstance(ChangeService.class);
-        List<Change> changeList = changeService.getAll(null);
-
-//        System.out.println(changeList);
+        List<Change> changeList = changeService.getAll(481L);
 
         Set<String> fileIdList = new HashSet<>();
 
@@ -115,13 +114,16 @@ public class JDriveMain {
             lastChangeId = (lastChangeId == null)? change.getId() : Math.max(lastChangeId, change.getId());
 
 //            System.out.println(change);
-
             changeExecutor.addChange(updateService.update(change));
         }
+
+        System.out.println(changeExecutor.size());
 
         changeExecutor.clean();
 
         System.out.println(changeExecutor.size());
+
+        changeExecutor.execute();
 
         configReader.writeProperty("lastChangeId", lastChangeId);
     }

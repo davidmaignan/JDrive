@@ -39,8 +39,8 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 mainClassName = 'org.main.JDriveMain'
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 version = '1.0'
 
 applicationDefaultJvmArgs = ["-Dgreeting.language=en"]

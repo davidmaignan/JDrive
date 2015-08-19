@@ -28,6 +28,11 @@ public class ChangeExecutor {
     }
 
     public int size(){
+
+        for (ChangeInterface service : changeList) {
+            System.out.println("service: " + service);
+        }
+
         return  changeList.size();
     }
 

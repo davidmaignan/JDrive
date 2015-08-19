@@ -7,6 +7,7 @@ import com.google.api.services.drive.model.File;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.impls.orient.OrientElementIterable;
 import org.db.DatabaseService;
 import org.db.Fields;
 import org.io.ChangeInterface;
@@ -18,6 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.writer.FactoryProducer;
 import org.writer.FileModule;
+
+import java.util.HashSet;
 
 /**
  * Update service
@@ -42,17 +45,16 @@ public class UpdateService {
 
     public ChangeInterface update(Change change) throws Exception {
         boolean success = false;
+        ChangeInterface service;
+
         Vertex vertex = dbService.getVertex(change.getFileId());
 
         if (vertex != null) {
-//            System.out.println(vertex.getProperty(Fields.FILE));
-            Long vertexDT = ((DateTime)vertex.getProperty(Fields.MODIFIED_DATE)).getValue();
+            Long vertexDT = vertex.getProperty(Fields.MODIFIED_DATE);
             Long changeDT = change.getModificationDate().getValue();
             String absolutePath = vertex.getProperty(Fields.PATH);
 
-//            System.out.println("id: " + change.getFileId());
-//            System.out.println("path: " + absolutePath);
-//            System.out.println(changeDT + " : " + vertexDT);
+            System.out.println(changeDT + " : " + vertexDT);
 
             /*
              Probleme: change can 3 types
@@ -65,42 +67,50 @@ public class UpdateService {
 
             if(changeDT > vertexDT) {
 
-                if( ! change.getFile().getMimeType().equals(MimeType.FOLDER)) {
-                    File file = fileService.getFile(vertex.getProperty(Fields.ID).toString());
+                //System.out.println(change.getDeleted());
 
-                    boolean result = FactoryProducer.getFactory("FILE").getWriter(vertex).write();
-
-                    if (result) {
-                        System.out.println(change.getFileId() + " updated");
-                        vertex.setProperty(Fields.MODIFIED_DATE, file.getModifiedDate());
-                        dbService.save(vertex);
-                    } else {
-                        vertex.setProperty(Fields.MODIFIED_DATE, change.getFile().getModifiedDate());
-                        dbService.save(vertex);
-                    }
-
-//                    System.out.println(String.format("%s: %b", change.getFileId(), result));
-                }
-
-                ChangeInterface service;
-
-//                System.out.println(file.getParents());
-//                System.out.println(((File)vertex.getProperty(Fields.FILE)).getParents());
-
-//                if(change.getFile().getParents().get(0) != vertexFile.getParents().get(0)) {
-//                    service = Guice.createInjector(new FileModule()).getInstance(MoveService.class);
-//                    service.setChange(change);
-//                    return service;
-//                }
-
-                if (change.getDeleted()) {
+                if (change.getDeleted() || this.getTrashedValue(change)) {
                     service = Guice.createInjector(new FileModule()).getInstance(DeleteService.class);
                     service.setChange(change);
                     return service;
                 }
+
+//                //If not a folder - reload file content
+//                if( ! change.getFile().getMimeType().equals(MimeType.FOLDER)) {
+//                    File file = fileService.getFile(vertex.getProperty(Fields.ID).toString());
+//
+//                    boolean result = FactoryProducer.getFactory("FILE").getWriter(vertex).write() || true;
+//
+//                    if(result) {
+//                        OrientElementIterable parentList = vertex.getProperty(Fields.PARENTS);
+//
+//                        Vertex parentVertex = (Vertex)parentList.iterator().next();
+//
+//                        String oldParent = parentVertex.getProperty(Fields.ID);
+//                        String newParent = change.getFile().getParents().get(0).getId();
+//
+//                        if (! oldParent.equals(newParent)) {
+//                            service = Guice.createInjector(new FileModule()).getInstance(MoveService.class);
+//                            service.setChange(change);
+//                            return service;
+//                        }
+//                    }
+//                }
+//                System.out.println(change.getFile().getParents().get(0).getId() + " - " + parentVertex.getProperty(Fields.ID));
             }
         }
 
         return null;
+    }
+
+    /**
+     * Get trashed label value if available
+     * @param change Change
+     * @return boolean
+     */
+    private boolean getTrashedValue(Change change){
+        return (change.getFile() != null
+                && change.getFile().getLabels() != null
+                && change.getFile().getLabels().getTrashed().booleanValue());
     }
 }

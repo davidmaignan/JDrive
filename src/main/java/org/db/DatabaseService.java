@@ -1,21 +1,27 @@
 package org.db;
 
+import com.google.api.services.drive.model.ParentReference;
 import com.google.inject.Inject;
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Edge;
+import com.orientechnologies.orient.core.exception.OSchemaException;
+import com.orientechnologies.orient.core.metadata.schema.OClass;
+import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
+import com.tinkerpop.blueprints.impls.orient.OrientVertexType;
 import org.model.tree.TreeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Iterator;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Database service
  *
- * Create and save vertex corresponding to a node from the google drive
- * in Orient DB
+ * Create / save vertex
+ *
+ * A vertex is equivalent to a node in the file directory structure
+ * on Google drive
  *
  * David Maignan <davidmaignan@gmail.com>
  */
@@ -29,13 +35,47 @@ public class DatabaseService {
     }
 
     /**
+     * Create a treeNode type in orientDB
+     */
+    public void createTreeNodeType() {
+        try {
+            OrientVertexType treeNode = graph.createVertexType("TreeNode");
+            treeNode.createProperty(Fields.ID, OType.STRING);
+            treeNode.createProperty(Fields.TITLE, OType.STRING);
+            treeNode.createProperty(Fields.MIME_TYPE, OType.STRING);
+            treeNode.createProperty(Fields.CREATED_DATE, OType.LONG).setNotNull(false);
+            treeNode.createProperty(Fields.MODIFIED_DATE, OType.LONG).setNotNull(false);
+            treeNode.createProperty(Fields.PATH, OType.STRING);
+            treeNode.createProperty(Fields.PARENTS, OType.EMBEDDEDSET);
+            treeNode.createProperty(Fields.IS_TRASHED, OType.BOOLEAN).setMin("0");
+
+            treeNode.createIndex("IDIdx", OClass.INDEX_TYPE.UNIQUE, Fields.ID);
+        }catch (OSchemaException exception){
+
+        }
+    }
+
+    /**
+     * Create a parentType in orientDB
+     */
+    public void createParentType(){
+        try{
+            OrientVertexType parentType = graph.createVertexType("Parent");
+            parentType.createProperty(Fields.ID, OType.STRING);
+            parentType.createProperty(Fields.IS_ROOT, OType.BOOLEAN);
+        }catch (OSchemaException exception) {
+
+        }
+    }
+
+    /**
      * Save a tree of nodes in the db
      *
      * @param node
      */
     public void save(TreeNode node) {
         try {
-            Vertex vertex = graph.addVertex(null);
+            Vertex vertex = graph.addVertex("class:TreeNode");
             this.setVertex(vertex, node);
 
             if(node.getChildren().size() > 0) {
@@ -47,7 +87,7 @@ public class DatabaseService {
             graph.commit();
 
         } catch (Exception exception) {
-            System.out.println(exception);
+            exception.printStackTrace();
             graph.rollback();
         }
     }
@@ -72,7 +112,7 @@ public class DatabaseService {
      * @param node TreeNode
      */
     private void save(Vertex parent, TreeNode node) {
-        Vertex childV = graph.addVertex(null);
+        Vertex childV = graph.addVertex("class:TreeNode");
         setVertex(childV, node);
 
         if(node.getChildren().size() > 0) {
@@ -92,12 +132,28 @@ public class DatabaseService {
         vertex.setProperty(Fields.ID, node.getId());
         vertex.setProperty(Fields.TITLE, node.getTitle());
         vertex.setProperty(Fields.PATH, node.getAbsolutePath());
-        vertex.setProperty(Fields.FILE, node.getData());
         vertex.setProperty(Fields.MIME_TYPE, node.getMimeType());
 
-        if(node.getModifiedDate() != null) {
-            vertex.setProperty(Fields.MODIFIED_DATE, node.getModifiedDate());
+        if(node.getCreatedDate() != null) {
+            vertex.setProperty(Fields.CREATED_DATE, node.getCreatedDate().getValue());
         }
+
+        if(node.getModifiedDate() != null) {
+            vertex.setProperty(Fields.MODIFIED_DATE, node.getModifiedDate().getValue());
+        }
+
+        Set<Vertex> parentSet = new HashSet<>();
+
+        if(node.getData() != null && node.getData().getParents() != null ) {
+            for(ParentReference parentReference : node.getData().getParents()) {
+                Vertex parentV = graph.addVertex("class:Parent");
+                parentV.setProperty(Fields.ID, parentReference.getId());
+                parentV.setProperty(Fields.IS_ROOT, parentReference.getIsRoot());
+                parentSet.add(parentV);
+            }
+        }
+
+        vertex.setProperty(Fields.PARENTS, parentSet);
     }
 
     /**
@@ -105,7 +161,7 @@ public class DatabaseService {
      */
     public void debug(){
         for (Vertex v : graph.getVertices()) {
-            //System.out.println(v.getProperty("identifier") + " : " + v.getProperty("title") + " - " + v.getProperty("modifiedDate"));
+            System.out.println(v.getProperty("identifier") + " : " + v.getProperty("title") + " - " + v.getProperty("modifiedDate"));
         }
     }
 

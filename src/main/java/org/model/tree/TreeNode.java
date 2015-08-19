@@ -25,7 +25,9 @@ public class TreeNode {
     private boolean isRoot;
     private boolean isSuperRoot;
     private boolean isAuthenticatedUser;
+    private DateTime createdDate;
     private DateTime modifiedDate;
+    private boolean isTrashed;
 
     /**
      * No args constructor
@@ -39,6 +41,7 @@ public class TreeNode {
         this.isAuthenticatedUser = true;
         this.children            = new ArrayList<>();
         this.data                = new File();
+        this.isTrashed           = false;
         data.setMimeType(MimeType.FOLDER);
     }
 
@@ -58,6 +61,12 @@ public class TreeNode {
         this.isAuthenticatedUser = this.getOwnerShip();
         this.children            = new ArrayList<>();
         this.modifiedDate        = this.data.getModifiedDate();
+        this.createdDate         = this.data.getCreatedDate();
+        this.isTrashed           = false;
+
+        if (file.getLabels().size() > 0) {
+            this.isTrashed = file.getLabels().getTrashed().booleanValue();
+        }
 
         if ( ! file.getMimeType().equals(MimeType.FOLDER)) {
             isFolder = false;
@@ -168,6 +177,10 @@ public class TreeNode {
 
     public String getMimeType() {
         return data.getMimeType();
+    }
+
+    public DateTime getCreatedDate() {
+        return createdDate;
     }
 
     public DateTime getModifiedDate() {
