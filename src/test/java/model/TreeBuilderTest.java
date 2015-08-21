@@ -6,6 +6,7 @@ import com.google.api.services.drive.model.ParentReference;
 import com.google.api.services.drive.model.User;
 import com.google.inject.*;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.model.tree.TreeBuilder;
 import org.model.tree.TreeModule;
@@ -218,6 +219,6 @@ public class TreeBuilderTest {
         treeBuilder.build(listFile);
         TreeNode root = treeBuilder.getRoot();
 
-        assertEquals("/Users/david/JDrive/folder1/file1", root.getChildren().get(0).getChildren().get(0).getAbsolutePath());
+        assertEquals("/Test/Path/JDrive/folder1/file1", root.getChildren().get(0).getChildren().get(0).getAbsolutePath());
     }
 }

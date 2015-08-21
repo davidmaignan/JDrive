@@ -20,7 +20,7 @@ public class ConfigurationTest {
     public void testJDrivePathExists() throws Exception{
         Configuration configConfiguration = new Configuration();
 
-        assertEquals("/Users/david/JDrive", configConfiguration.getProperty("rootFolder"));
+        assertEquals("/Test/Path/JDrive", configConfiguration.getProperty("rootFolder"));
     }
 
     @Test(timeout = 1000)
@@ -34,6 +34,6 @@ public class ConfigurationTest {
     public void testDBNameExists() throws Exception {
         Configuration configConfiguration = new Configuration();
 
-        assertEquals("JDrive", configConfiguration.getProperty("dbName"));
+        assertEquals("db_test", configConfiguration.getProperty("dbName"));
     }
 }

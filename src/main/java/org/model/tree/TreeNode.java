@@ -64,7 +64,7 @@ public class TreeNode {
         this.createdDate         = this.data.getCreatedDate();
         this.isTrashed           = false;
 
-        if (file.getLabels().size() > 0) {
+        if (file.getLabels() != null && file.getLabels().size() > 0) {
             this.isTrashed = file.getLabels().getTrashed().booleanValue();
         }
 

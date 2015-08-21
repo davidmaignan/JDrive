@@ -43,12 +43,12 @@ public class JDriveMain {
         initJDrive();
         initServices();
 
-//        boolean setUpSuccess = false;
-//        try {
-//            setUpSuccess = setUpJDrive();
-//        } catch (Exception exception) {
-//            System.out.println("Set up failed" + exception.toString());
-//        }
+        boolean setUpSuccess = false;
+        try {
+            setUpSuccess = setUpJDrive();
+        } catch (Exception exception) {
+            System.out.println("Set up failed" + exception.toString());
+        }
 
         try {
             setUpChanges();
@@ -67,14 +67,14 @@ public class JDriveMain {
     }
 
     private static void initServices() {
-        treeBuilder   = injector.getInstance(TreeBuilder.class);
-        fileService   = injector.getInstance(FileService.class);
-        updateService = injector.getInstance(UpdateService.class);
-        dbService     = injector.getInstance(DatabaseService.class);
+        treeBuilder     = injector.getInstance(TreeBuilder.class);
+        fileService    = injector.getInstance(FileService.class);
+        updateService  = injector.getInstance(UpdateService.class);
+        dbService      = injector.getInstance(DatabaseService.class);
         changeExecutor = injector.getInstance(ChangeExecutor.class);
 
-        dbService.createTreeNodeType();
-        dbService.createParentType();
+//        dbService.createTreeNodeType();
+//        dbService.createParentType();
     }
 
     private static boolean setUpJDrive() throws IOException, Exception{
@@ -97,35 +97,28 @@ public class JDriveMain {
 
     private static void setUpChanges() throws IOException, Exception{
         Configuration configReader = new Configuration();
-        Long lastChangeId = Long.getLong(configReader.getProperty("lastChangeId"));
+        Long lastChangeId = Long.valueOf(configReader.getProperty("lastChangeId"));
+
+        System.out.println("lastChangeId: " + lastChangeId);
 
         ChangeService changeService = injector.getInstance(ChangeService.class);
-        List<Change> changeList = changeService.getAll(481L);
+        List<Change> changeList = changeService.getAll(Long.valueOf(lastChangeId));
 
-        Set<String> fileIdList = new HashSet<>();
-
-        /**
-         * Changes:
-         *   - file or folder
-         *   - delete or update (mv or content only)
-         */
         for (Change change : changeList){
-            fileIdList.add(change.getFileId());
             lastChangeId = (lastChangeId == null)? change.getId() : Math.max(lastChangeId, change.getId());
 
-//            System.out.println(change);
             changeExecutor.addChange(updateService.update(change));
         }
 
         System.out.println(changeExecutor.size());
 
         changeExecutor.clean();
-
-        System.out.println(changeExecutor.size());
-
+        changeExecutor.debug();
         changeExecutor.execute();
 
-        configReader.writeProperty("lastChangeId", lastChangeId);
+        //configReader.writeProperty("lastChangeId", lastChangeId);
+
+        System.out.println(lastChangeId);
     }
 
     private static Configuration setConfiguration() throws IOException{

@@ -5,26 +5,26 @@ import com.google.inject.Inject;
 import com.tinkerpop.blueprints.Vertex;
 import org.db.DatabaseService;
 import org.db.Fields;
-import org.io.ChangeInterface;
-
-import java.io.File;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.*;
-import java.util.stream.Stream;
 
 /**
- * Delete a file or folder locally when deletion happens on Google drive
+ * Delete a file or folder locally when receiving a deletion change from api
  *
  * David Maignan <davidmaignan@gmail.com>
  */
 public class DeleteService implements ChangeInterface {
 
+    private static Logger logger;
     private final DatabaseService dbService;
     private Change change;
 
     @Inject
     public DeleteService(DatabaseService dbService) {
         this.dbService = dbService;
+        LoggerFactory.getLogger(this.getClass());
     }
 
     @Override
@@ -33,23 +33,32 @@ public class DeleteService implements ChangeInterface {
     }
 
     @Override
-    public final void execute() throws IOException{
+    public final void execute(){
         Vertex vertex = dbService.getVertex(change.getFileId());
 
         String absolutePath = vertex.getProperty(Fields.PATH);
 
         Path path = FileSystems.getDefault().getPath(absolutePath);
 
-        if(Files.isDirectory(path)) {
-            deleteDirectory(path);
+        try{
+            if (Files.isDirectory(path)) {
+                deleteDirectory(path);
+            }
+
+            Files.deleteIfExists(path);
+            dbService.delete(vertex);
+        }catch (IOException exception) {
+            logger.error("Error when deleting %s", path);
         }
     }
 
+    /**
+     * Delete files contains in directory prior deleting it
+     * @param path Path
+     * @throws IOException
+     */
     private void deleteDirectory(Path path) throws IOException {
-//        Files.list(path).forEach((Path element) ->
-//                System.out.println(element)
-//        );
-
+        //Delete files
         Files.list(path).filter( s -> {
             if (Files.isDirectory(s)) return false;
             else return true;
@@ -57,10 +66,11 @@ public class DeleteService implements ChangeInterface {
             try {
                 Files.deleteIfExists(s);
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error("Error when deleting %s", path);
             }
         });
 
+        //If directory - delete recursively
         Files.list(path).filter( s -> {
             if (Files.isDirectory(s)) return true;
             else return false;
@@ -68,7 +78,7 @@ public class DeleteService implements ChangeInterface {
             try {
                 deleteDirectory(s);
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error("Error when deleting %s", path);
             }
         });
 

@@ -28,12 +28,13 @@ public class ChangeExecutor {
     }
 
     public int size(){
+        return changeList.size();
+    }
 
+    public void debug(){
         for (ChangeInterface service : changeList) {
             System.out.println("service: " + service);
         }
-
-        return  changeList.size();
     }
 
     public void execute() throws IOException {
