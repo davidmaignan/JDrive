@@ -5,8 +5,6 @@ import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.File;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
-import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.orient.OrientElementIterable;
 import org.db.neo4j.DatabaseService;
 import org.db.Fields;
 import org.io.ChangeInterface;

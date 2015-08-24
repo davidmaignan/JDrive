@@ -2,10 +2,10 @@ package org.writer;
 
 import com.google.api.services.drive.model.File;
 import com.google.inject.Guice;
-import com.tinkerpop.blueprints.Vertex;
 import org.db.Fields;
 import org.model.tree.TreeNode;
 import org.model.types.MimeType;
+import org.neo4j.graphdb.Node;
 import org.writer.file.DocumentWriter;
 import org.writer.file.FileWriter;
 
@@ -21,20 +21,20 @@ public class WriterFileFactory extends AbstractFactory {
     }
 
     @Override
-    public WriterInterface getWriter(Vertex vertex) throws UnsupportedOperationException{
-        WriterInterface writer;
-        String mimeType = vertex.getProperty(Fields.MIME_TYPE);
-
-        if (mimeType.equals(MimeType.FOLDER)) {
-            throw new UnsupportedOperationException();
-        } else if (mimeType.equals(MimeType.DOCUMENT)) {
-            writer = Guice.createInjector(new FileModule()).getInstance(DocumentWriter.class);
-            ((DocumentWriter)writer).setVertex(vertex);
-        } else {
-            writer = Guice.createInjector(new FileModule()).getInstance(FileWriter.class);
-            ((FileWriter)writer).setVertex(vertex);
-
-        }
+    public WriterInterface getWriter(Node node) throws UnsupportedOperationException{
+        WriterInterface writer = null;
+//        String mimeType = vertex.getProperty(Fields.MIME_TYPE);
+//
+//        if (mimeType.equals(MimeType.FOLDER)) {
+//            throw new UnsupportedOperationException();
+//        } else if (mimeType.equals(MimeType.DOCUMENT)) {
+//            writer = Guice.createInjector(new FileModule()).getInstance(DocumentWriter.class);
+////            ((DocumentWriter)writer).setVertex(vertex);
+//        } else {
+//            writer = Guice.createInjector(new FileModule()).getInstance(FileWriter.class);
+////            ((FileWriter)writer).setVertex(vertex);
+//
+//        }
 
         return writer;
     }

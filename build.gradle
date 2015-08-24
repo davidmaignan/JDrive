@@ -62,19 +62,12 @@ dependencies {
     compile     'com.google.inject:guice-parent:4.0'
     compile     'org.slf4j:slf4j-api:1.7.12'
 
-    //OrientDB dependancy
-    compile     'com.orientechnologies:orientdb-core:2.1-rc6'
-    compile     'com.orientechnologies:orientdb-client:2.1-rc6'
-    compile     'com.orientechnologies:orientdb-enterprise:2.1-rc6'
-    compile     'com.tinkerpop.blueprints:blueprints-core:2.6.0'
-    compile     'com.orientechnologies:orientdb-graphdb:2.1-rc6'
-
 
     compile "org.neo4j:neo4j:${neo4jVersion}"
 
-    compile     'net.java.dev.jna:jna:4.1.0'
-    compile     'net.java.dev.jna:jna-platform:4.1.0'
-    compile     'com.googlecode.concurrentlinkedhashmap:concurrentlinkedhashmap-lru:1.4.2'
+//    compile     'net.java.dev.jna:jna:4.1.0'
+//    compile     'net.java.dev.jna:jna-platform:4.1.0'
+//    compile     'com.googlecode.concurrentlinkedhashmap:concurrentlinkedhashmap-lru:1.4.2'
     compile     'junit:junit:4.12'
     compile     fileTree( dir: 'libs', include: '*.jar')
 

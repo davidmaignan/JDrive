@@ -1,8 +1,8 @@
 package org.writer;
 
 import com.google.api.services.drive.model.File;
-import com.tinkerpop.blueprints.Vertex;
 import org.model.tree.TreeNode;
+import org.neo4j.graphdb.Node;
 
 /**
  * Abstract writer factory
@@ -15,5 +15,5 @@ import org.model.tree.TreeNode;
  */
 public abstract class AbstractFactory {
     public abstract WriterInterface getWriter(TreeNode node) throws UnsupportedOperationException;
-    public abstract WriterInterface getWriter(Vertex vertex) throws UnsupportedOperationException;
+    public abstract WriterInterface getWriter(Node node) throws UnsupportedOperationException;
 }

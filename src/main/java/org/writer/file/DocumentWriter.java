@@ -1,7 +1,6 @@
 package org.writer.file;
 
 import com.google.inject.Inject;
-import com.tinkerpop.blueprints.Vertex;
 import org.api.FileService;
 import org.db.Fields;
 import org.model.tree.TreeNode;
@@ -21,7 +20,7 @@ import java.lang.reflect.Field;
  */
 public class DocumentWriter implements WriterInterface {
     private FileService fileService;
-    private Vertex vertex;
+//    private Vertex vertex;
     private com.google.api.services.drive.model.File file;
     private PrintWriter output;
 
@@ -30,22 +29,22 @@ public class DocumentWriter implements WriterInterface {
         this.fileService = fileService;
     }
 
-    public void setVertex(Vertex vertex){
-        this.vertex = vertex;
-    }
+//    public void setVertex(Vertex vertex){
+//        this.vertex = vertex;
+//    }
 
     @Override
     public boolean write() {
-        com.google.api.services.drive.model.File file = this.fileService.getFile(vertex.getProperty(Fields.ID).toString());
-
-        try{
-            File fileIO  = new File(vertex.getProperty(Fields.PATH).toString());
-            output       = new PrintWriter(fileIO);
-            output.write(this.setContent(file));
-            output.close();
-        } catch (IOException e) {
-            return false;
-        }
+//        com.google.api.services.drive.model.File file = this.fileService.getFile(vertex.getProperty(Fields.ID).toString());
+//
+//        try{
+//            File fileIO  = new File(vertex.getProperty(Fields.PATH).toString());
+//            output       = new PrintWriter(fileIO);
+//            output.write(this.setContent(file));
+//            output.close();
+//        } catch (IOException e) {
+//            return false;
+//        }
 
         return true;
     }

@@ -2,7 +2,6 @@ package org.writer.file;
 
 import com.google.api.services.drive.model.File;
 import com.google.inject.Inject;
-import com.tinkerpop.blueprints.Vertex;
 import org.api.DriveService;
 import org.api.FileService;
 import org.db.Fields;
@@ -20,7 +19,6 @@ import java.io.OutputStream;
  * David Maignan <davidmaignan@gmail.com>
  */
 public class FileWriter implements WriterInterface {
-    private Vertex vertex;
     private final DriveService driveService;
     private final FileService fileService;
 
@@ -30,37 +28,37 @@ public class FileWriter implements WriterInterface {
         this.fileService  = fileService;
     }
 
-    public void setVertex(Vertex vertex){
-        this.vertex = vertex;
-    }
+//    public void setVertex(Vertex vertex){
+//        this.vertex = vertex;
+//    }
 
     @Override
     public boolean write() {
-        try {
-            FileOutputStream fos      = new FileOutputStream(vertex.getProperty(Fields.PATH).toString());
-            InputStream inputStream   = this.downloadFile(driveService, this.getFile(vertex.getProperty(Fields.ID).toString()));
-            OutputStream outputStream = new FileOutputStream(vertex.getProperty(Fields.PATH).toString());
-
-            if (inputStream == null) {
-                return false;
-            }
-
-            int numberOfBytesCopied = 0;
-            int r;
-
-            while ((r = inputStream.read()) != -1) {
-                outputStream.write((byte) r);
-                numberOfBytesCopied++;
-            }
-
-            inputStream.close();
-            outputStream.close();
-
-            return true;
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            FileOutputStream fos      = new FileOutputStream(vertex.getProperty(Fields.PATH).toString());
+//            InputStream inputStream   = this.downloadFile(driveService, this.getFile(vertex.getProperty(Fields.ID).toString()));
+//            OutputStream outputStream = new FileOutputStream(vertex.getProperty(Fields.PATH).toString());
+//
+//            if (inputStream == null) {
+//                return false;
+//            }
+//
+//            int numberOfBytesCopied = 0;
+//            int r;
+//
+//            while ((r = inputStream.read()) != -1) {
+//                outputStream.write((byte) r);
+//                numberOfBytesCopied++;
+//            }
+//
+//            inputStream.close();
+//            outputStream.close();
+//
+//            return true;
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
         return false;
     }

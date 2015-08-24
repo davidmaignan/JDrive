@@ -2,7 +2,6 @@ package org.io;
 
 import com.google.api.services.drive.model.Change;
 import com.google.inject.Inject;
-import com.tinkerpop.blueprints.Vertex;
 import org.db.neo4j.DatabaseService;
 import org.db.Fields;
 import org.slf4j.Logger;

@@ -1,14 +1,13 @@
 package org.writer;
 
 import com.google.api.services.drive.model.File;
-import com.tinkerpop.blueprints.Vertex;
 import org.model.tree.TreeNode;
 import org.model.types.MimeType;
 import com.google.inject.Guice;
+import org.neo4j.graphdb.Node;
 import org.writer.node.DocumentWriter;
 import org.writer.node.FileWriter;
 import org.writer.node.FolderWriter;
-
 
 /**
  * JDrive
@@ -32,7 +31,7 @@ public class WriterNodeFactory extends AbstractFactory {
     }
 
     @Override
-    public org.writer.file.FolderWriter getWriter(Vertex vertex) {
+    public org.writer.file.FolderWriter getWriter(Node node) {
         throw new UnsupportedOperationException("You cannot use a node factory to write a vertex");
     }
 }
