@@ -105,7 +105,27 @@ public class DatabaseService {
     public Node getNode(String property, String value) {
         Node node = null;
         try (Transaction tx = graphDB.beginTx()) {
-            node = graphDB.findNode(DynamicLabel.label("File"), Fields.ID, "root");
+            node = graphDB.findNode(DynamicLabel.label("File"), Fields.ID, value);
+
+            tx.success();
+        } catch (Exception exception) {
+            //@todo implement sl4j
+        }
+
+        return node;
+    }
+
+    /**
+     * Get node by property
+     *
+     * @param value String
+     *
+     * @return Node | null
+     */
+    public Node getNodeById(String value) {
+        Node node = null;
+        try (Transaction tx = graphDB.beginTx()) {
+            node = graphDB.findNode(DynamicLabel.label("File"), Fields.ID, value);
 
             tx.success();
         } catch (Exception exception) {

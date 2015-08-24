@@ -81,6 +81,18 @@ public class DatabaseServiceTest {
     }
 
     @Test(timeout = 3000)
+    public void testGetNodeById(){
+        dbService.save(this.getRootNode());
+
+        try (Transaction tx = graphDb.beginTx()) {
+            assertNotNull(dbService.getNodeById("folder1"));
+            tx.success();
+        } catch (Exception exception) {
+
+        }
+    }
+
+    @Test(timeout = 3000)
     public void testSetNodeProperties(){
         dbService.save(this.getRootNode());
 
