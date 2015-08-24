@@ -21,7 +21,7 @@ public class DatabaseConfiguration {
      *
      * @return String
      */
-    public String getDBPath(){return String.format("./%s", this.getDBName());}
+    public String getDBPath(){return String.format("%s", this.getDBName());}
 
     /**
      * Get database name

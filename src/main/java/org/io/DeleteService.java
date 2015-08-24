@@ -3,7 +3,7 @@ package org.io;
 import com.google.api.services.drive.model.Change;
 import com.google.inject.Inject;
 import com.tinkerpop.blueprints.Vertex;
-import org.db.DatabaseService;
+import org.db.neo4j.DatabaseService;
 import org.db.Fields;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,22 +34,22 @@ public class DeleteService implements ChangeInterface {
 
     @Override
     public final void execute(){
-        Vertex vertex = dbService.getVertex(change.getFileId());
-
-        String absolutePath = vertex.getProperty(Fields.PATH);
-
-        Path path = FileSystems.getDefault().getPath(absolutePath);
-
-        try{
-            if (Files.isDirectory(path)) {
-                deleteDirectory(path);
-            }
-
-            Files.deleteIfExists(path);
-            dbService.delete(vertex);
-        }catch (IOException exception) {
-            logger.error("Error when deleting %s", path);
-        }
+//        Vertex vertex = dbService.getVertex(change.getFileId());
+//
+//        String absolutePath = vertex.getProperty(Fields.PATH);
+//
+//        Path path = FileSystems.getDefault().getPath(absolutePath);
+//
+//        try{
+//            if (Files.isDirectory(path)) {
+//                deleteDirectory(path);
+//            }
+//
+//            Files.deleteIfExists(path);
+//            dbService.delete(vertex);
+//        }catch (IOException exception) {
+//            logger.error("Error when deleting %s", path);
+//        }
     }
 
     /**

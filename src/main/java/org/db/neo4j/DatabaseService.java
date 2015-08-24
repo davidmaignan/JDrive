@@ -1,19 +1,20 @@
 package org.db.neo4j;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.db.DatabaseConfiguration;
 import org.db.Fields;
 import org.model.tree.TreeNode;
 import org.neo4j.graphdb.*;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
-import java.util.Map;
 
 /**
  * Graph database service - Implementation for Neo4j
  *
  * David Maignan <davidmaignan@gmail.com>
  */
+@Singleton
 public class DatabaseService {
     private DatabaseConfiguration dbConfig;
     private GraphDatabaseService graphDB;
@@ -27,6 +28,25 @@ public class DatabaseService {
         this.dbConfig = dbConfig;
 
         graphDB = new GraphDatabaseFactory().newEmbeddedDatabase(dbConfig.getDBPath());
+
+        try (Transaction tx = graphDB.beginTx()) {
+            graphDB.schema()
+                    .constraintFor( DynamicLabel.label( "File" ) )
+                    .assertPropertyIsUnique( Fields.ID )
+                    .create();
+            tx.success();
+        } catch (Exception exception) {
+
+        }
+    }
+
+    /**
+     * Get graphDB
+     *
+     * @return GraphDatabaseService
+     */
+    public GraphDatabaseService getGraphDB(){
+        return graphDB;
     }
 
     /**
@@ -52,18 +72,24 @@ public class DatabaseService {
         }
     }
 
-    public void delete(String id) {
+    public boolean delete(String id) {
+        String query = "match (file {identifier: '%s'}) " +
+                "OPTIONAL MATCH (file)-[r*]->(p) " +
+                "foreach (rel in r | delete rel) " +
+                "delete p " +
+                "with file OPTIONAL MATCH (b)-[r2]-(file) " +
+                "delete r2,file";
+
         try (
-                Transaction ignored = graphDB.beginTx();
-                Result result = graphDB.execute(
-                        "MATCH (n { identifier: 'root' })-[r]-() DELETE n, r"
-                )
+                Transaction tx = graphDB.beginTx();
+                Result result = graphDB.execute(String.format(query, id))
             )
         {
-            ignored.success();
-            System.out.println(result.resultAsString());
-        } catch (Exception exception) {
+            tx.success();
 
+            return true;
+        } catch (Exception exception) {
+            return false;
         }
     }
 

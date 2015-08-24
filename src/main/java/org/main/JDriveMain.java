@@ -9,10 +9,11 @@ import org.api.change.ChangeService;
 import org.api.UpdateService;
 import org.configuration.Configuration;
 import org.api.FileService;
-import org.db.DatabaseService;
+import org.db.neo4j.DatabaseService;
 import org.io.ChangeExecutor;
 import org.model.tree.TreeBuilder;
 import org.model.tree.TreeModule;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.writer.TreeWriter;
 
 import java.io.IOException;
@@ -50,12 +51,14 @@ public class JDriveMain {
             System.out.println("Set up failed" + exception.toString());
         }
 
-        try {
-            setUpChanges();
-        } catch (Exception exception) {
-            exception.printStackTrace();
-            System.out.println("Set up changes failed" + exception.toString());
-        }
+//        try {
+//            setUpChanges();
+//        } catch (Exception exception) {
+//            exception.printStackTrace();
+//            System.out.println("Set up changes failed" + exception.toString());
+//        }
+
+        registerShutdownHook(dbService.getGraphDB());
 
     }
 
@@ -125,5 +128,20 @@ public class JDriveMain {
         Configuration configConfiguration = new Configuration();
 
         return configConfiguration;
+    }
+
+    private static void registerShutdownHook( final GraphDatabaseService graphDb )
+    {
+        // Registers a shutdown hook for the Neo4j instance so that it
+        // shuts down nicely when the VM exits (even if you "Ctrl-C" the
+        // running application).
+        Runtime.getRuntime().addShutdownHook( new Thread()
+        {
+            @Override
+            public void run()
+            {
+                graphDb.shutdown();
+            }
+        } );
     }
 }

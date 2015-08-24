@@ -4,7 +4,7 @@ import com.google.api.services.drive.model.Change;
 import com.google.inject.Inject;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientElementIterable;
-import org.db.DatabaseService;
+import org.db.neo4j.DatabaseService;
 import org.db.Fields;
 
 import java.io.IOException;
@@ -34,16 +34,16 @@ public class MoveService implements ChangeInterface {
 
     @Override
     public void execute() throws IOException {
-        Vertex oldVertex = dbService.getVertex(change.getFileId());
-        Vertex newVertex = dbService.getVertex(change.getFile().getParents().get(0).getId());
-
-        String oldPathString = oldVertex.getProperty(Fields.PATH);
-        Path oldPath = FileSystems.getDefault().getPath(oldPathString);
-
-        String newPathString = newVertex.getProperty(Fields.PATH) + "/" + change.getFile().getTitle();
-        Path newPath = FileSystems.getDefault().getPath(newPathString);
-
-        System.out.println(oldPathString + " : " + newPathString);
+//        Vertex oldVertex = dbService.getVertex(change.getFileId());
+//        Vertex newVertex = dbService.getVertex(change.getFile().getParents().get(0).getId());
+//
+//        String oldPathString = oldVertex.getProperty(Fields.PATH);
+//        Path oldPath = FileSystems.getDefault().getPath(oldPathString);
+//
+//        String newPathString = newVertex.getProperty(Fields.PATH) + "/" + change.getFile().getTitle();
+//        Path newPath = FileSystems.getDefault().getPath(newPathString);
+//
+//        System.out.println(oldPathString + " : " + newPathString);
 
 //        Files.move(oldPath, newPath, StandardCopyOption.REPLACE_EXISTING);
 
@@ -56,17 +56,17 @@ public class MoveService implements ChangeInterface {
      */
     private void update(String newPath) {
 //        dbService.update(change.getFileId());
-        Vertex vertex = dbService.getVertex(change.getFileId());
+//        Vertex vertex = dbService.getVertex(change.getFileId());
 
-        vertex.setProperty(Fields.MODIFIED_DATE, change.getModificationDate().getValue());
-        vertex.setProperty(Fields.PATH, newPath);
-
-        OrientElementIterable parentList = vertex.getProperty(Fields.PARENTS);
-        Vertex parentVertex = (Vertex) parentList.iterator().next();
-
-        parentVertex.setProperty(Fields.ID, change.getFile().getParents().get(0).getId());
-        dbService.save(parentVertex);
-
-        dbService.save(vertex);
+//        vertex.setProperty(Fields.MODIFIED_DATE, change.getModificationDate().getValue());
+//        vertex.setProperty(Fields.PATH, newPath);
+//
+//        OrientElementIterable parentList = vertex.getProperty(Fields.PARENTS);
+//        Vertex parentVertex = (Vertex) parentList.iterator().next();
+//
+//        parentVertex.setProperty(Fields.ID, change.getFile().getParents().get(0).getId());
+//        dbService.save(parentVertex);
+//
+//        dbService.save(vertex);
     }
 }

@@ -103,12 +103,20 @@ public class DatabaseServiceTest {
     public void testDeleteNode(){
         dbService.save(this.getRootNode());
 
-        dbService.delete("root");
+        dbService.delete("folder1");
 
         try (Transaction tx = graphDb.beginTx()) {
             GlobalGraphOperations globalGraphOp = GlobalGraphOperations.at(graphDb);
 
-            assertEquals(4, getResultAsList(globalGraphOp.getAllNodes()).size());
+            //2 nodes get deleted (folder 1, file 2)
+            assertEquals(3, getResultAsList(globalGraphOp.getAllNodes()).size());
+
+            //relationship between root and folder 1 is deleted
+            Node rootNode = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "root");
+            assertEquals(1, getResultAsList(rootNode.getRelationships()).size());
+
+            assertNull(graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "folder1"));
+            assertNull(graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "file1"));
 
             tx.success();
         } catch (Exception exception) {
