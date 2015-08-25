@@ -1,6 +1,5 @@
 package org.api;
 
-import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.File;
 import com.google.inject.Guice;
@@ -9,13 +8,13 @@ import org.db.neo4j.DatabaseService;
 import org.db.Fields;
 import org.io.ChangeInterface;
 import org.io.DeleteService;
-import org.io.MoveService;
 import org.model.tree.TreeNode;
 import org.model.types.MimeType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.neo4j.graphdb.Node;
 import org.writer.FactoryProducer;
 import org.writer.FileModule;
+
+import java.util.List;
 
 /**
  * Update service: apply changes received from Drive API
@@ -29,46 +28,62 @@ import org.writer.FileModule;
  * David Maignan <davidmaignan@gmail.com>
  */
 public class UpdateService {
-    private final FileService fileService;
-    private final DatabaseService dbService;
-    private final Logger logger;
+    private FileService fileService;
+    private DatabaseService dbService;
+    private ChangeInterface deleteService;
+    private ChangeInterface moveService;
+    private FactoryProducer factoryProducer;
     private TreeNode node;
-    private Drive.Changes changeList;
+    private List list;
 
-    @Inject
-    public UpdateService(DatabaseService dbService, FileService fileService) {
-        logger = LoggerFactory.getLogger(this.getClass());
-        this.dbService = dbService;
-        this.fileService = fileService;
+    public UpdateService(List list){
+        this.list = list;
     }
 
+    @Inject
+    public UpdateService(
+            DatabaseService dbService,
+            FileService fileService,
+            ChangeInterface deleteService,
+            ChangeInterface moveService,
+            FactoryProducer factoryProducer
+    ) {
+        this.dbService = dbService;
+        this.fileService = fileService;
+        this.deleteService = deleteService;
+        this.moveService = moveService;
+        this.factoryProducer = factoryProducer;
+    }
+
+
+
     public ChangeInterface update(Change change) throws Exception {
-//        boolean success = false;
-//        ChangeInterface service;
-//
-//        Vertex vertex = dbService.getVertex(change.getFileId());
-//
-//        if (vertex != null) {
-//            Long vertexDT = vertex.getProperty(Fields.MODIFIED_DATE);
-//            Long changeDT = change.getModificationDate().getValue();
-//
+        boolean success = false;
+        ChangeInterface service;
+
+        Node node = dbService.getNodeById(change.getFileId());
+
+        if (node != null) {
+            Long vertexDT = Long.valueOf(node.getProperty(Fields.MODIFIED_DATE).toString());
+            Long changeDT = change.getModificationDate().getValue();
+
 //            System.out.println(changeDT + " : " + vertexDT);
-//
-//            if (changeDT > vertexDT) {
-//
-//                //If file is deleted permanently or Trashed
-//                if (change.getDeleted() || this.getTrashedValue(change)) {
-//                    service = Guice.createInjector(new FileModule()).getInstance(DeleteService.class);
-//                    service.setChange(change);
-//                    return service;
-//                }
-//
+//            System.out.println(changeDT > vertexDT);
+
+            if (changeDT > vertexDT) {
+
+                //If file is deleted permanently or Trashed
+                if (this.getChangeDeleted(change) || this.getTrashedLabel(change)) {
+                    deleteService.setChange(change);
+                    return deleteService;
+                }
+
 //                //If file is not a folder: reload it's content
-//                if ( ! change.getFile().getMimeType().equals(MimeType.FOLDER)) {
-//                    File file = fileService.getFile(vertex.getProperty(Fields.ID).toString());
-//
-//                    success = FactoryProducer.getFactory("FILE").getWriter(vertex).write() || true;
-//                }
+                if ( ! change.getFile().getMimeType().equals(MimeType.FOLDER)) {
+                    File file = fileService.getFile(node.getProperty(Fields.ID).toString());
+
+                    success = this.factoryProducer.getFactory("FILE").getWriter(node).write() || true;
+                }
 //
 //                //If file is moved
 //                OrientElementIterable parentList = vertex.getProperty(Fields.PARENTS);
@@ -88,11 +103,16 @@ public class UpdateService {
 //                //Update modifiedDate for folder update (either a file was moved in it or removed from it)
 //                //but the folder itself was not changed only it's content
 //                dbService.updateProperty(vertex, Fields.MODIFIED_DATE, changeDT);
-//            }
-//        }
+            }
+        }
 
         return null;
     }
+
+    private boolean getChangeDeleted(Change change) {
+        return change.getDeleted() != null && change.getDeleted();
+    }
+
 
     /**
      * Get trashed label value if available
@@ -100,9 +120,18 @@ public class UpdateService {
      * @param change Change
      * @return boolean
      */
-    private boolean getTrashedValue(Change change) {
+    private boolean getTrashedLabel(Change change) {
         return (change.getFile() != null
-                && change.getFile().getLabels() != null
-                && change.getFile().getLabels().getTrashed().booleanValue());
+                    && change.getFile().getExplicitlyTrashed() != null
+                    && change.getFile().getExplicitlyTrashed()
+                )
+                || (change.getFile() != null
+                    && change.getFile().getLabels() != null
+                    && change.getFile().getLabels().getTrashed()
+                );
+
+//        return (change.getFile() != null
+//                && (change.getFile().getExplicitlyTrashed()
+//                || (change.getFile().getLabels() != null && change.getFile().getLabels().getTrashed().booleanValue())));
     }
 }

@@ -17,8 +17,10 @@ import java.nio.file.StandardCopyOption;
  * David Maignan <davidmaignan@gmail.com>
  */
 public class MoveService implements ChangeInterface {
-    private final DatabaseService dbService;
+    private DatabaseService dbService;
     private Change change;
+
+    public MoveService(){}
 
     @Inject
     public MoveService(DatabaseService dbService) {

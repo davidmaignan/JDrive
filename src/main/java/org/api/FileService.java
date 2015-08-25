@@ -19,6 +19,8 @@ import java.util.List;
 public class FileService {
     private DriveService driveService;
 
+    public FileService(){}
+
     @Inject
     public FileService(DriveService driveService) {
         this.driveService = driveService;

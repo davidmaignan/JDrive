@@ -17,8 +17,12 @@ import java.nio.file.*;
 public class DeleteService implements ChangeInterface {
 
     private static Logger logger;
-    private final DatabaseService dbService;
+    private DatabaseService dbService;
     private Change change;
+
+    public DeleteService(){
+
+    }
 
     @Inject
     public DeleteService(DatabaseService dbService) {

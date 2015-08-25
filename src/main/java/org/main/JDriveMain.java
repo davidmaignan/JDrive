@@ -44,19 +44,19 @@ public class JDriveMain {
         initJDrive();
         initServices();
 
-        boolean setUpSuccess = false;
-        try {
-            setUpSuccess = setUpJDrive();
-        } catch (Exception exception) {
-            System.out.println("Set up failed" + exception.toString());
-        }
-
+//        boolean setUpSuccess = false;
 //        try {
-//            setUpChanges();
+//            setUpSuccess = setUpJDrive();
 //        } catch (Exception exception) {
-//            exception.printStackTrace();
-//            System.out.println("Set up changes failed" + exception.toString());
+//            System.out.println("Set up failed" + exception.toString());
 //        }
+
+        try {
+            setUpChanges();
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            System.out.println("Set up changes failed" + exception.toString());
+        }
 
         registerShutdownHook(dbService.getGraphDB());
 

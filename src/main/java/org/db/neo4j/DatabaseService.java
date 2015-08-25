@@ -14,10 +14,13 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
  *
  * David Maignan <davidmaignan@gmail.com>
  */
-@Singleton
 public class DatabaseService {
     private DatabaseConfiguration dbConfig;
     private GraphDatabaseService graphDB;
+
+    public DatabaseService(){
+
+    }
 
     public DatabaseService(GraphDatabaseService graphDB) {
         this.graphDB = graphDB;
@@ -105,7 +108,7 @@ public class DatabaseService {
     public Node getNode(String property, String value) {
         Node node = null;
         try (Transaction tx = graphDB.beginTx()) {
-            node = graphDB.findNode(DynamicLabel.label("File"), Fields.ID, value);
+            node = graphDB.findNode(DynamicLabel.label("File"), Fields.ID, "root");
 
             tx.success();
         } catch (Exception exception) {
@@ -118,14 +121,16 @@ public class DatabaseService {
     /**
      * Get node by property
      *
+
      * @param value String
      *
      * @return Node | null
      */
     public Node getNodeById(String value) {
+        System.out.println("do you try this code");
         Node node = null;
         try (Transaction tx = graphDB.beginTx()) {
-            node = graphDB.findNode(DynamicLabel.label("File"), Fields.ID, value);
+            node = graphDB.findNode(DynamicLabel.label("File"), Fields.ID, "root");
 
             tx.success();
         } catch (Exception exception) {
