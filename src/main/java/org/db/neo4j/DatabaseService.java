@@ -8,6 +8,8 @@ import org.model.tree.TreeNode;
 import org.neo4j.graphdb.*;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
+import java.util.Map;
+
 
 /**
  * Graph database service - Implementation for Neo4j
@@ -94,6 +96,29 @@ public class DatabaseService {
         } catch (Exception exception) {
             return false;
         }
+    }
+
+    public Node getParent(String id) {
+        Node resultNode = null;
+
+        String query = "match (file {identifier: '%s'}) " +
+                "OPTIONAL MATCH (folder)-[r]->(file) return folder;";
+        try (
+                Transaction tx = graphDB.beginTx();
+                Result result = graphDB.execute(String.format(query, id))
+        )
+        {
+            if(result.hasNext()) {
+                resultNode = (Node)result.next().get("folder");
+            }
+
+            tx.success();
+
+        } catch (Exception exception) {
+
+        }
+
+        return resultNode;
     }
 
 

@@ -9,6 +9,7 @@ import com.google.inject.Injector;
 import org.db.Fields;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.model.tree.TreeBuilder;
 import org.model.tree.TreeNode;
@@ -41,6 +42,7 @@ public class DatabaseServiceTest {
     }
 
     @Test
+    @Ignore
     public void testSave(){
         dbService.save(this.getRootNode());
 
@@ -54,6 +56,7 @@ public class DatabaseServiceTest {
     }
 
     @Test
+    @Ignore
     public void testRelationShip(){
         dbService.save(this.getRootNode());
 
@@ -69,6 +72,7 @@ public class DatabaseServiceTest {
     }
 
     @Test(timeout = 3000)
+    @Ignore
     public void testGetNode(){
         dbService.save(this.getRootNode());
 
@@ -81,6 +85,7 @@ public class DatabaseServiceTest {
     }
 
     @Test(timeout = 3000)
+    @Ignore
     public void testGetNodeById(){
         dbService.save(this.getRootNode());
 
@@ -93,6 +98,7 @@ public class DatabaseServiceTest {
     }
 
     @Test(timeout = 3000)
+    @Ignore
     public void testSetNodeProperties(){
         dbService.save(this.getRootNode());
 
@@ -112,6 +118,7 @@ public class DatabaseServiceTest {
     }
 
     @Test(timeout = 30000)
+    @Ignore
     public void testDeleteNode(){
         dbService.save(this.getRootNode());
 
@@ -133,6 +140,20 @@ public class DatabaseServiceTest {
             tx.success();
         } catch (Exception exception) {
             exception.printStackTrace();
+        }
+    }
+
+    @Test(timeout = 10000)
+    public void testGetParent(){
+        dbService.save(this.getRootNode());
+
+        try (Transaction tx = graphDb.beginTx()) {
+            Node parentNode = dbService.getParent("folder1");
+            assertEquals("root", parentNode.getProperty(Fields.ID));
+
+            tx.success();
+        } catch (Exception exception) {
+
         }
     }
 

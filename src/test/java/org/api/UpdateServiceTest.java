@@ -145,6 +145,34 @@ public class UpdateServiceTest {
         assertTrue(changeService instanceof DeleteService);
     }
 
+    @Test
+    public void testChangeFolder() throws Exception {
+        String[] args = new String[]{
+                "mockID",
+                "folder1",
+                "/mock/path/folder1",
+                MimeType.FOLDER,
+                "1420643650751", //"2015-01-06T15:14:10.751Z"
+                "1420643650751"
+        };
+
+        Node node = this.getNodeMocked(args);
+
+        when(spyDbService.getNodeById("mockID")).thenReturn(node);
+
+        Change change = new Change();
+        change.setFileId("mockID");
+        change.setModificationDate(new DateTime("2015-02-06T15:14:10.751Z"));
+
+        File file = new File();
+        file.setLabels(new File.Labels().setTrashed(true));
+        change.setFile(file);
+
+        ChangeInterface changeService = service.update(change);
+
+        assertTrue(changeService instanceof DeleteService);
+    }
+
 
     /**
      * Get node mock
