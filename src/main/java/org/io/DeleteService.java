@@ -4,6 +4,7 @@ import com.google.api.services.drive.model.Change;
 import com.google.inject.Inject;
 import org.db.neo4j.DatabaseService;
 import org.db.Fields;
+import org.neo4j.graphdb.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.IOException;
@@ -24,23 +25,23 @@ public class DeleteService extends ModifiedService implements ChangeInterface {
 
     @Override
     public final boolean execute(){
-//        Vertex vertex = dbService.getVertex(change.getFileId());
-//
-//        String absolutePath = vertex.getProperty(Fields.PATH);
-//
-//        Path path = FileSystems.getDefault().getPath(absolutePath);
-//
-//        try{
-//            if (Files.isDirectory(path)) {
-//                deleteDirectory(path);
-//            }
-//
-//            Files.deleteIfExists(path);
-//            dbService.delete(vertex);
-//        }catch (IOException exception) {
-//            logger.error("Error when deleting %s", path);
-//        return false;
-//        }
+        Node node = dbService.getNodeById(change.getFileId());
+
+        String absolutePath = node.getProperty(Fields.PATH).toString();
+
+        Path path = FileSystems.getDefault().getPath(absolutePath);
+
+        try{
+            if (Files.isDirectory(path)) {
+                deleteDirectory(path);
+            }
+
+            Files.deleteIfExists(path);
+            dbService.delete(change.getFileId());
+        }catch (IOException exception) {
+            logger.error("Error when deleting %s", path);
+        return false;
+        }
 
         return true;
     }

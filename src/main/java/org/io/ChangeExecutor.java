@@ -5,8 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * JDrive
- * Created by David Maignan <davidmaignan@gmail.com> on 15-08-18.
+ * Change executor: execute recursively a list of change service
+ *
+ * David Maignan <davidmaignan@gmail.com>
  */
 public class ChangeExecutor {
 
@@ -37,9 +38,18 @@ public class ChangeExecutor {
         }
     }
 
+    /**
+     * Execute list of ChangeInterface services
+     *
+     * @throws IOException
+     */
     public void execute() throws IOException {
-        for (ChangeInterface service : changeList) {
-            service.execute();
+        while(changeList.size() > 0) {
+            for (ChangeInterface service : changeList) {
+                if (service.execute()) {
+                    changeList.remove(service);
+                }
+            }
         }
     }
 }

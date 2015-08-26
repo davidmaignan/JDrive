@@ -10,16 +10,16 @@ import java.util.List;
  * David Maignan <davidmaignan@gmail.com>
  */
 public class TreeWriter {
-    public boolean write(TreeNode root) throws IOException, Exception {
+    public boolean write(TreeNode root) throws Exception {
         return writeTree(root);
     }
 
     /**
-     * Debug code
+     * Write a tree
      *
-     * @param node
+     * @param node TreeNode
      */
-    public boolean writeTree(TreeNode node) throws IOException, NullPointerException, Exception {
+    public boolean writeTree(TreeNode node) throws Exception {
         boolean result = true;
         if (! FactoryProducer.getFactory("NODE").getWriter(node).write()) {
             result = false;

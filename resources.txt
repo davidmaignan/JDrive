@@ -1,0 +1,81 @@
+Guice:
+http://stackoverflow.com/questions/28734581/guice-singleton-static-injection-pattern
+
+https://www.airpair.com/neo4j/posts/getting-started-with-neo4j-and-cypher
+http://wes.skeweredrook.com/cypher-it-doesnt-all-start-with-the-start/
+
+Delete recursively
+http://stackoverflow.com/questions/25101026/how-to-delete-nodes-recursively-from-a-start-node
+http://stackoverflow.com/questions/29714877/neo4j-how-to-delete-nodes-recursively-from-some-start-node
+
+Cypher:
+
+match (n) return n;
+
+Get file with no relation
+match (n) --> (m) where not (m) --> () return m;
+
+Get relations
+match (n)-->(b) return b;
+
+
+Get field
+match (n) return n.title;
+
+
+Get relations for db
+match (file {title:'db'}) --> (r) where not (r) -> () return r; //not working
+
+match a=(node {n: 'root'}) --> (m) return m -->();
+
+match (n {n: 'root'}) --> (m) return n, m -->();
+
+match (n {n: 'root'}) --> (m) return n, m -->();
+
+MATCH (n) MATCH (n)-[r]->() DELETE n,r;
+
+//OK ?
+MATCH (n {n:'a'}) OPTIONAL MATCH (n)-[r*]->(p) foreach (rel in r | delete rel) DELETE p with n OPTIONAL MATCH (b)-[r2]-(n)
+ ddelete r2,n;
+
+MATCH (n {n:'root'}) OPTIONAL MATCH (n)-[r]-(m)-[s]->() return n,r,m,s;
+
+start n=node(*) return n;
+
+create (root:Node {n:"root"}), (a:Node {n:"a"}), (b:Node {n:"b"}), (c:Node {n:"c"}),
+(d:Node {n:"d"}), (e:Node {n:"e"}), (f:Node {n:"f"}), (g:Node {n:"g"}), (h:Node {n:"h"}),
+(i:Node {n:"i"}), (j:Node {n:"j"}), (k:Node {n:"k"}), (l:Node {n:"l"}), (m:Node {n:"m"}),
+(n:Node {n:"n"}), (o:Node {n:"o"}), (p:Node {n:"p"}), (q:Node {n:"q"}),
+root-[:parent_of]->a, root-[:parent_of]->b, a-[:parent_of]->c,
+a-[:parent_of]->d, b-[:parent_of]->e, b-[:parent_of]->f,
+c-[:parent_of]->g, c-[:parent_of]->h, d-[:parent_of]->i,
+d-[:parent_of]->j, e-[:parent_of]->k, e-[:parent_of]->l,
+f-[:parent_of]->m, f-[:parent_of]->n, g-[:parent_of]->o,
+g-[:parent_of]->p, d-[:parent_of]->q;
+
+MATCH (n) MATCH (n)-[r]-() return n,r;
+
+start category= (node{n:'root'}) match path = category-[*]-> subcategory return category, collect(subcategory);
+
+//Delete all except a
+match path=(n {n:'a'})-[r*]-(e) foreach (rel in r|delete rel) delete e;
+
+//Get child nodes recursively
+match path=(n {n:'a'})-[r*]->(e) return n,e;
+
+//Delete relation and children node
+match path=(n {n:'a'})-[r*]->(e) foreach (rel in r | delete rel) delete e;
+
+
+start a=node({n:'a'}) match (a)-[r*]->(e) foreach (rel in r | delete rel) delete a,e;
+
+
+match (p:Node) where p.n='a' with p OPTIONAL MATCH (p)-[r*]->(t) foreach (rel in r | delete rel) delete t
+
+
+//Delete longest relation and its node
+match p=(n {n:'a'})-[r*]->() with p order by length(p) desc limit 1 foreach(r in relationships(p) | delete r) delete p;
+
+//Delete
+MATCH (n {n:'a'}) OPTIONAL MATCH (b)-[r]-(n) delete r,n;
+
