@@ -16,24 +16,13 @@ import java.nio.file.StandardCopyOption;
  *
  * David Maignan <davidmaignan@gmail.com>
  */
-public class MoveService implements ChangeInterface {
-    private DatabaseService dbService;
+public class MoveService extends ModifiedService implements ChangeInterface {
     private Change change;
 
     public MoveService(){}
 
-    @Inject
-    public MoveService(DatabaseService dbService) {
-        this.dbService = dbService;
-    }
-
     @Override
-    public void setChange(Change change) {
-        this.change = change;
-    }
-
-    @Override
-    public void execute() throws IOException {
+    public boolean execute() throws IOException {
 //        Vertex oldVertex = dbService.getVertex(change.getFileId());
 //        Vertex newVertex = dbService.getVertex(change.getFile().getParents().get(0).getId());
 //
@@ -48,6 +37,8 @@ public class MoveService implements ChangeInterface {
 //        Files.move(oldPath, newPath, StandardCopyOption.REPLACE_EXISTING);
 
 //        this.update(newPathString);
+
+        return this.updateDB();
     }
 
     /**

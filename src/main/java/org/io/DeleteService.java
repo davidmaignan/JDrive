@@ -14,29 +14,16 @@ import java.nio.file.*;
  *
  * David Maignan <davidmaignan@gmail.com>
  */
-public class DeleteService implements ChangeInterface {
+public class DeleteService extends ModifiedService implements ChangeInterface {
 
     private static Logger logger;
     private DatabaseService dbService;
     private Change change;
 
-    public DeleteService(){
-
-    }
-
-    @Inject
-    public DeleteService(DatabaseService dbService) {
-        this.dbService = dbService;
-        LoggerFactory.getLogger(this.getClass());
-    }
+    public DeleteService(){}
 
     @Override
-    public void setChange(Change change) {
-        this.change = change;
-    }
-
-    @Override
-    public final void execute(){
+    public final boolean execute(){
 //        Vertex vertex = dbService.getVertex(change.getFileId());
 //
 //        String absolutePath = vertex.getProperty(Fields.PATH);
@@ -52,7 +39,10 @@ public class DeleteService implements ChangeInterface {
 //            dbService.delete(vertex);
 //        }catch (IOException exception) {
 //            logger.error("Error when deleting %s", path);
+//        return false;
 //        }
+
+        return true;
     }
 
     /**

@@ -10,6 +10,6 @@ import java.io.IOException;
  * David Maignan <davidmaignan@gmail.com>
  */
 public interface ChangeInterface {
-    public void execute() throws IOException;
+    public boolean execute() throws IOException;
     public void setChange(Change change);
 }

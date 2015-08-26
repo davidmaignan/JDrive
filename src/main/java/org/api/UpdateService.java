@@ -1,25 +1,21 @@
 package org.api;
 
 import com.google.api.services.drive.model.Change;
-import com.google.api.services.drive.model.File;
-import com.google.inject.Guice;
 import com.google.inject.Inject;
 import org.db.neo4j.DatabaseService;
 import org.db.Fields;
 import org.io.ChangeInterface;
-import org.io.DeleteService;
 import org.model.tree.TreeNode;
 import org.model.types.MimeType;
 import org.neo4j.graphdb.Node;
 import org.writer.FactoryProducer;
-import org.writer.FileModule;
 
 import java.util.List;
 
 /**
  * Update service: apply changes received from Drive API
  *
- *  Change can 3 types:
+ *  Change can be different types:
  *    - hard deletion or Trashed label
  *    - change of content
  *    - change of location
@@ -32,13 +28,12 @@ public class UpdateService {
     private DatabaseService dbService;
     private ChangeInterface deleteService;
     private ChangeInterface moveService;
+    private ChangeInterface modifiedService;
     private FactoryProducer factoryProducer;
     private TreeNode node;
     private List list;
 
-    public UpdateService(List list){
-        this.list = list;
-    }
+    public UpdateService(){}
 
     @Inject
     public UpdateService(
@@ -46,22 +41,23 @@ public class UpdateService {
             FileService fileService,
             ChangeInterface deleteService,
             ChangeInterface moveService,
+            ChangeInterface modifiedService,
             FactoryProducer factoryProducer
     ) {
         this.dbService = dbService;
         this.fileService = fileService;
         this.deleteService = deleteService;
         this.moveService = moveService;
+        this.modifiedService = modifiedService;
         this.factoryProducer = factoryProducer;
     }
 
-
-
     public ChangeInterface update(Change change) throws Exception {
         boolean success = false;
-        ChangeInterface service;
 
-        Node node = dbService.getNodeById(change.getFileId());
+        String fileId = change.getFileId();
+
+        Node node = dbService.getNodeById(fileId);
 
         if (node != null) {
             Long vertexDT = Long.valueOf(node.getProperty(Fields.MODIFIED_DATE).toString());
@@ -78,31 +74,34 @@ public class UpdateService {
                     return deleteService;
                 }
 
-//                //If file is not a folder: reload it's content
+                //If file is not a folder: reload it's content
                 if ( ! change.getFile().getMimeType().equals(MimeType.FOLDER)) {
-                    File file = fileService.getFile(node.getProperty(Fields.ID).toString());
-
-                    success = this.factoryProducer.getFactory("FILE").getWriter(node).write() || true;
+//                    File file = fileService.getFile(node.getProperty(Fields.ID).toString());
+//                    success = this.factoryProducer.getFactory("FILE").getWriter(node).write() || true;
                 }
-//
-//                //If file is moved
-//                OrientElementIterable parentList = vertex.getProperty(Fields.PARENTS);
-//                Vertex parentVertex              = (Vertex) parentList.iterator().next();
-//
-//                String oldParent = parentVertex.getProperty(Fields.ID);
-//                String newParent = change.getFile().getParents().get(0).getId();
-//
-//                System.out.println(change.getFile().getTitle() + ": " + oldParent + " : " + newParent + " : " + change.getFile().getMimeType());
-//
-//                if (!oldParent.equals(newParent)) {
-//                    service = Guice.createInjector(new FileModule()).getInstance(MoveService.class);
-//                    service.setChange(change);
-//                    return service;
-//                }
-//
-//                //Update modifiedDate for folder update (either a file was moved in it or removed from it)
-//                //but the folder itself was not changed only it's content
-//                dbService.updateProperty(vertex, Fields.MODIFIED_DATE, changeDT);
+
+                //This case is unlikely to happen. If it's the case - need to log this change and investigate
+                if ("true".equals(node.getProperty(Fields.IS_ROOT).toString())) {
+                    return null;
+                }
+
+                // If file/folder has been moved
+                if(change.getFile().getParents() != null && change.getFile().getParents().size() > 0) {
+
+                    Node oldParent = dbService.getParent(fileId);
+
+                    String oldParentId = oldParent.getProperty(Fields.ID).toString();
+                    String parentId    = change.getFile().getParents().get(0).getId();
+
+                    if( ! oldParentId.equals(parentId)) {
+                        moveService.setChange(change);
+                        return moveService;
+                    }
+                }
+
+                //If reach this part file / folder is in the same location. Just need to update the db
+                modifiedService.setChange(change);
+                return modifiedService;
             }
         }
 
@@ -118,6 +117,7 @@ public class UpdateService {
      * Get trashed label value if available
      *
      * @param change Change
+     *
      * @return boolean
      */
     private boolean getTrashedLabel(Change change) {
@@ -129,9 +129,5 @@ public class UpdateService {
                     && change.getFile().getLabels() != null
                     && change.getFile().getLabels().getTrashed()
                 );
-
-//        return (change.getFile() != null
-//                && (change.getFile().getExplicitlyTrashed()
-//                || (change.getFile().getLabels() != null && change.getFile().getLabels().getTrashed().booleanValue())));
     }
 }
