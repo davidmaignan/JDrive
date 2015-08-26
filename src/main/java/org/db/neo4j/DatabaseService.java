@@ -16,6 +16,7 @@ import java.util.Map;
  *
  * David Maignan <davidmaignan@gmail.com>
  */
+@Singleton
 public class DatabaseService {
     private DatabaseConfiguration dbConfig;
     private GraphDatabaseService graphDB;
@@ -152,7 +153,6 @@ public class DatabaseService {
      * @return Node | null
      */
     public Node getNodeById(String value) {
-        System.out.println("do you try this code");
         Node node = null;
         try (Transaction tx = graphDB.beginTx()) {
             node = graphDB.findNode(DynamicLabel.label("File"), Fields.ID, "root");
@@ -165,12 +165,36 @@ public class DatabaseService {
         return node;
     }
 
+    public Node update(String id, String property, String value) {
+        Node resultNode = null;
+
+        String query = "match (file {%s: '%s'}) " +
+                "set file.%s = %s RETURN file";
+        try (
+                Transaction tx = graphDB.beginTx();
+                Result result = graphDB.execute(String.format(query, Fields.ID, id, property, value));
+        )
+        {
+            if(result.hasNext()) {
+                resultNode = (Node)result.next().get("folder");
+            }
+
+            tx.success();
+
+        } catch (Exception exception) {
+
+        }
+
+        return resultNode;
+    }
+
     private void setNode(Node dbNode, TreeNode tNode) {
         dbNode.addLabel(DynamicLabel.label("File"));
         dbNode.setProperty(Fields.ID, tNode.getId());
         dbNode.setProperty(Fields.TITLE, tNode.getTitle());
         dbNode.setProperty(Fields.PATH, tNode.getAbsolutePath());
         dbNode.setProperty(Fields.MIME_TYPE, tNode.getMimeType());
+        dbNode.setProperty(Fields.IS_ROOT, tNode.isSuperRoot());
 
         if (tNode.getCreatedDate() != null) {
             dbNode.setProperty(Fields.CREATED_DATE, tNode.getCreatedDate().getValue());

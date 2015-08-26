@@ -157,6 +157,20 @@ public class DatabaseServiceTest {
         }
     }
 
+    @Test(timeout = 100000)
+    public void testUpdateProperty(){
+        dbService.save(this.getRootNode());
+
+        try (Transaction tx = graphDb.beginTx()) {
+            Node parentNode = dbService.update("folder1", Fields.CREATED_DATE, "999");
+            assertEquals("999", parentNode.getProperty(Fields.CREATED_DATE));
+
+            tx.success();
+        } catch (Exception exception) {
+
+        }
+    }
+
     /**
      * Get a list from an iterable
      * @param iterable
