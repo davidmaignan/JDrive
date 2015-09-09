@@ -46,6 +46,11 @@ public class DeleteService extends ModifiedService implements ChangeInterface {
         return true;
     }
 
+    @Override
+    public Change getChange() {
+        return null;
+    }
+
     /**
      * Delete files contains in directory prior deleting it
      * @param path Path

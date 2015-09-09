@@ -13,9 +13,4 @@ public class TreeModule extends AbstractModule{
     protected void configure() {
 
     }
-
-//    @Provides
-//    String provideRootFolder(Configuration configReader) {
-//        return configReader.getRootFolder();
-//    }
 }

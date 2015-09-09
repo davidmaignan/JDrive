@@ -1,5 +1,6 @@
 package org.writer;
 
+import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.File;
 import com.google.inject.Guice;
 import org.db.Fields;
@@ -17,7 +18,7 @@ import org.writer.file.FileWriter;
 public class WriterFileFactory extends AbstractFactory {
     @Override
     public WriterInterface getWriter(TreeNode node) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException("You cannot use a file factory to write a treenode");
+        throw new UnsupportedOperationException("You cannot use a file factory to write a tree node");
     }
 
     @Override
@@ -37,5 +38,10 @@ public class WriterFileFactory extends AbstractFactory {
 //        }
 
         return writer;
+    }
+
+    @Override
+    public WriterInterface getWriter(Change change) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException("You cannot use a file factory to write a change");
     }
 }

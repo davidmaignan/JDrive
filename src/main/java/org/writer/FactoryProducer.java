@@ -1,5 +1,8 @@
 package org.writer;
 
+import com.google.inject.Guice;
+import org.db.DatabaseModule;
+
 /**
  * Factory writer producer
  *
@@ -10,9 +13,10 @@ public class FactoryProducer {
 
         if(choice.equalsIgnoreCase("NODE")){
             return new WriterNodeFactory();
-
         } else if(choice.equalsIgnoreCase("FILE")){
             return new WriterFileFactory();
+        } else if (choice.equalsIgnoreCase("CHANGE")) {
+            return new WriterChangeFactory();
         }
 
         throw new Exception(String.format("%s is not allowed to produce a writer factory", choice));

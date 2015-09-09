@@ -30,6 +30,11 @@ public class ModifiedService implements ChangeInterface {
     }
 
     @Override
+    public Change getChange() {
+        return null;
+    }
+
+    @Override
     public boolean execute() throws IOException {
         return this.updateDB();
     }

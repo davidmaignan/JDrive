@@ -46,14 +46,19 @@ create (root:Node {n:"root"}), (a:Node {n:"a"}), (b:Node {n:"b"}), (c:Node {n:"c
 (d:Node {n:"d"}), (e:Node {n:"e"}), (f:Node {n:"f"}), (g:Node {n:"g"}), (h:Node {n:"h"}),
 (i:Node {n:"i"}), (j:Node {n:"j"}), (k:Node {n:"k"}), (l:Node {n:"l"}), (m:Node {n:"m"}),
 (n:Node {n:"n"}), (o:Node {n:"o"}), (p:Node {n:"p"}), (q:Node {n:"q"}),
-root-[:parent_of]->a, root-[:parent_of]->b, a-[:parent_of]->c,
-a-[:parent_of]->d, b-[:parent_of]->e, b-[:parent_of]->f,
-c-[:parent_of]->g, c-[:parent_of]->h, d-[:parent_of]->i,
-d-[:parent_of]->j, e-[:parent_of]->k, e-[:parent_of]->l,
-f-[:parent_of]->m, f-[:parent_of]->n, g-[:parent_of]->o,
-g-[:parent_of]->p, d-[:parent_of]->q;
+root-[:PARENT]->a, root-[:PARENT]->b, a-[:CHILD]->root, b-[:CHILD]->root,
+a-[:PARENT]->c, c-[:CHILD]->a, a-[:PARENT]->d, d-[:CHILD]->a,
+b-[:PARENT]->e, b-[:PARENT]->f, e-[:CHILD]->b, f-[:CHILD]->b,
+c-[:PARENT]->g, c-[:PARENT]->h, g-[:CHILD]->c, h-[:CHILD]->c,
+d-[:PARENT]->i, d-[:PARENT]->j, i-[:CHILD]->d, j-[:CHILD]->d,
+e-[:PARENT]->k, e-[:PARENT]->l, k-[:CHILD]->e, l-[:CHILD]->e,
+f-[:PARENT]->m, f-[:PARENT]->n, m-[:CHILD]->f, n-[:CHILD]->f,
+g-[:PARENT]->o, g-[:PARENT]->p, o-[:CHILD]->g, p-[:CHILD]->g,
+d-[:PARENT]->q, q-[:CHILD]->d;
 
 MATCH (n) MATCH (n)-[r]-() return n,r;
+
+
 
 start category= (node{n:'root'}) match path = category-[*]-> subcategory return category, collect(subcategory);
 
@@ -79,3 +84,18 @@ match p=(n {n:'a'})-[r*]->() with p order by length(p) desc limit 1 foreach(r in
 //Delete
 MATCH (n {n:'a'}) OPTIONAL MATCH (b)-[r]-(n) delete r,n;
 
+match (file {identifier:'0AHmMPOF_fWirUk9PVA'}) OPTIONAL MATCH (file)-[r:CHILD*]->(p) foreach (rel in r | delete rel) return p;
+
+(•_•)
+<)   )
+ /    \
+  (•_•)
+<(   (>
+  /    \
+
+match (n {n:'a'}) match (n)<-[r*]->(m) foreach (rel in r | delete rel) return n;
+
+
+match (n {n:'a'}), (others) where (others)-[:CHILD*]->(n) with others match (others)-[r]-() delete others, r with (n {n:'a'}) match (n)<-[r2:PARENT]-() return r2, n;
+
+match (n {n:'a'}), (others) where (others)-[:CHILD*]->(n) with n match (n)<-[r2:PARENT]-() return r2, n;

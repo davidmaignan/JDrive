@@ -1,7 +1,6 @@
 package org.db;
 
 import com.google.inject.Guice;
-import org.db.neo4j.DatabaseModule;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;

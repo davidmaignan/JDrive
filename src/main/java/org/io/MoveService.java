@@ -39,4 +39,9 @@ public class MoveService extends ModifiedService implements ChangeInterface {
 
         return this.updateDB();
     }
+
+    @Override
+    public Change getChange() {
+        return null;
+    }
 }

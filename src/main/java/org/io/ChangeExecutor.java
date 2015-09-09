@@ -6,36 +6,42 @@ import java.util.List;
 
 /**
  * Change executor: execute recursively a list of change service
- *
+ * <p>
  * David Maignan <davidmaignan@gmail.com>
  */
 public class ChangeExecutor {
 
     private List<ChangeInterface> changeList;
+    private List<ChangeInterface> changeListFailed;
 
     public ChangeExecutor() {
         changeList = new ArrayList<>();
+        changeListFailed = new ArrayList<>();
     }
 
     public void addChange(ChangeInterface service) {
         changeList.add(service);
     }
 
-    public void clean(){
+    public void clean() {
         List<ChangeInterface> listNull = new ArrayList<>();
         listNull.add(null);
 
         changeList.removeAll(listNull);
     }
 
-    public int size(){
+    public int size() {
         return changeList.size();
     }
 
-    public void debug(){
+    public void debug() {
         for (ChangeInterface service : changeList) {
             System.out.println("service: " + service);
         }
+    }
+
+    public List<ChangeInterface> getChangeListFailed() {
+        return changeListFailed;
     }
 
     /**
@@ -44,11 +50,9 @@ public class ChangeExecutor {
      * @throws IOException
      */
     public void execute() throws IOException {
-        while(changeList.size() > 0) {
-            for (ChangeInterface service : changeList) {
-                if (service.execute()) {
-                    changeList.remove(service);
-                }
+        for (ChangeInterface service : changeList) {
+            if( ! service.execute()) {
+                changeListFailed.add(service);
             }
         }
     }

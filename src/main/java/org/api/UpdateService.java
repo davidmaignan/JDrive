@@ -1,14 +1,15 @@
 package org.api;
 
 import com.google.api.services.drive.model.Change;
+import com.google.api.services.drive.model.File;
 import com.google.inject.Inject;
-import org.db.neo4j.DatabaseService;
 import org.db.Fields;
-import org.io.ChangeInterface;
+import org.db.neo4j.DatabaseService;
+import org.io.*;
+import org.io.change.create.FactoryChangeCreateService;
+import org.io.change.move.FactoryChangeMoveService;
 import org.model.tree.TreeNode;
-import org.model.types.MimeType;
 import org.neo4j.graphdb.Node;
-import org.writer.FactoryProducer;
 
 import java.util.List;
 
@@ -29,83 +30,96 @@ public class UpdateService {
     private ChangeInterface deleteService;
     private ChangeInterface moveService;
     private ChangeInterface modifiedService;
-    private FactoryProducer factoryProducer;
+    private ChangeInterface createService;
+    private FactoryChangeCreateService factoryChangeCreateService;
+    private FactoryChangeMoveService factoryChangeMoveService;
     private TreeNode node;
     private List list;
 
-    public UpdateService(){}
-
     @Inject
     public UpdateService(
-            DatabaseService dbService,
-            FileService fileService,
-            ChangeInterface deleteService,
-            ChangeInterface moveService,
-            ChangeInterface modifiedService,
-            FactoryProducer factoryProducer
-    ) {
+            FactoryChangeCreateService factoryChangeCreateService,
+            FactoryChangeMoveService factoryChangeMoveService,
+            DatabaseService dbService) {
+        this.factoryChangeCreateService = factoryChangeCreateService;
+        this.factoryChangeMoveService = factoryChangeMoveService;
         this.dbService = dbService;
-        this.fileService = fileService;
-        this.deleteService = deleteService;
-        this.moveService = moveService;
-        this.modifiedService = modifiedService;
-        this.factoryProducer = factoryProducer;
     }
 
     public ChangeInterface update(Change change) throws Exception {
-        boolean success = false;
+        File file = change.getFile();
 
-        String fileId = change.getFileId();
-
-        Node node = dbService.getNodeById(fileId);
+        Node node = dbService.getNodeById(file.getId());
 
         if (node != null) {
-            Long vertexDT = Long.valueOf(node.getProperty(Fields.MODIFIED_DATE).toString());
+
+            Long vertexDT = Long.valueOf(dbService.getNodePropertyById(file.getId(), Fields.MODIFIED_DATE));
             Long changeDT = change.getModificationDate().getValue();
-
-//            System.out.println(changeDT + " : " + vertexDT);
-//            System.out.println(changeDT > vertexDT);
-
+//
+            System.out.println(changeDT + " : " + vertexDT);
+            System.out.println(changeDT > vertexDT);
+//
             if (changeDT > vertexDT) {
 
-                //If file is deleted permanently or Trashed
-                if (this.getChangeDeleted(change) || this.getTrashedLabel(change)) {
-                    deleteService.setChange(change);
-                    return deleteService;
+                System.out.println(change);
+
+                //If title changed or parent change
+                if ( ! file.getTitle().equals(dbService.getNodePropertyById(file.getId(), Fields.TITLE))) {
+
+//                    System.out.println("title changed");
+//                    System.exit(0);
+
+                    return factoryChangeMoveService.get(change);
                 }
 
-                //If file is not a folder: reload it's content
-                if ( ! change.getFile().getMimeType().equals(MimeType.FOLDER)) {
-//                    File file = fileService.getFile(node.getProperty(Fields.ID).toString());
-//                    success = this.factoryProducer.getFactory("FILE").getWriter(node).write() || true;
-                }
 
-                //This case is unlikely to happen. If it's the case - need to log this change and investigate
-                if ("true".equals(node.getProperty(Fields.IS_ROOT).toString())) {
-                    return null;
-                }
 
-                // If file/folder has been moved
-                if(change.getFile().getParents() != null && change.getFile().getParents().size() > 0) {
+                //If file -> reload content
 
-                    Node oldParent = dbService.getParent(fileId);
+                //Otherwise change db modified date
+//
+//                //If file is deleted permanently or Trashed
+//                if (this.getChangeDeleted(change) || this.getTrashedLabel(change)) {
+//                    deleteService.setChange(change);
+//                    return deleteService;
+//                }
+//
+////                //If file is not a folder: reload it's content
+////                if ( ! change.getFile().getMimeType().equals(MimeType.FOLDER)) {
+//////                    File file = fileService.getFile(node.getProperty(Fields.ID).toString());
+//////                    success = this.factoryProducer.getFactory("FILE").getWriter(node).write() || true;
+////                }
+//
+//                //This case is unlikely to happen. If it's the case - need to log this change and investigate
+//                if ("true".equals(node.getProperty(Fields.IS_ROOT).toString())) {
+//                    return null;
+//                }
+//
+//                // If file/folder has been moved
+//                if(change.getFile().getParents() != null && change.getFile().getParents().size() > 0) {
+//
+//                    Node oldParent = dbService.getParent(fileId);
+//
+//                    String oldParentId = oldParent.getProperty(Fields.ID).toString();
+//                    String parentId    = change.getFile().getParents().get(0).getId();
+//
+//                    if( ! oldParentId.equals(parentId)) {
+//                        moveService.setChange(change);
+//                        return moveService;
+//                    }
+//                }
+//
+//                //If reach this part file / folder is in the same location. Just need to update the db
+//                modifiedService.setChange(change);
+//                return modifiedService;
 
-                    String oldParentId = oldParent.getProperty(Fields.ID).toString();
-                    String parentId    = change.getFile().getParents().get(0).getId();
-
-                    if( ! oldParentId.equals(parentId)) {
-                        moveService.setChange(change);
-                        return moveService;
-                    }
-                }
-
-                //If reach this part file / folder is in the same location. Just need to update the db
-                modifiedService.setChange(change);
-                return modifiedService;
+                return null;
             }
+
+            return null;
         }
 
-        return null;
+        return factoryChangeCreateService.get(change);
     }
 
     private boolean getChangeDeleted(Change change) {

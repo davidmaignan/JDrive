@@ -2,17 +2,17 @@ package org.main;
 
 import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.File;
-import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.api.change.ChangeService;
 import org.api.UpdateService;
 import org.configuration.Configuration;
 import org.api.FileService;
+import org.db.DatabaseModule;
 import org.db.neo4j.DatabaseService;
 import org.io.ChangeExecutor;
+import org.io.ChangeInterface;
 import org.model.tree.TreeBuilder;
-import org.model.tree.TreeModule;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.writer.TreeWriter;
 
@@ -44,29 +44,29 @@ public class JDriveMain {
         initJDrive();
         initServices();
 
-//        boolean setUpSuccess = false;
-//        try {
-//            setUpSuccess = setUpJDrive();
-//        } catch (Exception exception) {
-//            System.out.println("Set up failed" + exception.toString());
-//        }
-
+        boolean setUpSuccess = false;
         try {
-            setUpChanges();
+            setUpSuccess = setUpJDrive();
         } catch (Exception exception) {
-            exception.printStackTrace();
-            System.out.println("Set up changes failed" + exception.toString());
+            System.out.println("Set up failed" + exception.toString());
         }
 
-        registerShutdownHook(dbService.getGraphDB());
+//        try {
+//            setUpChanges();
+//        } catch (Exception exception) {
+//            exception.printStackTrace();
+//            System.out.println("Set up changes failed" + exception.toString());
+//        }
 
+        registerShutdownHook(dbService.getGraphDB());
     }
 
     private static void initJDrive() {
-        ArrayList<AbstractModule> moduleList = new ArrayList<>();
-        moduleList.add(new TreeModule());
+//        ArrayList<AbstractModule> moduleList = new ArrayList<>();
+//        moduleList.add(new TreeModule());
+//        moduleList.add(new DatabaseModule());
 
-        injector = Guice.createInjector(moduleList);
+        injector = Guice.createInjector(new DatabaseModule());
     }
 
     private static void initServices() {
@@ -80,7 +80,7 @@ public class JDriveMain {
 //        dbService.createParentType();
     }
 
-    private static boolean setUpJDrive() throws IOException, Exception{
+    private static boolean setUpJDrive() throws Exception{
         List<File> result = fileService.getAll();
         treeBuilder.build(result);
         TreeBuilder.printTree(treeBuilder.getRoot());
@@ -100,28 +100,40 @@ public class JDriveMain {
 
     private static void setUpChanges() throws IOException, Exception{
         Configuration configReader = new Configuration();
-        Long lastChangeId = Long.valueOf(configReader.getProperty("lastChangeId"));
 
-        System.out.println("lastChangeId: " + lastChangeId);
+        Long lastChangeId = null;
+
+        try {
+            lastChangeId = Long.valueOf(configReader.getProperty("lastChangeId"));
+        } catch (NumberFormatException exception) {
+
+        }
 
         ChangeService changeService = injector.getInstance(ChangeService.class);
-        List<Change> changeList = changeService.getAll(Long.valueOf(lastChangeId));
+        List<Change> changeList = changeService.getAll(lastChangeId);
 
         for (Change change : changeList){
+
             lastChangeId = (lastChangeId == null)? change.getId() : Math.max(lastChangeId, change.getId());
 
-            changeExecutor.addChange(updateService.update(change));
+            ChangeInterface service = updateService.update(change);
+            service.setChange(change);
+
+            changeExecutor.addChange(service);
         }
 
         System.out.println(changeExecutor.size());
 
-        changeExecutor.clean();
+//        changeExecutor.clean();
         changeExecutor.debug();
         changeExecutor.execute();
 
-        //configReader.writeProperty("lastChangeId", lastChangeId);
+        for (ChangeInterface service : changeExecutor.getChangeListFailed()) {
+            System.out.println("Failed to create: " + service.getChange().getFile().getTitle());
+        }
 
-        System.out.println(lastChangeId);
+//        configReader.writeProperty("lastChangeId", lastChangeId);
+//        System.out.println(lastChangeId);
     }
 
     private static Configuration setConfiguration() throws IOException{
@@ -140,7 +152,7 @@ public class JDriveMain {
             @Override
             public void run()
             {
-                graphDb.shutdown();
+//                graphDb.shutdown();
             }
         } );
     }

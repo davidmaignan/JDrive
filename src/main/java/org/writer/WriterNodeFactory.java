@@ -1,5 +1,6 @@
 package org.writer;
 
+import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.File;
 import org.model.tree.TreeNode;
 import org.model.types.MimeType;
@@ -32,6 +33,11 @@ public class WriterNodeFactory extends AbstractFactory {
 
     @Override
     public org.writer.file.FolderWriter getWriter(Node node) {
-        throw new UnsupportedOperationException("You cannot use a node factory to write a vertex");
+        throw new UnsupportedOperationException("You cannot use a node factory to write a db node");
+    }
+
+    @Override
+    public WriterInterface getWriter(Change change) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException("You cannot use a node factory to write a change");
     }
 }

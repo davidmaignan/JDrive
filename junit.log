@@ -1,0 +1,109 @@
+3362 ERROR DatabaseService: org.neo4j.graphdb.ConstraintViolationException: Label 'File' and property 'identifier' already have a unique constraint defined on them.
+7445 ERROR DatabaseService: org.neo4j.graphdb.ConstraintViolationException: Label 'File' and property 'identifier' already have a unique constraint defined on them.
+7528 INFO  MoveDocumentWriter: /Users/david/JDrive/file0_0 : /Users/david/JDrive/folder0/file0
+3769 ERROR DatabaseService: org.neo4j.graphdb.ConstraintViolationException: Label 'File' and property 'identifier' already have a unique constraint defined on them.
+7960 ERROR DatabaseService: org.neo4j.graphdb.ConstraintViolationException: Label 'File' and property 'identifier' already have a unique constraint defined on them.
+8060 INFO  MoveDocumentWriter: /Users/david/JDrive/file0_0 : /Users/david/JDrive/folder0/file0
+8107 ERROR DatabaseService: Fail to update db: org.neo4j.graphdb.QueryExecutionException: Invalid input 'U': expected '*' or '/' (line 1, column 115 (offset: 114))
+"match (file {identifier: '1MvwRosjmcEDn4V2uTirnw3M5gEMEni-vV1K9mr7K3fU'}) set file.title = file0 set file.path = /Users/david/JDrive/folder0/file0 set file.modifiedDate = 2015-09-08T17:48:53.746Z return file"
+                                                                                                                   ^
+3915 ERROR DatabaseService: org.neo4j.graphdb.ConstraintViolationException: Label 'File' and property 'identifier' already have a unique constraint defined on them.
+7999 ERROR DatabaseService: org.neo4j.graphdb.ConstraintViolationException: Label 'File' and property 'identifier' already have a unique constraint defined on them.
+8091 INFO  MoveDocumentWriter: /Users/david/JDrive/file0_0 : /Users/david/JDrive/folder0/file0
+3651 ERROR DatabaseService: org.neo4j.graphdb.ConstraintViolationException: Label 'File' and property 'identifier' already have a unique constraint defined on them.
+7639 ERROR DatabaseService: org.neo4j.graphdb.ConstraintViolationException: Label 'File' and property 'identifier' already have a unique constraint defined on them.
+7723 INFO  MoveDocumentWriter: /Users/david/JDrive/file0_0 : /Users/david/JDrive/folder0/file0
+3586 ERROR DatabaseService: org.neo4j.graphdb.ConstraintViolationException: Label 'File' and property 'identifier' already have a unique constraint defined on them.
+7568 ERROR DatabaseService: org.neo4j.graphdb.ConstraintViolationException: Label 'File' and property 'identifier' already have a unique constraint defined on them.
+7670 INFO  MoveDocumentWriter: /Users/david/JDrive/file0_0 : /Users/david/JDrive/folder0/file0
+7674 ERROR MoveDocumentWriter: Fail to move the document: java.nio.file.NoSuchFileException: /Users/david/JDrive/file0_0
+5119 ERROR DatabaseService: Fail to update db: java.lang.NullPointerException
+4405 ERROR DatabaseService: Fail to update db: java.lang.NullPointerException
+4245 ERROR DatabaseService: Fail to update db: java.lang.NullPointerException
+5984 ERROR DatabaseService: Fail to update db: java.lang.NullPointerException
+844  INFO  DatabaseService: folder1
+855  INFO  DatabaseService: file1
+859  INFO  DatabaseService: folder2
+866  INFO  DatabaseService: file2
+1359 INFO  DatabaseService: folder1
+1364 INFO  DatabaseService: file1
+1369 INFO  DatabaseService: folder2
+1370 INFO  DatabaseService: file2
+3954 INFO  DatabaseService: folder1
+3956 INFO  DatabaseService: file1
+3957 INFO  DatabaseService: folder2
+3958 INFO  DatabaseService: file2
+4201 INFO  DatabaseService: folder1
+4205 INFO  DatabaseService: file1
+4208 INFO  DatabaseService: folder2
+4211 INFO  DatabaseService: file2
+864  INFO  DatabaseService: folder1
+873  INFO  DatabaseService: file1
+877  INFO  DatabaseService: folder2
+881  INFO  DatabaseService: file2
+951  INFO  DatabaseService: folder1
+965  INFO  DatabaseService: file1
+970  INFO  DatabaseService: folder2
+977  INFO  DatabaseService: file2
+3648 INFO  DatabaseService: folder1
+3661 INFO  DatabaseService: file1
+3664 INFO  DatabaseService: folder2
+3667 INFO  DatabaseService: file2
+3912 INFO  DatabaseServiceTest: Node[2]
+3368 INFO  DatabaseService: Node[2]
+3371 INFO  DatabaseService: Node[1]
+3502 INFO  DatabaseService: Node[2]
+3505 INFO  DatabaseService: Node[1]
+3680 INFO  DatabaseService: Node[2]
+3685 INFO  DatabaseService: Node[1]
+3937 ERROR DatabaseServiceTest: 1
+3466 INFO  DatabaseService: Node[2]
+3469 INFO  DatabaseService: Node[1]
+7649 INFO  DatabaseService: /Test/Path/JDrive/folder2/file1
+6429 INFO  DatabaseService: /Test/Path/JDrive/folder2/file1
+6402 INFO  DatabaseService: /Test/Path/JDrive/folder2/file1
+6739 INFO  DatabaseService: /Test/Path/JDrive/folder2/file1
+6553 INFO  DatabaseService: /Test/Path/JDrive/folder2/file1
+7009 ERROR DatabaseService: Fail to update db: java.util.NoSuchElementException: next on empty iterator
+7561 INFO  DatabaseService: null
+7566 INFO  DatabaseService: file1
+7570 INFO  DatabaseService: /Test/Path/JDrive/folder2/file1
+7793 INFO  DatabaseService: file1
+7796 INFO  DatabaseService: file1
+7796 INFO  DatabaseService: /Test/Path/JDrive/folder2/file1
+8225 ERROR DatabaseService: Fail to update db: java.lang.ClassCastException: scala.collection.convert.Wrappers$MapWrapper cannot be cast to org.neo4j.graphdb.Node
+7273 INFO  DatabaseService: file1
+7277 INFO  DatabaseService: file1
+7277 INFO  DatabaseService: /Test/Path/JDrive/folder2/file1
+7686 INFO  DatabaseService: Node[2]
+7696 INFO  DatabaseService: file1
+7699 INFO  DatabaseService: file1
+7699 INFO  DatabaseService: /Test/Path/JDrive/folder2/file1
+8512 ERROR DatabaseService: Fail to update db: java.lang.NullPointerException
+7989 ERROR DatabaseService: Fail to update db: java.lang.NullPointerException
+6783 INFO  DatabaseService: Node[1]
+7849 INFO  DatabaseService: Node[1]
+7123 INFO  DatabaseService: Node[1]
+7739 INFO  DatabaseService: folder2
+7612 INFO  DatabaseService: folder2
+7309 INFO  DatabaseService: folder2
+7055 INFO  DatabaseService: folder2
+7416 INFO  DatabaseService: folder2
+7332 INFO  DatabaseService: folder2
+7355 INFO  DatabaseServiceTest: file1
+7355 INFO  DatabaseServiceTest: file2
+7359 INFO  DatabaseServiceTest: folder2
+10169 INFO  DatabaseServiceTest: file2
+10177 INFO  DatabaseServiceTest: folder2
+7053 INFO  DatabaseServiceTest: folder2
+7057 INFO  DatabaseServiceTest: root
+6875 INFO  DatabaseServiceTest: folder2
+7068 INFO  DatabaseServiceTest: root
+6569 INFO  DatabaseServiceTest: folder2
+6598 INFO  DatabaseServiceTest: folder2
+6447 INFO  DatabaseServiceTest: folder2
+9727 INFO  DatabaseServiceTest: folder2
+6868 INFO  DatabaseServiceTest: file2
+8608 INFO  DatabaseServiceTest: root
+6755 INFO  DatabaseServiceTest: file1
+6761 INFO  DatabaseServiceTest: file2

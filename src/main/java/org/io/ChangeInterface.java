@@ -12,4 +12,5 @@ import java.io.IOException;
 public interface ChangeInterface {
     public boolean execute() throws IOException;
     public void setChange(Change change);
+    public Change getChange();
 }
