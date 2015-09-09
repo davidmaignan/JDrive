@@ -61,7 +61,6 @@ public class DatabaseServiceTest {
     }
 
     @Test
-    @Ignore
     public void testRelationShipRoot(){
         dbService.save(this.getRootNode());
 
@@ -102,7 +101,6 @@ public class DatabaseServiceTest {
     }
 
     @Test
-    @Ignore
     public void testLeaf(){
         dbService.save(this.getRootNode());
 
@@ -118,7 +116,6 @@ public class DatabaseServiceTest {
     }
 
     @Test
-    @Ignore
     public void testGetPropertyById(){
         dbService.save(this.getRootNode());
 
@@ -131,7 +128,6 @@ public class DatabaseServiceTest {
     }
 
     @Test(timeout = 10000)
-    @Ignore
     public void testGetNode(){
         dbService.save(this.getRootNode());
 
@@ -144,7 +140,6 @@ public class DatabaseServiceTest {
     }
 
     @Test(timeout = 10000)
-    @Ignore
     public void testGetNodeById(){
         dbService.save(this.getRootNode());
 
@@ -157,7 +152,6 @@ public class DatabaseServiceTest {
     }
 
     @Test(timeout = 10000)
-    @Ignore
     public void testSetNodeProperties(){
         dbService.save(this.getRootNode());
 
@@ -177,7 +171,6 @@ public class DatabaseServiceTest {
     }
 
     @Test(timeout = 100000)
-    @Ignore
     public void testDeleteNode(){
         dbService.save(this.getRootNode());
         dbService.delete("folder1");
@@ -216,7 +209,6 @@ public class DatabaseServiceTest {
     }
 
     @Test(timeout = 100000)
-    @Ignore
     public void testUpdateProperty(){
         dbService.save(this.getRootNode());
 
