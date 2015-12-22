@@ -33,13 +33,13 @@ public class DatabaseServiceTest {
     private static Logger logger;
 
     @BeforeClass
-    public static void init(){
+    public static void init() {
         logger = LoggerFactory.getLogger("DatabaseServiceTest");
     }
 
     @Before
     public void setUp() throws Exception {
-        graphDb   = new TestGraphDatabaseFactory().newImpermanentDatabase();
+        graphDb = new TestGraphDatabaseFactory().newImpermanentDatabase();
         Configuration configuration = new Configuration();
         dbService = new DatabaseService(graphDb, configuration);
     }
@@ -49,8 +49,8 @@ public class DatabaseServiceTest {
         graphDb.shutdown();
     }
 
-    @Test(timeout = 10000) @Ignore
-    public void testSave(){
+    @Test(timeout = 10000)
+    public void testSave() {
         dbService.save(this.getRootNode());
 
         try (Transaction tx = graphDb.beginTx()) {
@@ -63,8 +63,8 @@ public class DatabaseServiceTest {
         }
     }
 
-    @Test(timeout = 10000) @Ignore
-    public void testRelationShipRoot(){
+    @Test(timeout = 10000)
+    public void testRelationShipRoot() {
         dbService.save(this.getRootNode());
 
         try (Transaction tx = graphDb.beginTx()) {
@@ -78,7 +78,7 @@ public class DatabaseServiceTest {
 
             List<String> nodeIds = new ArrayList<>(Arrays.asList(new String[]{"folder1", "folder2"}));
 
-            for(Relationship rel : relationships) {
+            for (Relationship rel : relationships) {
                 assertEquals(rootNode, rel.getEndNode());
                 String nodeID = rel.getStartNode().getProperty(Fields.ID).toString();
                 assertTrue(nodeIds.remove(nodeID));
@@ -92,8 +92,8 @@ public class DatabaseServiceTest {
         }
     }
 
-    @Test(timeout = 10000) @Ignore
-    public void testRelationShipFolder(){
+    @Test(timeout = 10000)
+    public void testRelationShipFolder() {
         dbService.save(this.getRootNode());
 
         try (Transaction tx = graphDb.beginTx()) {
@@ -104,14 +104,14 @@ public class DatabaseServiceTest {
             List<Relationship> incomingRelationshipList = getResultAsList(
                     rootNode.getRelationships(RelTypes.PARENT, Direction.INCOMING)
             );
-            assertEquals(1, incomingRelationshipList.size() );
+            assertEquals(1, incomingRelationshipList.size());
             assertRelation(incomingRelationshipList.get(0), "file3", "folder3");
 
             List<Relationship> outgoingRelationshipList = getResultAsList(
                     rootNode.getRelationships(RelTypes.PARENT, Direction.OUTGOING)
             );
 
-            assertEquals(1, outgoingRelationshipList.size() );
+            assertEquals(1, outgoingRelationshipList.size());
             assertRelation(outgoingRelationshipList.get(0), "folder3", "folder2");
 
             tx.success();
@@ -120,11 +120,11 @@ public class DatabaseServiceTest {
         }
     }
 
-    @Test(timeout = 10000) @Ignore
-    public void testLeaf(){
+    @Test(timeout = 10000)
+    public void testLeaf() {
         dbService.save(this.getRootNode());
 
-        try(Transaction tx = graphDb.beginTx()) {
+        try (Transaction tx = graphDb.beginTx()) {
             Node file1 = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "file1");
 
             List<Relationship> list = getResultAsList(file1.getRelationships(RelTypes.PARENT));
@@ -134,8 +134,8 @@ public class DatabaseServiceTest {
         }
     }
 
-    @Test(timeout = 10000) @Ignore
-    public void testGetPropertyById(){
+    @Test(timeout = 10000)
+    public void testGetPropertyById() {
         dbService.save(this.getRootNode());
 
         try (Transaction tx = graphDb.beginTx()) {
@@ -149,8 +149,8 @@ public class DatabaseServiceTest {
         }
     }
 
-    @Test(timeout = 10000) @Ignore
-    public void testGetNode(){
+    @Test(timeout = 10000)
+    public void testGetNode() {
         dbService.save(this.getRootNode());
 
         try (Transaction tx = graphDb.beginTx()) {
@@ -164,8 +164,7 @@ public class DatabaseServiceTest {
     }
 
     @Test(timeout = 10000)
-    @Ignore
-    public void testGetNodeById(){
+    public void testGetNodeById() {
         dbService.save(this.getRootNode());
 
         try (Transaction tx = graphDb.beginTx()) {
@@ -178,8 +177,7 @@ public class DatabaseServiceTest {
     }
 
     @Test(timeout = 10000)
-    @Ignore
-    public void testSetNodeProperties(){
+    public void testSetNodeProperties() {
         dbService.save(this.getRootNode());
 
         try (Transaction tx = graphDb.beginTx()) {
@@ -198,8 +196,7 @@ public class DatabaseServiceTest {
     }
 
     @Test(timeout = 100000)
-    @Ignore
-    public void testDeleteNode(){
+    public void testDeleteNode() {
         dbService.save(this.getRootNode());
         dbService.delete("folder2");
 
@@ -230,8 +227,7 @@ public class DatabaseServiceTest {
     }
 
     @Test(timeout = 10000)
-    @Ignore
-    public void testGetParent(){
+    public void testGetParent() {
         dbService.save(this.getRootNode());
 
         try (Transaction tx = graphDb.beginTx()) {
@@ -245,10 +241,10 @@ public class DatabaseServiceTest {
     }
 
     @Test(timeout = 100000)
-    public void testNodeAbsolutePath(){
+    public void testNodeAbsolutePath() {
         dbService.save(this.getRootNode());
 
-        try(Transaction tx = graphDb.beginTx()) {
+        try (Transaction tx = graphDb.beginTx()) {
             assertEquals("/Test/Path/JDrive/folder1/file1", dbService.getNodeAbsolutePath("file1"));
             assertEquals("/Test/Path/JDrive/folder2/folder3/file3", dbService.getNodeAbsolutePath("file3"));
         } catch (Exception exception) {
@@ -257,8 +253,7 @@ public class DatabaseServiceTest {
     }
 
     @Test(timeout = 100000)
-    @Ignore
-    public void testUpdateProperty(){
+    public void testUpdateProperty() {
         dbService.save(this.getRootNode());
 
         try (Transaction tx = graphDb.beginTx()) {
@@ -272,8 +267,7 @@ public class DatabaseServiceTest {
     }
 
     @Test(timeout = 10000)
-    @Ignore
-    public void testUpdateChangeFile(){
+    public void testUpdateChangeFile() {
         dbService.save(this.getRootNode());
 
         Change change = new Change();
@@ -307,8 +301,7 @@ public class DatabaseServiceTest {
     }
 
     @Test(timeout = 10000)
-    @Ignore
-    public void testUpdateChangeFolder(){
+    public void testUpdateChangeFolder() {
         dbService.save(this.getRootNode());
 
         Change change = new Change();
@@ -357,8 +350,7 @@ public class DatabaseServiceTest {
     }
 
     @Test(timeout = 10000)
-    @Ignore
-    public void testSaveNodeChange(){
+    public void testSaveNodeChange() {
         dbService.save(this.getRootNode());
 
         Change change = new Change();
@@ -397,14 +389,15 @@ public class DatabaseServiceTest {
 
     /**
      * Get a list from an iterable
+     *
      * @param iterable
      * @param <E>
      * @return
      */
-    private <E> List<E> getResultAsList(Iterable<E> iterable){
+    private <E> List<E> getResultAsList(Iterable<E> iterable) {
         List<E> result = new ArrayList<E>();
 
-        iterable.forEach( s -> {
+        iterable.forEach(s -> {
             result.add(s);
         });
 
@@ -412,14 +405,14 @@ public class DatabaseServiceTest {
     }
 
     /**
-     *  - root
-     *     - folder 1
-     *         - file1
-     *     - folder 2
-     *         - file2
+     * - root
+     * - folder 1
+     * - file1
+     * - folder 2
+     * - file2
      */
-    private TreeNode getRootNode(){
-        ArrayList<File>listFile = new ArrayList<>();
+    private TreeNode getRootNode() {
+        ArrayList<File> listFile = new ArrayList<>();
 
         File folder1 = new File();
 
@@ -514,14 +507,14 @@ public class DatabaseServiceTest {
         return treeBuilder.getRoot();
     }
 
-    private ArrayList<ParentReference> getParentReferenceList(String id, boolean bool){
+    private ArrayList<ParentReference> getParentReferenceList(String id, boolean bool) {
         ArrayList<ParentReference> parentList = new ArrayList<>();
         parentList.add(this.getParentReference(id, bool));
 
         return parentList;
     }
 
-    private ParentReference getParentReference(String id, boolean bool){
+    private ParentReference getParentReference(String id, boolean bool) {
         ParentReference parentReference = new ParentReference();
         parentReference.setId(id);
         parentReference.setIsRoot(bool);
@@ -544,7 +537,7 @@ public class DatabaseServiceTest {
         return owner;
     }
 
-    private void assertRelation(Relationship relation, String startNode, String endNode){
+    private void assertRelation(Relationship relation, String startNode, String endNode) {
         assertEquals(startNode, relation.getStartNode().getProperty(Fields.ID).toString());
         assertEquals(endNode, relation.getEndNode().getProperty(Fields.ID).toString());
     }

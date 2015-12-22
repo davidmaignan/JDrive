@@ -45,8 +45,6 @@ public class DatabaseService implements DatabaseServiceInterface {
 
         Connection object = Connection.getInstance();
 
-//        graphDB = new GraphDatabaseFactory().newEmbeddedDatabase(dbConfig.getDBPath());
-
         graphDB = object.getGraphDB();
 
         try (Transaction tx = graphDB.beginTx()) {
@@ -279,8 +277,6 @@ public class DatabaseService implements DatabaseServiceInterface {
                 pathBuilder.insert(0, "/");
             }
 
-            pathBuilder.insert(0, configuration.getRootDirSystem());
-
             pathBuilder.append("/");
             pathBuilder.append(node.getProperty(Fields.TITLE).toString());
 
@@ -290,7 +286,7 @@ public class DatabaseService implements DatabaseServiceInterface {
             //@todo implement sl4j
         }
 
-        return pathBuilder.toString();
+        return pathBuilder.substring(1).toString();
     }
 
     /**
