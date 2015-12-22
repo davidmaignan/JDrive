@@ -40,8 +40,6 @@ public class MoveFolderWriter implements WriterChangeInterface {
         Path oldPath = FileSystems.getDefault().getPath(oldPathString);
         Path newPath = FileSystems.getDefault().getPath(newPathString);
 
-        System.out.println(oldPathString + " : " + newPathString);
-
         try{
             Files.move(oldPath, newPath, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException exception) {

@@ -46,15 +46,9 @@ create (root:Node {n:"root"}), (a:Node {n:"a"}), (b:Node {n:"b"}), (c:Node {n:"c
 (d:Node {n:"d"}), (e:Node {n:"e"}), (f:Node {n:"f"}), (g:Node {n:"g"}), (h:Node {n:"h"}),
 (i:Node {n:"i"}), (j:Node {n:"j"}), (k:Node {n:"k"}), (l:Node {n:"l"}), (m:Node {n:"m"}),
 (n:Node {n:"n"}), (o:Node {n:"o"}), (p:Node {n:"p"}), (q:Node {n:"q"}),
-root-[:PARENT]->a, root-[:PARENT]->b, a-[:CHILD]->root, b-[:CHILD]->root,
-a-[:PARENT]->c, c-[:CHILD]->a, a-[:PARENT]->d, d-[:CHILD]->a,
-b-[:PARENT]->e, b-[:PARENT]->f, e-[:CHILD]->b, f-[:CHILD]->b,
-c-[:PARENT]->g, c-[:PARENT]->h, g-[:CHILD]->c, h-[:CHILD]->c,
-d-[:PARENT]->i, d-[:PARENT]->j, i-[:CHILD]->d, j-[:CHILD]->d,
-e-[:PARENT]->k, e-[:PARENT]->l, k-[:CHILD]->e, l-[:CHILD]->e,
-f-[:PARENT]->m, f-[:PARENT]->n, m-[:CHILD]->f, n-[:CHILD]->f,
-g-[:PARENT]->o, g-[:PARENT]->p, o-[:CHILD]->g, p-[:CHILD]->g,
-d-[:PARENT]->q, q-[:CHILD]->d;
+root-[:PARENT]->a, root-[:PARENT]->b, a-[:PARENT]->c, a-[:PARENT]->d, b-[:PARENT]->e, b-[:PARENT]->f,
+c-[:PARENT]->g, c-[:PARENT]->h, d-[:PARENT]->i, d-[:PARENT]->j, e-[:PARENT]->k, e-[:PARENT]->l,
+f-[:PARENT]->m, f-[:PARENT]->n, g-[:PARENT]->o, g-[:PARENT]->p, h-[:PARENT]->q;
 
 MATCH (n) MATCH (n)-[r]-() return n,r;
 

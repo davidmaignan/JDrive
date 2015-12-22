@@ -30,6 +30,10 @@ public class Configuration {
         return this.getProperty("rootFolder");
     }
 
+    public String getRootDirSystem(){
+        return this.getProperty("rootDirSystem");
+    }
+
     /**
      * Get property by name
      *

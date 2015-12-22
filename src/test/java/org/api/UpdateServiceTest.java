@@ -51,6 +51,7 @@ public class UpdateServiceTest {
     }
 
     @Test
+    @Ignore
     public void testTest() throws Exception {
         Change change = new Change();
         File file = new File();

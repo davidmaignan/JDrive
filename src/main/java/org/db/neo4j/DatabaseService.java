@@ -4,17 +4,18 @@ import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.File;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.configuration.Configuration;
 import org.db.DatabaseConfiguration;
 import org.db.DatabaseServiceInterface;
 import org.db.Fields;
 import org.model.tree.TreeNode;
+import org.model.types.MimeType;
 import org.neo4j.graphdb.*;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-import java.util.MissingFormatArgumentException;
+import java.util.*;
 
 /**
  * Graph database service - Implementation for Neo4j
@@ -24,20 +25,23 @@ import java.util.MissingFormatArgumentException;
 @Singleton
 public class DatabaseService implements DatabaseServiceInterface {
     private DatabaseConfiguration dbConfig;
+    private Configuration configuration;
     private GraphDatabaseService graphDB;
     private Logger logger;
 
     public DatabaseService(){}
 
-    public DatabaseService(GraphDatabaseService graphDB) {
-        this.graphDB = graphDB;
-        logger       = LoggerFactory.getLogger(this.getClass().getSimpleName());
+    public DatabaseService(GraphDatabaseService graphDB, Configuration configuration) {
+        this.graphDB       = graphDB;
+        this.configuration = configuration;
+        logger             = LoggerFactory.getLogger(this.getClass().getSimpleName());
     }
 
     @Inject
-    public DatabaseService(DatabaseConfiguration dbConfig){
-        this.dbConfig = dbConfig;
-        logger        = LoggerFactory.getLogger(this.getClass().getSimpleName());
+    public DatabaseService(DatabaseConfiguration dbConfig, Configuration configuration){
+        this.dbConfig      = dbConfig;
+        this.configuration = configuration;
+        logger             = LoggerFactory.getLogger(this.getClass().getSimpleName());
 
         Connection object = Connection.getInstance();
 
@@ -59,7 +63,6 @@ public class DatabaseService implements DatabaseServiceInterface {
 
     /**
      * Get graphDB
-     *
      * @return GraphDatabaseService
      */
     public GraphDatabaseService getGraphDB(){
@@ -67,7 +70,7 @@ public class DatabaseService implements DatabaseServiceInterface {
     }
 
     /**
-     *
+     * Save a treeNode
      * @param node TreeNode
      */
     public void save(TreeNode node){
@@ -90,6 +93,11 @@ public class DatabaseService implements DatabaseServiceInterface {
         }
     }
 
+    /**
+     * Save a change
+     * @param change Change
+     * @return boolean
+     */
     public boolean save(Change change) {
         try (Transaction tx = graphDB.beginTx()) {
 
@@ -106,8 +114,6 @@ public class DatabaseService implements DatabaseServiceInterface {
                     )
             );
 
-            parentNode.createRelationshipTo(node, RelTypes.CHILD);
-
             tx.success();
 
             return true;
@@ -120,33 +126,37 @@ public class DatabaseService implements DatabaseServiceInterface {
         return false;
     }
 
+    /**
+     * Delete a node by id
+     * @param id String
+     * @return boolean
+     */
     public boolean delete(String id) {
-        String query1 = "match (file {identifier:'%s'}), (others) where (others)<-[:CHILD*]-(file) with others match (others)-[r]-() delete others, r";
-        String query2 = "match (file {identifier:'%s'}) MATCH (file)-[r]-() delete r, file";
-
+        String query = "match (file {identifier: '%s'}) match (file)<-[r*]-(m) foreach (rel in r | delete rel) delete m with file match (file)-[r]->(m) delete r, file";
         try (
                 Transaction tx = graphDB.beginTx();
-
+                Result result = graphDB.execute(String.format(query, id))
             )
         {
-            Result result = graphDB.execute(String.format(query1, id));
-            Result result2 = graphDB.execute(String.format(query2, id));
             tx.success();
 
             return true;
         } catch (Exception exception) {
-            //@todo implement sl4j
             logger.error("Fail to delete: " + id);
         }
 
         return false;
     }
 
+    /**
+     * Get parent for a file
+     * @param id String
+     * @return Node
+     */
     public Node getParent(String id) {
         Node resultNode = null;
 
-        String query = "match (file {identifier: '%s'}) " +
-                "OPTIONAL MATCH (folder)<-[:PARENT]-(file) return folder;";
+        String query = "match (file {identifier: '%s'}) MATCH (folder)<-[:PARENT]-(file) return folder;";
         try (
                 Transaction tx = graphDB.beginTx();
                 Result result = graphDB.execute(String.format(query, id))
@@ -157,9 +167,8 @@ public class DatabaseService implements DatabaseServiceInterface {
             }
 
             tx.success();
-
         } catch (Exception exception) {
-
+            logger.error("Failt to retreive the parent for: " + id);
         }
 
         return resultNode;
@@ -189,9 +198,7 @@ public class DatabaseService implements DatabaseServiceInterface {
 
     /**
      * Get node by property
-     *
      * @param value String
-     *
      * @return Node | null
      */
     public Node getNodeById(String value) {
@@ -239,6 +246,51 @@ public class DatabaseService implements DatabaseServiceInterface {
         }
 
         return resultProperty;
+    }
+
+    /**
+     * Get absolutePath for a node by Id
+     * @param nodeId
+     * @return
+     * @throws Exception
+     */
+    public String getNodeAbsolutePath(String nodeId) throws Exception {
+        StringBuilder pathBuilder = new StringBuilder();
+        Node node                 = this.getNodeById(nodeId);
+
+        if(node == null) {
+            logger.error("Cannot get an absolute path for a non existing node:" + nodeId);
+            throw new Exception("Cannot get an absolute path for a non existing node:" + nodeId);
+        }
+
+        String query = "match (file {identifier:'%s'}) match (file)-[r*]->(m {identifier:'root'}) return r";
+
+        try (
+                Transaction tx = graphDB.beginTx()) {
+                Result result = graphDB.execute(String.format(query, nodeId)
+            );
+
+            Map<String, Object> row = result.next();
+
+            List<Relationship> relationshipList = (List<Relationship>)row.get("r");
+
+            for (Relationship rel : relationshipList) {
+                pathBuilder.insert(0, rel.getEndNode().getProperty(Fields.TITLE).toString());
+                pathBuilder.insert(0, "/");
+            }
+
+            pathBuilder.insert(0, configuration.getRootDirSystem());
+
+            pathBuilder.append("/");
+            pathBuilder.append(node.getProperty(Fields.TITLE).toString());
+
+            tx.success();
+
+        } catch (Exception exception) {
+            //@todo implement sl4j
+        }
+
+        return pathBuilder.toString();
     }
 
     /**
@@ -313,10 +365,11 @@ public class DatabaseService implements DatabaseServiceInterface {
 
             if (! parentNode.getProperty(Fields.ID).equals(newParentId)) {
                 String queryDeleteRelations = String.format(
-                        "match (file {identifier:'%s'}) match (file)-[r:%s]-(m) delete r with m match (m)-[r:%s]->(file) delete r",
-                        id,
-                        RelTypes.PARENT,
-                        RelTypes.CHILD
+                        //match (n {n:'d'}) match (n)<-[r:PARENT]-(m) delete r with m  match (m)<-[r:CHILD]-(n {n:'d'}) delete r;
+                        //match (n {n:'a'}) match (n)<-[r:PARENT]-(p) return r;
+                        //match (n {n:'a'}) match (n)-[r:CHILD]->(m) return r, m, n;
+                        "match (file {identifier:'%s'}) match (file)-[r:PARENT]->() delete r with file match (file)<-[r2:CHILD]-() delete r2",
+                        id
                 );
 
                 graphDB.execute(queryDeleteRelations);
@@ -324,7 +377,16 @@ public class DatabaseService implements DatabaseServiceInterface {
                 Node newParentNode = this.getNodeById(newParentId);
 
                 node.createRelationshipTo(newParentNode, RelTypes.PARENT);
-                newParentNode.createRelationshipTo(node, RelTypes.CHILD);
+
+                //If it's a folder update path for every child
+//                if (file.getMimeType().equals(MimeType.FOLDER)) {
+//                    Iterator<Relationship> children = node.getRelationships(RelTypes.CHILD, Direction.INCOMING).iterator();
+//
+//                    while(children.hasNext()) {
+//                        Relationship rel = children.next();
+//                        logger.info(rel.getStartNode().getProperty(Fields.ID).toString());
+//                    }
+//                }
             }
 
             tx.success();
@@ -410,7 +472,6 @@ public class DatabaseService implements DatabaseServiceInterface {
         Node childV = graphDB.createNode();
         this.setNode(childV, node);
 
-        parent.createRelationshipTo(childV, RelTypes.CHILD);
         childV.createRelationshipTo(parent, RelTypes.PARENT);
 
         if (node.getChildren().size() > 0) {
