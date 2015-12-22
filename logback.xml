@@ -1,27 +1,53 @@
 <configuration>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <!-- encoders are assigned the type
-             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
         <encoder>
             <pattern>%-4relative [%thread] %-5level %logger{35} - %msg %n</pattern>
         </encoder>
     </appender>
-    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>junit.log</file>
+    <appender name="InfoFile" class="ch.qos.logback.core.FileAppender">
+        <file>logs/Info.log</file>
         <append>true</append>
-        <!-- encoders are assigned the type
-             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
         <encoder>
             <pattern>%-4r %-5level %logger{35}: %msg%n</pattern>
         </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+    <appender name="DebugFile" class="ch.qos.logback.core.FileAppender">
+        <file>logs/Debug.log</file>
+        <append>true</append>
+        <encoder>
+            <pattern>%-4r %-5level %logger{35}: %msg%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>DEBUG</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+    <appender name="ErrorFile" class="ch.qos.logback.core.FileAppender">
+        <file>logs/Error.log</file>
+        <append>true</append>
+        <encoder>
+            <pattern>%-4r %-5level %logger{35}: %msg%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
     </appender>
     <root level="INFO">
-        <appender-ref ref="FILE" />
+        <appender-ref ref="InfoFile" />
         <appender-ref ref="STDOUT" />
     </root>
-    <!-- We want error logging from this logger to go to an extra appender
-         It still inherits CONSOLE STDOUT from the root logger -->
-    <logger name="junit" level="INFO">
-        <appender-ref ref="STDOUT" />
-    </logger>
+    <root level="ERROR">
+        <appender-ref ref="ErrorFile" />
+    </root>
+    <root level="DEBUG">
+        <appender-ref ref="DebugFile" />
+    </root>
 </configuration>

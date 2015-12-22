@@ -23,4 +23,5 @@ gradle-app.setting
 !gradle-wrapper.jar
 
 #logs
-junit.log
+logs/*.log
+
