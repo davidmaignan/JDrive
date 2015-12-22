@@ -2,14 +2,9 @@ package org.writer.file;
 
 import com.google.inject.Inject;
 import org.api.FileService;
-import org.db.Fields;
-import org.model.tree.TreeNode;
 import org.writer.WriterInterface;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.Field;
 
 /**
  * Document writer

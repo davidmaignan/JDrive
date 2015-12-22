@@ -1,14 +1,8 @@
 package org.writer;
 
 import com.google.api.services.drive.model.Change;
-import com.google.api.services.drive.model.File;
-import com.google.inject.Guice;
-import org.db.Fields;
 import org.model.tree.TreeNode;
-import org.model.types.MimeType;
 import org.neo4j.graphdb.Node;
-import org.writer.file.DocumentWriter;
-import org.writer.file.FileWriter;
 
 /**
  * Writer file factory

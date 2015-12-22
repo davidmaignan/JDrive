@@ -1,9 +1,7 @@
 package org.io;
 
 import com.google.api.services.drive.model.Change;
-import com.google.inject.Inject;
-import org.db.neo4j.DatabaseService;
-import org.db.Fields;
+import database.Fields;
 import org.neo4j.graphdb.Node;
 
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package org.db.neo4j;
+package database.neo4j;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.model.Change;
@@ -8,7 +8,7 @@ import com.google.api.services.drive.model.User;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.configuration.Configuration;
-import org.db.Fields;
+import database.Fields;
 import org.junit.*;
 import org.model.tree.TreeBuilder;
 import org.model.tree.TreeNode;
@@ -23,7 +23,6 @@ import org.writer.FileModule;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.Assert.*;
 

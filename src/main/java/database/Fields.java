@@ -1,4 +1,4 @@
-package org.db;
+package database;
 
 /**
  * OrientDB fields name

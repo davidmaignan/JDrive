@@ -2,12 +2,10 @@ package org.io.change.create;
 
 import com.google.api.services.drive.model.Change;
 import com.google.inject.Inject;
-import org.db.neo4j.DatabaseService;
+import database.neo4j.DatabaseService;
 import org.io.ChangeInterface;
 import org.io.annotation.Document;
 import org.io.change.writer.WriterChangeInterface;
-
-import java.io.IOException;
 
 /**
  * JDrive

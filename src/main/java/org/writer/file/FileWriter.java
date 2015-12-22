@@ -4,14 +4,10 @@ import com.google.api.services.drive.model.File;
 import com.google.inject.Inject;
 import org.api.DriveService;
 import org.api.FileService;
-import org.db.Fields;
-import org.model.tree.TreeNode;
 import org.writer.WriterInterface;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 /**
  * Write a file from a vertex

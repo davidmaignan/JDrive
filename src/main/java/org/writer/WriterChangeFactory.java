@@ -1,12 +1,8 @@
 package org.writer;
 
 import com.google.api.services.drive.model.Change;
-import com.google.inject.Guice;
-import org.db.DatabaseModule;
 import org.model.tree.TreeNode;
-import org.model.types.MimeType;
 import org.neo4j.graphdb.Node;
-import org.io.change.writer.FolderWriter;
 
 /**
  * JDrive

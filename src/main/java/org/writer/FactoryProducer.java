@@ -1,8 +1,5 @@
 package org.writer;
 
-import com.google.inject.Guice;
-import org.db.DatabaseModule;
-
 /**
  * Factory writer producer
  *

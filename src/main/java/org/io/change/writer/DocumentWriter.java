@@ -3,8 +3,8 @@ package org.io.change.writer;
 import com.google.api.services.drive.model.Change;
 import com.google.inject.Inject;
 import org.api.FileService;
-import org.db.Fields;
-import org.db.neo4j.DatabaseService;
+import database.Fields;
+import database.neo4j.DatabaseService;
 
 import java.io.File;
 import java.io.IOException;

@@ -1,6 +1,8 @@
 package org.db;
 
 import com.google.inject.Guice;
+import database.DatabaseConfiguration;
+import database.DatabaseModule;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;

@@ -2,10 +2,8 @@ package org.io.change.writer;
 
 import com.google.api.services.drive.model.Change;
 import com.google.inject.Inject;
-import org.db.Fields;
-import org.db.neo4j.DatabaseService;
-import org.neo4j.graphdb.Node;
-import org.writer.WriterInterface;
+import database.Fields;
+import database.neo4j.DatabaseService;
 
 import java.io.IOException;
 import java.nio.file.FileSystems;

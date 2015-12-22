@@ -1,4 +1,4 @@
-package org.db;
+package database;
 
 import org.model.tree.TreeNode;
 

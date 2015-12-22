@@ -1,17 +1,15 @@
-package org.db.neo4j;
+package database.neo4j;
 
 import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.File;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.configuration.Configuration;
-import org.db.DatabaseConfiguration;
-import org.db.DatabaseServiceInterface;
-import org.db.Fields;
+import database.DatabaseConfiguration;
+import database.DatabaseServiceInterface;
+import database.Fields;
 import org.model.tree.TreeNode;
-import org.model.types.MimeType;
 import org.neo4j.graphdb.*;
-import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +53,7 @@ public class DatabaseService implements DatabaseServiceInterface {
             tx.success();
         } catch (Exception exception) {
             //@todo implement sl4js
-            logger.error(exception.toString());
+            //logger.error(exception.toString());
         }
     }
 

@@ -1,13 +1,7 @@
-package org.db;
+package database;
 
-import com.google.common.eventbus.AsyncEventBus;
 import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
-import org.db.neo4j.DatabaseService;
-
-import java.util.concurrent.Executor;
-import java.util.concurrent.*;
+import database.neo4j.DatabaseService;
 
 /**
  * JDrive

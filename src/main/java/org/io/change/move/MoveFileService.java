@@ -2,7 +2,7 @@ package org.io.change.move;
 
 import com.google.api.services.drive.model.Change;
 import com.google.inject.Inject;
-import org.db.neo4j.DatabaseService;
+import database.neo4j.DatabaseService;
 import org.io.ChangeInterface;
 import org.io.annotation.Folder;
 import org.io.change.writer.WriterChangeInterface;

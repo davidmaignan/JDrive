@@ -1,4 +1,4 @@
-package org.db;
+package database;
 
 import com.google.inject.Inject;
 import org.configuration.Configuration;

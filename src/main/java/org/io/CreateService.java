@@ -1,7 +1,7 @@
 package org.io;
 
 import com.google.api.services.drive.model.Change;
-import org.db.neo4j.DatabaseService;
+import database.neo4j.DatabaseService;
 import org.writer.WriterInterface;
 
 import java.io.IOException;

@@ -2,8 +2,8 @@ package org.io.change.writer;
 
 import com.google.api.services.drive.model.Change;
 import com.google.inject.Inject;
-import org.db.Fields;
-import org.db.neo4j.DatabaseService;
+import database.Fields;
+import database.neo4j.DatabaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
