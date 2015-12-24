@@ -7,5 +7,5 @@ import org.neo4j.graphdb.RelationshipType;
  * Created by David Maignan <davidmaignan@gmail.com> on 15-08-21.
  */
 public enum RelTypes implements RelationshipType {
-    PARENT
+    PARENT, CHANGE
 }
