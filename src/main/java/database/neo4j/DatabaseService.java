@@ -17,7 +17,7 @@ import java.util.*;
 
 /**
  * Graph database service - Implementation for Neo4j
- *
+ * <p>
  * David Maignan <davidmaignan@gmail.com>
  */
 @Singleton
@@ -27,19 +27,20 @@ public class DatabaseService implements DatabaseServiceInterface {
     private GraphDatabaseService graphDB;
     private Logger logger;
 
-    public DatabaseService(){}
+    public DatabaseService() {
+    }
 
     public DatabaseService(GraphDatabaseService graphDB, Configuration configuration) {
-        this.graphDB       = graphDB;
+        this.graphDB = graphDB;
         this.configuration = configuration;
-        logger             = LoggerFactory.getLogger(this.getClass().getSimpleName());
+        logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
     }
 
     @Inject
-    public DatabaseService(DatabaseConfiguration dbConfig, Configuration configuration){
-        this.dbConfig      = dbConfig;
+    public DatabaseService(DatabaseConfiguration dbConfig, Configuration configuration) {
+        this.dbConfig = dbConfig;
         this.configuration = configuration;
-        logger             = LoggerFactory.getLogger(this.getClass().getSimpleName());
+        logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
 
         Connection object = Connection.getInstance();
 
@@ -47,8 +48,8 @@ public class DatabaseService implements DatabaseServiceInterface {
 
         try (Transaction tx = graphDB.beginTx()) {
             graphDB.schema()
-                    .constraintFor( DynamicLabel.label( "File" ) )
-                    .assertPropertyIsUnique( Fields.ID )
+                    .constraintFor(DynamicLabel.label("File"))
+                    .assertPropertyIsUnique(Fields.ID)
                     .create();
             tx.success();
         } catch (Exception exception) {
@@ -59,17 +60,19 @@ public class DatabaseService implements DatabaseServiceInterface {
 
     /**
      * Get graphDB
+     *
      * @return GraphDatabaseService
      */
-    public GraphDatabaseService getGraphDB(){
+    public GraphDatabaseService getGraphDB() {
         return graphDB;
     }
 
     /**
      * Save a treeNode
+     *
      * @param node TreeNode
      */
-    public void save(TreeNode node){
+    public void save(TreeNode node) {
         try (Transaction tx = graphDB.beginTx()) {
 
             Node rootNode = graphDB.createNode();
@@ -86,44 +89,13 @@ public class DatabaseService implements DatabaseServiceInterface {
         } catch (Exception exception) {
             //@todo implement sl4j
             logger.error("Cannot save the tree of nodes");
+            logger.error(exception.getMessage());
         }
-    }
-
-    /**
-     * Save a change
-     * @param change Change
-     * @return boolean
-     */
-    public boolean save(Change change) {
-        try (Transaction tx = graphDB.beginTx()) {
-
-            Node node = graphDB.createNode();
-            this.setNode(node, change);
-
-            Node parentNode = this.getNodeById(change.getFile().getParents().get(0).getId());
-
-            node.setProperty(Fields.PATH,
-                    String.format(
-                            "%s/%s",
-                            parentNode.getProperty(Fields.PATH),
-                            change.getFile().getTitle()
-                    )
-            );
-
-            tx.success();
-
-            return true;
-
-        } catch (Exception exception) {
-            //@todo implement sl4j
-            logger.error("failed to save change in db" + change.getFile().getTitle());
-        }
-
-        return false;
     }
 
     /**
      * Delete a node by id
+     *
      * @param id String
      * @return boolean
      */
@@ -132,8 +104,7 @@ public class DatabaseService implements DatabaseServiceInterface {
         try (
                 Transaction tx = graphDB.beginTx();
                 Result result = graphDB.execute(String.format(query, id))
-            )
-        {
+        ) {
             tx.success();
 
             return true;
@@ -146,6 +117,7 @@ public class DatabaseService implements DatabaseServiceInterface {
 
     /**
      * Get parent for a file
+     *
      * @param id String
      * @return Node
      */
@@ -156,44 +128,42 @@ public class DatabaseService implements DatabaseServiceInterface {
         try (
                 Transaction tx = graphDB.beginTx();
                 Result result = graphDB.execute(String.format(query, id))
-        )
-        {
-            if(result.hasNext()) {
-                resultNode = (Node)result.next().get("folder");
+        ) {
+            if (result.hasNext()) {
+                resultNode = (Node) result.next().get("folder");
             }
 
             tx.success();
         } catch (Exception exception) {
-            logger.error("Failt to retreive the parent for: " + id);
+            logger.error("Fail to retrieve the parent for: " + id);
         }
 
         return resultNode;
     }
 
-    /**
-     * Get node by property
-     *
-     * @param property String
-     * @param value String
-     *
-     * @return Node | null
-     */
-    public Node getNode(String property, String value) {
-        Node node = null;
-        try (Transaction tx = graphDB.beginTx()) {
-            node = graphDB.findNode(DynamicLabel.label("File"), Fields.ID, "root");
-
-            tx.success();
-        } catch (Exception exception) {
-            //@todo implement sl4j
-            logger.error("failed to get node: " +  property + ": " + value);
-        }
-
-        return node;
-    }
+//    /**
+//     * Get node by property
+//     *
+//     * @param property String
+//     * @param value    String
+//     * @return Node | null
+//     */
+//    public Node getNode(String property, String value) {
+//        Node node = null;
+//        try (Transaction tx = graphDB.beginTx()) {
+//            node = graphDB.findNode(DynamicLabel.label("File"), Fields.ID, "root");
+//
+//            tx.success();
+//        } catch (Exception exception) {
+//            logger.error("failed to get node: " + property + ": " + value);
+//        }
+//
+//        return node;
+//    }
 
     /**
      * Get node by property
+     *
      * @param value String
      * @return Node | null
      */
@@ -207,7 +177,7 @@ public class DatabaseService implements DatabaseServiceInterface {
 
             tx.success();
 
-            return (Node)result.next().get("n");
+            return (Node) result.next().get("n");
 
         } catch (Exception exception) {
             //@todo implement sl4j
@@ -218,7 +188,8 @@ public class DatabaseService implements DatabaseServiceInterface {
 
     /**
      * Get property for a node by it's identifier
-     * @param id String
+     *
+     * @param id       String
      * @param property String
      * @return String
      */
@@ -227,10 +198,10 @@ public class DatabaseService implements DatabaseServiceInterface {
 
         String query = "match (file {identifier: '%s'}) return file.%s as %s";
 
-        try(Transaction tx = graphDB.beginTx();
-            Result result = graphDB.execute(String.format(query, id, property, property))) {
+        try (Transaction tx = graphDB.beginTx();
+             Result result = graphDB.execute(String.format(query, id, property, property))) {
 
-            if(result.hasNext()) {
+            if (result.hasNext()) {
                 resultProperty = String.valueOf(result.next().get(property));
             }
 
@@ -246,15 +217,16 @@ public class DatabaseService implements DatabaseServiceInterface {
 
     /**
      * Get absolutePath for a node by Id
+     *
      * @param nodeId
      * @return
      * @throws Exception
      */
     public String getNodeAbsolutePath(String nodeId) throws Exception {
         StringBuilder pathBuilder = new StringBuilder();
-        Node node                 = this.getNodeById(nodeId);
+        Node node = this.getNodeById(nodeId);
 
-        if(node == null) {
+        if (node == null) {
             logger.error("Cannot get an absolute path for a non existing node:" + nodeId);
             throw new Exception("Cannot get an absolute path for a non existing node:" + nodeId);
         }
@@ -263,12 +235,12 @@ public class DatabaseService implements DatabaseServiceInterface {
 
         try (
                 Transaction tx = graphDB.beginTx()) {
-                Result result = graphDB.execute(String.format(query, nodeId)
+            Result result = graphDB.execute(String.format(query, nodeId)
             );
 
             Map<String, Object> row = result.next();
 
-            List<Relationship> relationshipList = (List<Relationship>)row.get("r");
+            List<Relationship> relationshipList = (List<Relationship>) row.get("r");
 
             for (Relationship rel : relationshipList) {
                 pathBuilder.insert(0, rel.getEndNode().getProperty(Fields.TITLE).toString());
@@ -289,6 +261,7 @@ public class DatabaseService implements DatabaseServiceInterface {
 
     /**
      * Update property for a specific node
+     *
      * @param id
      * @param property
      * @param value
@@ -302,10 +275,9 @@ public class DatabaseService implements DatabaseServiceInterface {
         try (
                 Transaction tx = graphDB.beginTx();
                 Result result = graphDB.execute(String.format(query, Fields.ID, id, property, value));
-        )
-        {
-            if(result.hasNext()) {
-                resultNode = (Node)result.next().get("folder");
+        ) {
+            if (result.hasNext()) {
+                resultNode = (Node) result.next().get("folder");
             }
 
             tx.success();
@@ -321,17 +293,16 @@ public class DatabaseService implements DatabaseServiceInterface {
 
     /**
      * Update node from a change api request
+     *
      * @param change Change
      * @return boolean
      */
     public boolean update(Change change) {
-        String id   = change.getFileId();
-        File file   = change.getFile();
-        String path = this.getNewPath(file);
+        String id = change.getFileId();
+        File file = change.getFile();
 
         String query = "match (file {identifier: '%s'}) " +
                 "set file.title = '%s' " +
-                "set file.path = '%s' " +
                 "set file.modifiedDate = '%s' return file";
 
         try (Transaction tx = graphDB.beginTx()) {
@@ -340,13 +311,12 @@ public class DatabaseService implements DatabaseServiceInterface {
                             query,
                             id,
                             file.getTitle(),
-                            path,
                             file.getModifiedDate()
                     )
             );
 
             Map<String, Object> row = resultUpdate.next();
-            Node node = (Node)row.get("file");
+            Node node = (Node) row.get("file");
 
             //Check if parent was changed
             String newParentId = change.getFile().getParents().get(0).getId();
@@ -357,7 +327,7 @@ public class DatabaseService implements DatabaseServiceInterface {
                 throw new Exception("Error updating db with changeId: " + change.getFileId() + ". No parent found! Every node other than root should have a parent.");
             }
 
-            if (! parentNode.getProperty(Fields.ID).equals(newParentId)) {
+            if (!parentNode.getProperty(Fields.ID).equals(newParentId)) {
                 String queryDeleteRelations = String.format(
                         //match (n {n:'d'}) match (n)<-[r:PARENT]-(m) delete r with m  match (m)<-[r:CHILD]-(n {n:'d'}) delete r;
                         //match (n {n:'a'}) match (n)<-[r:PARENT]-(p) return r;
@@ -371,16 +341,6 @@ public class DatabaseService implements DatabaseServiceInterface {
                 Node newParentNode = this.getNodeById(newParentId);
 
                 node.createRelationshipTo(newParentNode, RelTypes.PARENT);
-
-                //If it's a folder update path for every child
-//                if (file.getMimeType().equals(MimeType.FOLDER)) {
-//                    Iterator<Relationship> children = node.getRelationships(RelTypes.CHILD, Direction.INCOMING).iterator();
-//
-//                    while(children.hasNext()) {
-//                        Relationship rel = children.next();
-//                        logger.info(rel.getStartNode().getProperty(Fields.ID).toString());
-//                    }
-//                }
             }
 
             tx.success();
@@ -394,25 +354,93 @@ public class DatabaseService implements DatabaseServiceInterface {
         return true;
     }
 
+    public void addChange(Change change) {
+        try (Transaction tx = graphDB.beginTx()) {
+
+            Node changeNode = graphDB.createNode();
+            changeNode.addLabel(DynamicLabel.label("Change"));
+
+            changeNode.setProperty(Fields.ID, change.getId());
+            changeNode.setProperty(Fields.FILE_ID, change.getFileId());
+            changeNode.setProperty(Fields.MODIFIED_DATE, change.getModificationDate().getValue());
+            changeNode.setProperty(Fields.SELF_LINK, change.getSelfLink());
+            changeNode.setProperty(Fields.DELETED, change.getDeleted());
+
+            Node fileNode     = this.getNodeById(change.getFileId());
+            Node relationNode = this.getLastNodeOfTheQueueChange(change.getFileId());
+
+            relationNode = (relationNode == null) ? fileNode : relationNode;
+
+            changeNode.createRelationshipTo(relationNode, RelTypes.CHANGE);
+
+            tx.success();
+
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            logger.error("Fail to update db: " + exception);
+        }
+    }
+
+    public Node getLastNodeOfTheQueueChange(String nodeId){
+
+        String query = "match (file {identifier:'%s'}) match (file)<-[r:CHANGE*]-(m) " +
+                "with m, count(r) AS length order by length desc limit 1  return  m;";
+
+
+        try (Transaction tx = graphDB.beginTx()) {
+            Result result = graphDB.execute(String.format(query, nodeId));
+
+            tx.success();
+
+
+            if(result.hasNext()) {
+                return (Node) result.next().get("m");
+            }
+
+            return null;
+
+
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+            return null;
+        }
+    }
+
+//    match (n)<-[r:CHANGE*]-(m) where n.n = 'a' with m, count(r) AS length order by length desc limit 1  return  m;
+
     /**
-     * Build a path for a file
-     * @param file File
-     * @return String
-     *
-     * @throws MissingFormatArgumentException
+     * -     * Save a change
+     * -     * @param change Change
+     * -     * @return boolean
+     * -
      */
-    private String getNewPath(File file) throws MissingFormatArgumentException{
-        return String.format(
-                "%s/%s",
-                this.getNodePropertyById(
-                        file.getParents().get(0).getId(),
-                        Fields.PATH),
-                file.getTitle()
-        );
+    public boolean save(Change change) {
+        try (Transaction tx = graphDB.beginTx()) {
+            Node node = graphDB.createNode();
+            this.setNode(node, change);
+            Node parentNode = this.getNodeById(change.getFile().getParents().get(0).getId());
+            node.setProperty(Fields.PATH,
+                    String.format(
+                            "%s/%s",
+                            parentNode.getProperty(Fields.PATH),
+                            change.getFile().getTitle()
+                    )
+            );
+
+            tx.success();
+
+            return true;
+
+        } catch (Exception exception) {
+            //@todo implement sl4j
+            logger.error("failed to save change in db" + change.getFile().getTitle());
+        }
+        return false;
     }
 
     /**
-      Set node property
+     * Set node property
+     *
      * @param dbNode Node
      * @param change Change
      */
@@ -423,7 +451,6 @@ public class DatabaseService implements DatabaseServiceInterface {
         dbNode.setProperty(Fields.ID, file.getId());
         dbNode.setProperty(Fields.TITLE, file.getTitle());
         dbNode.setProperty(Fields.MIME_TYPE, file.getMimeType());
-        dbNode.setProperty(Fields.IS_ROOT, false);
 
         if (file.getCreatedDate() != null) {
             dbNode.setProperty(Fields.CREATED_DATE, file.getCreatedDate().getValue());
@@ -436,14 +463,14 @@ public class DatabaseService implements DatabaseServiceInterface {
 
     /**
      * Set node property
+     *
      * @param dbNode Node
-     * @param tNode TreeNode
+     * @param tNode  TreeNode
      */
     private void setNode(Node dbNode, TreeNode tNode) {
         dbNode.addLabel(DynamicLabel.label("File"));
         dbNode.setProperty(Fields.ID, tNode.getId());
         dbNode.setProperty(Fields.TITLE, tNode.getTitle());
-        dbNode.setProperty(Fields.PATH, tNode.getAbsolutePath());
         dbNode.setProperty(Fields.MIME_TYPE, tNode.getMimeType());
         dbNode.setProperty(Fields.IS_ROOT, tNode.isSuperRoot());
 
