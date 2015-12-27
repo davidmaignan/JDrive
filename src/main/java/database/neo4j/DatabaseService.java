@@ -17,7 +17,7 @@ import java.util.*;
 
 /**
  * Graph database service - Implementation for Neo4j
- * <p>
+ * 
  * David Maignan <davidmaignan@gmail.com>
  */
 @Singleton
@@ -53,8 +53,7 @@ public class DatabaseService implements DatabaseServiceInterface {
                     .create();
             tx.success();
         } catch (Exception exception) {
-            //@todo implement sl4js
-            //logger.error(exception.toString());
+            logger.error(exception.getMessage());
         }
     }
 
@@ -87,7 +86,6 @@ public class DatabaseService implements DatabaseServiceInterface {
             tx.success();
 
         } catch (Exception exception) {
-            //@todo implement sl4j
             logger.error("Cannot save the tree of nodes");
             logger.error(exception.getMessage());
         }
@@ -100,7 +98,8 @@ public class DatabaseService implements DatabaseServiceInterface {
      * @return boolean
      */
     public boolean delete(String id) {
-        String query = "match (file {identifier: '%s'}) match (file)<-[r*]-(m) foreach (rel in r | delete rel) delete m with file match (file)-[r]->(m) delete r, file";
+        String query = "match (file {identifier: '%s'}) match (file)<-[r*]-(m) " +
+                "foreach (rel in r | delete rel) delete m with file match (file)-[r]->(m) delete r, file";
         try (
                 Transaction tx = graphDB.beginTx();
                 Result result = graphDB.execute(String.format(query, id))
@@ -110,6 +109,7 @@ public class DatabaseService implements DatabaseServiceInterface {
             return true;
         } catch (Exception exception) {
             logger.error("Fail to delete: " + id);
+            logger.error(exception.getMessage());
         }
 
         return false;
@@ -136,30 +136,11 @@ public class DatabaseService implements DatabaseServiceInterface {
             tx.success();
         } catch (Exception exception) {
             logger.error("Fail to retrieve the parent for: " + id);
+            logger.error(exception.getMessage());
         }
 
         return resultNode;
     }
-
-//    /**
-//     * Get node by property
-//     *
-//     * @param property String
-//     * @param value    String
-//     * @return Node | null
-//     */
-//    public Node getNode(String property, String value) {
-//        Node node = null;
-//        try (Transaction tx = graphDB.beginTx()) {
-//            node = graphDB.findNode(DynamicLabel.label("File"), Fields.ID, "root");
-//
-//            tx.success();
-//        } catch (Exception exception) {
-//            logger.error("failed to get node: " + property + ": " + value);
-//        }
-//
-//        return node;
-//    }
 
     /**
      * Get node by property
@@ -180,7 +161,7 @@ public class DatabaseService implements DatabaseServiceInterface {
             return (Node) result.next().get("n");
 
         } catch (Exception exception) {
-            //@todo implement sl4j
+            logger.error(exception.getMessage());
         }
 
         return node;
@@ -207,9 +188,7 @@ public class DatabaseService implements DatabaseServiceInterface {
 
             tx.success();
         } catch (Exception exception) {
-            //@todo implement sl4j
-            exception.printStackTrace();
-            System.exit(0);
+            logger.error(exception.getMessage());
         }
 
         return resultProperty;
@@ -253,7 +232,7 @@ public class DatabaseService implements DatabaseServiceInterface {
             tx.success();
 
         } catch (Exception exception) {
-            //@todo implement sl4j
+            logger.error(exception.getMessage());
         }
 
         return pathBuilder.substring(1).toString();
@@ -283,7 +262,6 @@ public class DatabaseService implements DatabaseServiceInterface {
             tx.success();
 
         } catch (Exception exception) {
-            //@todo implement sl4j
             logger.error("Fail to update: " + id + " - " + exception.toString());
 
         }
@@ -324,15 +302,14 @@ public class DatabaseService implements DatabaseServiceInterface {
             Node parentNode = this.getParent(id);
 
             if (parentNode == null) {
-                throw new Exception("Error updating db with changeId: " + change.getFileId() + ". No parent found! Every node other than root should have a parent.");
+                throw new Exception("Error updating db with changeId: " + change.getFileId()
+                        + ". No parent found! Every node other than root should have a parent.");
             }
 
             if (!parentNode.getProperty(Fields.ID).equals(newParentId)) {
                 String queryDeleteRelations = String.format(
-                        //match (n {n:'d'}) match (n)<-[r:PARENT]-(m) delete r with m  match (m)<-[r:CHILD]-(n {n:'d'}) delete r;
-                        //match (n {n:'a'}) match (n)<-[r:PARENT]-(p) return r;
-                        //match (n {n:'a'}) match (n)-[r:CHILD]->(m) return r, m, n;
-                        "match (file {identifier:'%s'}) match (file)-[r:PARENT]->() delete r with file match (file)<-[r2:CHILD]-() delete r2",
+                        "match (file {identifier:'%s'}) match (file)-[r:PARENT]->() " +
+                                "delete r with file match (file)<-[r2:CHILD]-() delete r2",
                         id
                 );
 
@@ -376,7 +353,6 @@ public class DatabaseService implements DatabaseServiceInterface {
             tx.success();
 
         } catch (Exception exception) {
-            exception.printStackTrace();
             logger.error("Fail to update db: " + exception);
         }
     }
