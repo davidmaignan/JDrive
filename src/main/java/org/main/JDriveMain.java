@@ -4,6 +4,7 @@ import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.File;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import database.repository.ChangeRepository;
 import org.api.change.ChangeService;
 import org.api.UpdateService;
 import org.configuration.Configuration;
@@ -32,6 +33,7 @@ public class JDriveMain {
     private static FileService fileService;
     private static UpdateService updateService;
     private static DatabaseService dbService;
+    private static ChangeRepository changeRepository;
     private static ChangeExecutor changeExecutor;
 
     private static Logger logger = LoggerFactory.getLogger(JDriveMain.class);
@@ -76,6 +78,7 @@ public class JDriveMain {
         fileService    = injector.getInstance(FileService.class);
         updateService  = injector.getInstance(UpdateService.class);
         dbService      = injector.getInstance(DatabaseService.class);
+        changeRepository = injector.getInstance(ChangeRepository.class);
         changeExecutor = injector.getInstance(ChangeExecutor.class);
 
 //        dbService.createTreeNodeType();
@@ -130,7 +133,7 @@ public class JDriveMain {
 
 
 
-            dbService.addChange(change);
+            changeRepository.addChange(change);
 
 //            ChangeInterface service = updateService.update(change);
 //            changeExecutor.addChange(service);
