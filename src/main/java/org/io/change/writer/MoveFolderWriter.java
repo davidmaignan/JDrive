@@ -3,7 +3,7 @@ package org.io.change.writer;
 import com.google.api.services.drive.model.Change;
 import com.google.inject.Inject;
 import database.Fields;
-import database.neo4j.DatabaseService;
+import database.repository.DatabaseService;
 
 import java.io.IOException;
 import java.nio.file.FileSystems;

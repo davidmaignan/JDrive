@@ -9,12 +9,13 @@ import org.api.UpdateService;
 import org.configuration.Configuration;
 import org.api.FileService;
 import database.DatabaseModule;
-import database.neo4j.DatabaseService;
+import database.repository.DatabaseService;
 import org.io.ChangeExecutor;
 import org.io.ChangeInterface;
 import org.model.tree.TreeBuilder;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.writer.TreeWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
@@ -33,6 +34,8 @@ public class JDriveMain {
     private static DatabaseService dbService;
     private static ChangeExecutor changeExecutor;
 
+    private static Logger logger = LoggerFactory.getLogger(JDriveMain.class);
+
     /**
      * Main
      *
@@ -48,15 +51,14 @@ public class JDriveMain {
         try {
             setUpSuccess = setUpJDrive();
         } catch (Exception exception) {
-            System.out.println("Set up failed" + exception.toString());
+            logger.error(exception.getMessage());
         }
 
-//        try {
-//            setUpChanges();
-//        } catch (Exception exception) {
-//            exception.printStackTrace();
-//            System.out.println("Set up changes failed" + exception.toString());
-//        }
+        try {
+            setUpChanges();
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
 
         registerShutdownHook(dbService.getGraphDB());
     }
@@ -82,15 +84,21 @@ public class JDriveMain {
 
     private static boolean setUpJDrive() throws Exception{
         List<File> result = fileService.getAll();
+
         treeBuilder.build(result);
         TreeBuilder.printTree(treeBuilder.getRoot());
-        Boolean writeSuccess = injector.getInstance(TreeWriter.class).writeTree(treeBuilder.getRoot());
 
-        if (writeSuccess) {
-            dbService.save(treeBuilder.getRoot());
-        }
+        dbService.save(treeBuilder.getRoot());
 
-        return writeSuccess;
+        return true;
+
+//        Boolean writeSuccess = injector.getInstance(TreeWriter.class).writeTree(treeBuilder.getRoot());
+//
+//        if (writeSuccess) {
+//            dbService.save(treeBuilder.getRoot());
+//        }
+//
+//        return writeSuccess;
     }
 
     private static void setUpMonitor(){
@@ -112,27 +120,32 @@ public class JDriveMain {
         ChangeService changeService = injector.getInstance(ChangeService.class);
         List<Change> changeList = changeService.getAll(lastChangeId);
 
-        for (Change change : changeList){
+        System.out.println(changeList.size());
 
+        int index = 0;
+
+        for (Change change : changeList){
+            System.out.println("index: " + index++);
             lastChangeId = (lastChangeId == null)? change.getId() : Math.max(lastChangeId, change.getId());
 
-            ChangeInterface service = updateService.update(change);
-            service.setChange(change);
 
-            changeExecutor.addChange(service);
+
+            dbService.addChange(change);
+
+//            ChangeInterface service = updateService.update(change);
+//            changeExecutor.addChange(service);
         }
 
-        System.out.println(changeExecutor.size());
-
+//        System.out.println(changeExecutor.size());
 //        changeExecutor.clean();
-        changeExecutor.debug();
-        changeExecutor.execute();
+//        changeExecutor.debug();
+//        changeExecutor.execute();
 
         for (ChangeInterface service : changeExecutor.getChangeListFailed()) {
             System.out.println("Failed to create: " + service.getChange().getFile().getTitle());
         }
 
-//        configReader.writeProperty("lastChangeId", lastChangeId);
+        configReader.writeProperty("lastChangeId", lastChangeId);
 //        System.out.println(lastChangeId);
     }
 

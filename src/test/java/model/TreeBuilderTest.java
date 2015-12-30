@@ -219,6 +219,6 @@ public class TreeBuilderTest {
         treeBuilder.build(listFile);
         TreeNode root = treeBuilder.getRoot();
 
-        assertEquals("/Test/Path/JDrive/folder1/file1", root.getChildren().get(0).getChildren().get(0).getAbsolutePath());
+        assertEquals("/folder1/file1", root.getChildren().get(0).getChildren().get(0).getAbsolutePath());
     }
 }

@@ -1,7 +1,7 @@
 package database;
 
 import com.google.inject.AbstractModule;
-import database.neo4j.DatabaseService;
+import database.repository.DatabaseService;
 
 /**
  * JDrive

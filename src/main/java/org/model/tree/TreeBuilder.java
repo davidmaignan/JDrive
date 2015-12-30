@@ -22,7 +22,7 @@ public class TreeBuilder {
     @Inject
     public TreeBuilder(Configuration configConfiguration) throws Exception {
         this.configConfiguration = configConfiguration;
-        root              = new TreeNode(this.configConfiguration.getProperty("rootFolder"));
+        root = new TreeNode();
     }
 
     /**

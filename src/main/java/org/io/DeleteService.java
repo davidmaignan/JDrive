@@ -1,7 +1,7 @@
 package org.io;
 
 import com.google.api.services.drive.model.Change;
-import database.neo4j.DatabaseService;
+import database.repository.DatabaseService;
 import database.Fields;
 import org.neo4j.graphdb.Node;
 import org.slf4j.Logger;

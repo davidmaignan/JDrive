@@ -27,6 +27,10 @@ public class FileWriter implements WriterInterface {
 
     @Override
     public boolean write() {
+
+        System.out.println(node);
+
+
         try {
             FileOutputStream fos      = new FileOutputStream(node.getAbsolutePath());
             InputStream inputStream   = this.downloadFile(driveService, node.getData());

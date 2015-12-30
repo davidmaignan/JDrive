@@ -1,13 +1,11 @@
-package database.neo4j;
+package database.repository;
 
 import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.File;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import database.*;
 import org.configuration.Configuration;
-import database.DatabaseConfiguration;
-import database.DatabaseServiceInterface;
-import database.Fields;
 import org.model.tree.TreeNode;
 import org.neo4j.graphdb.*;
 import org.slf4j.Logger;

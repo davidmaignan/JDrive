@@ -32,9 +32,9 @@ public class TreeNode {
     /**
      * No args constructor
      */
-    public TreeNode(String rootFolder){
+    public TreeNode(){
         super();
-        this.title               = rootFolder;
+        this.title               = "";
         this.isFolder            = true;
         this.isSuperRoot         = true;
         this.isRoot              = false;

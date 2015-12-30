@@ -36,7 +36,7 @@ MATCH (n) MATCH (n)-[r]->() DELETE n,r;
 
 //OK ?
 MATCH (n {n:'a'}) OPTIONAL MATCH (n)-[r*]->(p) foreach (rel in r | delete rel) DELETE p with n OPTIONAL MATCH (b)-[r2]-(n)
- ddelete r2,n;
+ delete r2,n;
 
 MATCH (n {n:'root'}) OPTIONAL MATCH (n)-[r]-(m)-[s]->() return n,r,m,s;
 
@@ -46,9 +46,10 @@ create (root:Node {n:"root"}), (a:Node {n:"a"}), (b:Node {n:"b"}), (c:Node {n:"c
 (d:Node {n:"d"}), (e:Node {n:"e"}), (f:Node {n:"f"}), (g:Node {n:"g"}), (h:Node {n:"h"}),
 (i:Node {n:"i"}), (j:Node {n:"j"}), (k:Node {n:"k"}), (l:Node {n:"l"}), (m:Node {n:"m"}),
 (n:Node {n:"n"}), (o:Node {n:"o"}), (p:Node {n:"p"}), (q:Node {n:"q"}),
+(r:Node {n:"r"}),(s:Node {n:"s"}),
 root-[:PARENT]->a, root-[:PARENT]->b, a-[:PARENT]->c, a-[:PARENT]->d, b-[:PARENT]->e, b-[:PARENT]->f,
 c-[:PARENT]->g, c-[:PARENT]->h, d-[:PARENT]->i, d-[:PARENT]->j, e-[:PARENT]->k, e-[:PARENT]->l,
-f-[:PARENT]->m, f-[:PARENT]->n, g-[:PARENT]->o, g-[:PARENT]->p, h-[:PARENT]->q;
+f-[:PARENT]->m, f-[:PARENT]->n, g-[:PARENT]->o, g-[:PARENT]->p, h-[:PARENT]->q, r-[:CHANGE]->a, s-[:CHANGE]->r;
 
 MATCH (n) MATCH (n)-[r]-() return n,r;
 
@@ -93,3 +94,15 @@ match (n {n:'a'}) match (n)<-[r*]->(m) foreach (rel in r | delete rel) return n;
 match (n {n:'a'}), (others) where (others)-[:CHILD*]->(n) with others match (others)-[r]-() delete others, r with (n {n:'a'}) match (n)<-[r2:PARENT]-() return r2, n;
 
 match (n {n:'a'}), (others) where (others)-[:CHILD*]->(n) with n match (n)<-[r2:PARENT]-() return r2, n;
+
+http://neo4j.com/docs/stable/cypher-refcard/
+
+match (n)<-[r:CHANGE*]-(m) where n.n = 'a' with m, count(r) AS length order by length desc limit 1  return  m;
+
+
+----------------
+Change:
+
+File <-[r:CHANGE]- Change Node | relationship Start (change node) - End (file node)
+
+match (change) return change;

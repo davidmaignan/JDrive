@@ -1,4 +1,4 @@
-package database.neo4j;
+package database.repository;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.model.Change;
@@ -7,6 +7,7 @@ import com.google.api.services.drive.model.ParentReference;
 import com.google.api.services.drive.model.User;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import database.RelTypes;
 import org.configuration.Configuration;
 import database.Fields;
 import org.junit.*;
@@ -461,7 +462,7 @@ public class DatabaseServiceTest {
             assertNotNull(relationship);
 
             assertEquals(123456789L, relationship.getStartNode().getProperty(Fields.ID));
-            
+
             tx.success();
         }
     }
