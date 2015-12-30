@@ -148,19 +148,6 @@ public class DatabaseServiceTest {
     }
 
     @Test(timeout = 10000)
-    public void testGetNode() {
-        dbService.save(this.getRootNode());
-
-        try (Transaction tx = graphDb.beginTx()) {
-//            assertNotNull(dbService.getNode(Fields.ID, "folder1"));
-//            assertNotNull(dbService.getNode(Fields.TITLE, "folder1"));
-            tx.success();
-        } catch (Exception exception) {
-
-        }
-    }
-
-    @Test(timeout = 10000)
     public void testGetNodeById() {
         dbService.save(this.getRootNode());
 
@@ -440,6 +427,45 @@ public class DatabaseServiceTest {
         }
     }
 
+    @Test(timeout = 10000)
+    public void testAddChangeDuplication() {
+        dbService.save(this.getRootNode());
+
+        Change change = new Change();
+        change.setId(123456789L);
+        change.setModificationDate(new DateTime(1L));
+        change.setDeleted(false);
+        change.setSelfLink("mockSelfLink");
+        change.setFileId("folder1");
+
+        File file1 = new File();
+        file1.setTitle("folder1");
+        file1.setId("folder1");
+        file1.setMimeType(MimeType.FOLDER);
+
+        file1.setParents(this.getParentReferenceList(
+                "folder2",
+                false
+        ));
+
+        change.setFile(file1);
+
+        assertTrue(dbService.addChange(change));
+
+        assertFalse(dbService.addChange(change));
+
+        try (Transaction tx = graphDb.beginTx()) {
+            Node node = dbService.getNodeById(change.getFileId());
+
+            Relationship relationship = node.getSingleRelationship(RelTypes.CHANGE, Direction.INCOMING);
+            assertNotNull(relationship);
+
+            assertEquals(123456789L, relationship.getStartNode().getProperty(Fields.ID));
+            
+            tx.success();
+        }
+    }
+
     private void debugDb(){
         GlobalGraphOperations globalGraphOp = GlobalGraphOperations.at(graphDb);
 
@@ -454,9 +480,6 @@ public class DatabaseServiceTest {
         for (Relationship rel : relationshipList) {
             System.out.printf("Type: %s - Start: %s - End :%s\n", rel.getType(), rel.getStartNode(), rel.getEndNode());
         }
-
-
-//        assertEquals(2, getResultAsList(globalGraphOp.getAllRelationships()).size());
     }
 
     /**

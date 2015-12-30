@@ -17,7 +17,7 @@ import java.util.*;
 
 /**
  * Graph database service - Implementation for Neo4j
- * 
+ *
  * David Maignan <davidmaignan@gmail.com>
  */
 @Singleton
@@ -34,6 +34,26 @@ public class DatabaseService implements DatabaseServiceInterface {
         this.graphDB = graphDB;
         this.configuration = configuration;
         logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
+
+        try (Transaction tx = graphDB.beginTx()) {
+            graphDB.schema()
+                    .constraintFor(DynamicLabel.label("File"))
+                    .assertPropertyIsUnique(Fields.ID)
+                    .create();
+            tx.success();
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        try (Transaction tx = graphDB.beginTx()) {
+            graphDB.schema()
+                    .constraintFor(DynamicLabel.label("Change"))
+                    .assertPropertyIsUnique(Fields.ID)
+                    .create();
+            tx.success();
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
     }
 
     @Inject
@@ -49,6 +69,16 @@ public class DatabaseService implements DatabaseServiceInterface {
         try (Transaction tx = graphDB.beginTx()) {
             graphDB.schema()
                     .constraintFor(DynamicLabel.label("File"))
+                    .assertPropertyIsUnique(Fields.ID)
+                    .create();
+            tx.success();
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        try (Transaction tx = graphDB.beginTx()) {
+            graphDB.schema()
+                    .constraintFor(DynamicLabel.label("Change"))
                     .assertPropertyIsUnique(Fields.ID)
                     .create();
             tx.success();
@@ -151,16 +181,41 @@ public class DatabaseService implements DatabaseServiceInterface {
     public Node getNodeById(String value) {
         Node node = null;
 
-        String query = "match (n {identifier:'%s'}) return n";
+        String query = "match (file {identifier:'%s'}) return file";
 
         try (Transaction tx = graphDB.beginTx()) {
             Result result = graphDB.execute(String.format(query, value));
 
             tx.success();
 
-            return (Node) result.next().get("n");
+            if(result.hasNext()) {
+                return (Node) result.next().get("file");
+            }
 
         } catch (Exception exception) {
+            logger.error("Fail to get node: " + value);
+            logger.error(exception.getMessage());
+        }
+
+        return node;
+    }
+
+    public Node getChangeById(long value) {
+        Node node = null;
+
+        String query = "match (change:Change) where change.identifier=%s return change" ;
+
+        try (Transaction tx = graphDB.beginTx()) {
+            Result result = graphDB.execute(String.format(query, value));
+
+            tx.success();
+
+            if(result.hasNext()) {
+                return (Node) result.next().get("change");
+            }
+
+        } catch (Exception exception) {
+            logger.error("Fail to get change: " + value);
             logger.error(exception.getMessage());
         }
 
@@ -188,6 +243,7 @@ public class DatabaseService implements DatabaseServiceInterface {
 
             tx.success();
         } catch (Exception exception) {
+            logger.error("Fail to getNodePropertyById: " + id);
             logger.error(exception.getMessage());
         }
 
@@ -323,18 +379,23 @@ public class DatabaseService implements DatabaseServiceInterface {
             tx.success();
 
         } catch (Exception exception) {
-            exception.printStackTrace();
-            logger.error("Fail to update db: " + exception);
+            logger.error(exception.getMessage());
             return false;
         }
 
         return true;
     }
 
-    public void addChange(Change change) {
+    public boolean addChange(Change change) {
         try (Transaction tx = graphDB.beginTx()) {
 
-            Node changeNode = graphDB.createNode();
+            Node changeNode = this.getChangeById(change.getId());
+
+            if(changeNode != null) {
+                return false;
+            }
+
+            changeNode = graphDB.createNode();
             changeNode.addLabel(DynamicLabel.label("Change"));
 
             changeNode.setProperty(Fields.ID, change.getId());
@@ -342,6 +403,7 @@ public class DatabaseService implements DatabaseServiceInterface {
             changeNode.setProperty(Fields.MODIFIED_DATE, change.getModificationDate().getValue());
             changeNode.setProperty(Fields.SELF_LINK, change.getSelfLink());
             changeNode.setProperty(Fields.DELETED, change.getDeleted());
+            changeNode.setProperty(Fields.PROCESSED, false);
 
             Node fileNode     = this.getNodeById(change.getFileId());
             Node relationNode = this.getLastNodeOfTheQueueChange(change.getFileId());
@@ -352,9 +414,13 @@ public class DatabaseService implements DatabaseServiceInterface {
 
             tx.success();
 
+            return true;
+
         } catch (Exception exception) {
-            logger.error("Fail to update db: " + exception);
+            logger.error(exception.getMessage());
         }
+
+        return false;
     }
 
     public Node getLastNodeOfTheQueueChange(String nodeId){
@@ -449,6 +515,7 @@ public class DatabaseService implements DatabaseServiceInterface {
         dbNode.setProperty(Fields.TITLE, tNode.getTitle());
         dbNode.setProperty(Fields.MIME_TYPE, tNode.getMimeType());
         dbNode.setProperty(Fields.IS_ROOT, tNode.isSuperRoot());
+        dbNode.setProperty(Fields.PROCESSED, false);
 
         if (tNode.getCreatedDate() != null) {
             dbNode.setProperty(Fields.CREATED_DATE, tNode.getCreatedDate().getValue());

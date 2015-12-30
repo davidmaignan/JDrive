@@ -17,7 +17,7 @@ public class Fields {
     public static final String IS_ROOT        = "IsRoot";
     public static final String IS_TRASHED     = "isTrashed";
     public static final String LAST_CHANGE_ID = "lastChangeId";
-    public static final String IS_WRITTEN     = "isWrittern";
+    public static final String PROCESSED      = "processed";
 
     //Change
     public static final String FILE_ID        = "fileId";
