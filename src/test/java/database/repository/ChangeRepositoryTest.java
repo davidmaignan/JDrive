@@ -34,7 +34,7 @@ import static org.junit.Assert.*;
 public class ChangeRepositoryTest {
 
     protected GraphDatabaseService graphDb;
-    private ChangeRepository dbService;
+    private ChangeRepository repository;
     private static Logger logger;
 
     @BeforeClass
@@ -46,7 +46,7 @@ public class ChangeRepositoryTest {
     public void setUp() throws Exception {
         graphDb = new TestGraphDatabaseFactory().newImpermanentDatabase();
         Configuration configuration = new Configuration();
-        dbService = new ChangeRepository(graphDb, configuration);
+        repository = new ChangeRepository(graphDb, configuration);
     }
 
     @After
@@ -56,7 +56,7 @@ public class ChangeRepositoryTest {
 
     @Test(timeout = 10000)
     public void testAddFirstChangeFile() {
-        dbService.save(this.getRootNode());
+        repository.save(this.getRootNode());
 
         Change change = new Change();
         change.setId(123456789L);
@@ -77,10 +77,10 @@ public class ChangeRepositoryTest {
 
         change.setFile(file1);
 
-        dbService.addChange(change);
+        repository.addChange(change);
 
         try (Transaction tx = graphDb.beginTx()) {
-            Node node = dbService.getNodeById(change.getFileId());
+            Node node = repository.getNodeById(change.getFileId());
 
             Relationship relationship = node.getSingleRelationship(RelTypes.CHANGE, Direction.INCOMING);
             assertNotNull(relationship);
@@ -93,7 +93,7 @@ public class ChangeRepositoryTest {
 
     @Test(timeout = 10000)
     public void testAddSecondChangeFile() {
-        dbService.save(this.getRootNode());
+        repository.save(this.getRootNode());
 
         Change change = new Change();
         change.setId(111111111L);
@@ -114,11 +114,7 @@ public class ChangeRepositoryTest {
 
         change.setFile(file1);
 
-        dbService.addChange(change);
-
-
-        System.out.printf("change 1 1 added");
-
+        repository.addChange(change);
 
         Change change2 = new Change();
         change2.setId(999999999L);
@@ -139,11 +135,11 @@ public class ChangeRepositoryTest {
 
         change2.setFile(file2);
 
-        dbService.addChange(change2);
+        repository.addChange(change2);
 
         try (Transaction tx = graphDb.beginTx()) {
 
-            Node fileNode = dbService.getNodeById("folder1");
+            Node fileNode = repository.getNodeById("folder1");
 
             Relationship relationship = fileNode.getSingleRelationship(RelTypes.CHANGE, Direction.INCOMING);
 
@@ -165,7 +161,7 @@ public class ChangeRepositoryTest {
 
     @Test(timeout = 10000)
     public void testAddChangeDuplication() {
-        dbService.save(this.getRootNode());
+        repository.save(this.getRootNode());
 
         Change change = new Change();
         change.setId(123456789L);
@@ -186,12 +182,12 @@ public class ChangeRepositoryTest {
 
         change.setFile(file1);
 
-        assertTrue(dbService.addChange(change));
+        assertTrue(repository.addChange(change));
 
-        assertFalse(dbService.addChange(change));
+        assertFalse(repository.addChange(change));
 
         try (Transaction tx = graphDb.beginTx()) {
-            Node node = dbService.getNodeById(change.getFileId());
+            Node node = repository.getNodeById(change.getFileId());
 
             Relationship relationship = node.getSingleRelationship(RelTypes.CHANGE, Direction.INCOMING);
             assertNotNull(relationship);
