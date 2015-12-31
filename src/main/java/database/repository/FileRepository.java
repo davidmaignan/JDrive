@@ -37,7 +37,7 @@ public class FileRepository extends DatabaseService {
      * @return processed value updated
      */
     public boolean markAsProcessed(String id) {
-        String query = "match (file {%s: '%s'}) set file.%s = %s return file.%s";
+        String query = "match (file:File {%s: '%s'}) set file.%s = %s return file.%s";
 
         try (
                 Transaction tx = graphDB.beginTx();
