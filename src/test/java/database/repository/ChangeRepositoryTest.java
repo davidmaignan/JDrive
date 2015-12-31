@@ -19,6 +19,7 @@ import org.model.tree.TreeNode;
 import org.model.types.MimeType;
 import org.neo4j.graphdb.*;
 import org.neo4j.test.TestGraphDatabaseFactory;
+import org.neo4j.tooling.GlobalGraphOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.writer.FileModule;
@@ -53,6 +54,14 @@ public class ChangeRepositoryTest {
     @After
     public void tearDown() throws Exception {
         graphDb.shutdown();
+    }
+
+    @Test(timeout = 10000)
+    public void testMarkAsProcessed() {
+        repository.save(this.getRootNode());
+        repository.addChange(this.generateChange(1l, "folder1"));
+
+        assertTrue(repository.markAsProcessed(1l));
     }
 
     @Test(timeout = 10000)
@@ -417,5 +426,21 @@ public class ChangeRepositoryTest {
     private void assertRelation(Relationship relation, String startNode, String endNode) {
         assertEquals(startNode, relation.getStartNode().getProperty(Fields.ID).toString());
         assertEquals(endNode, relation.getEndNode().getProperty(Fields.ID).toString());
+    }
+
+    private void debugDb(){
+        GlobalGraphOperations globalGraphOp = GlobalGraphOperations.at(graphDb);
+
+        List<Node> nodeList = getResultAsList(globalGraphOp.getAllNodes());
+
+        for(Node node : nodeList) {
+            System.out.printf("%s\n", node.getProperty(Fields.ID));
+        }
+
+        List<Relationship> relationshipList = getResultAsList(globalGraphOp.getAllRelationships());
+
+        for (Relationship rel : relationshipList) {
+            System.out.printf("Type: %s - Start: %s - End :%s\n", rel.getType(), rel.getStartNode(), rel.getEndNode());
+        }
     }
 }

@@ -28,6 +28,37 @@ public class ChangeRepository extends DatabaseService {
         super(graphDb, configuration);
     }
 
+    /**
+     * Set processed as true
+     * @param id
+     * @return processed value updated
+     */
+    public boolean markAsProcessed(long id) {
+        String query = "match (change:Change {%s: %d}) set change.%s = %s return change.%s";
+
+        try (
+                Transaction tx = graphDB.beginTx();
+                Result queryResult = graphDB.execute(String.format(query, Fields.ID, id,
+                        Fields.PROCESSED, true, Fields.PROCESSED))
+        ) {
+
+            boolean result = false;
+
+            if(queryResult.hasNext()) {
+                result = (boolean)queryResult.next().get(String.format("change.%s", Fields.PROCESSED));
+            }
+
+            tx.success();
+
+            return result;
+
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        return false;
+    }
+
     public Node getChangeById(long value) {
         Node node = null;
 
