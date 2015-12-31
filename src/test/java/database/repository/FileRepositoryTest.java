@@ -25,6 +25,7 @@ import org.writer.FileModule;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Queue;
 
 import static org.junit.Assert.*;
 
@@ -33,7 +34,7 @@ import static org.junit.Assert.*;
  */
 public class FileRepositoryTest {
     protected GraphDatabaseService graphDb;
-    private DatabaseService dbService;
+    private FileRepository fileRepository;
     private static Logger logger;
 
     @BeforeClass
@@ -45,7 +46,7 @@ public class FileRepositoryTest {
     public void setUp() throws Exception {
         graphDb = new TestGraphDatabaseFactory().newImpermanentDatabase();
         Configuration configuration = new Configuration();
-        dbService = new DatabaseService(graphDb, configuration);
+        fileRepository = new FileRepository(graphDb, configuration);
     }
 
     @After
@@ -53,14 +54,35 @@ public class FileRepositoryTest {
         graphDb.shutdown();
     }
 
+    @Test(timeout = 100000)
+    public void testGetUnProcessedFile(){
+        fileRepository.save(this.getRootNode());
+
+        Queue<Node> result = fileRepository.getUnprocessedQueue();
+
+        assertEquals(7, result.size());
+
+        try(Transaction tx = graphDb.beginTx()) {
+            assertEquals("root", result.remove().getProperty(Fields.ID));
+            assertEquals("folder1", result.remove().getProperty(Fields.ID));
+            assertEquals("file1", result.remove().getProperty(Fields.ID));
+            assertEquals("folder2", result.remove().getProperty(Fields.ID));
+            assertEquals("file2", result.remove().getProperty(Fields.ID));
+            assertEquals("folder3", result.remove().getProperty(Fields.ID));
+            assertEquals("file3", result.remove().getProperty(Fields.ID));
+        }
+    }
+
     @Test(timeout = 10000)
     public void testSave() {
-        dbService.save(this.getRootNode());
+        fileRepository.save(this.getRootNode());
 
         try (Transaction tx = graphDb.beginTx()) {
             GlobalGraphOperations globalGraphOp = GlobalGraphOperations.at(graphDb);
 
             assertEquals(7, getResultAsList(globalGraphOp.getAllNodes()).size());
+
+            tx.success();
 
         } catch (Exception exception) {
 
@@ -69,7 +91,7 @@ public class FileRepositoryTest {
 
     @Test(timeout = 10000)
     public void testRelationShipRoot() {
-        dbService.save(this.getRootNode());
+        fileRepository.save(this.getRootNode());
 
         try (Transaction tx = graphDb.beginTx()) {
             Node rootNode = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "root");
@@ -98,7 +120,7 @@ public class FileRepositoryTest {
 
     @Test(timeout = 10000)
     public void testRelationShipFolder() {
-        dbService.save(this.getRootNode());
+        fileRepository.save(this.getRootNode());
 
         try (Transaction tx = graphDb.beginTx()) {
             Node rootNode = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "folder3");
@@ -126,7 +148,7 @@ public class FileRepositoryTest {
 
     @Test(timeout = 10000)
     public void testLeaf() {
-        dbService.save(this.getRootNode());
+        fileRepository.save(this.getRootNode());
 
         try (Transaction tx = graphDb.beginTx()) {
             Node file1 = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "file1");
@@ -140,7 +162,7 @@ public class FileRepositoryTest {
 
     @Test(timeout = 10000)
     public void testSetNodeProperties() {
-        dbService.save(this.getRootNode());
+        fileRepository.save(this.getRootNode());
 
         try (Transaction tx = graphDb.beginTx()) {
             Node node = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "folder1");
@@ -159,10 +181,10 @@ public class FileRepositoryTest {
 
     @Test(timeout = 10000)
     public void testGetParent() {
-        dbService.save(this.getRootNode());
+        fileRepository.save(this.getRootNode());
 
         try (Transaction tx = graphDb.beginTx()) {
-            Node parentNode = dbService.getParent("folder1");
+            Node parentNode = fileRepository.getParent("folder1");
             assertEquals("root", parentNode.getProperty(Fields.ID));
 
             tx.success();
@@ -173,11 +195,14 @@ public class FileRepositoryTest {
 
     @Test(timeout = 100000)
     public void testNodeAbsolutePath() {
-        dbService.save(this.getRootNode());
+        fileRepository.save(this.getRootNode());
 
         try (Transaction tx = graphDb.beginTx()) {
-            assertEquals("/folder1/file1", dbService.getNodeAbsolutePath("file1"));
-            assertEquals("/folder2/folder3/file3", dbService.getNodeAbsolutePath("file3"));
+            assertEquals("/folder1/file1", fileRepository.getNodeAbsolutePath("file1"));
+            assertEquals("/folder2/folder3/file3", fileRepository.getNodeAbsolutePath("file3"));
+
+            tx.success();
+
         } catch (Exception exception) {
 
         }
@@ -185,10 +210,12 @@ public class FileRepositoryTest {
 
     /**
      * - root
-     * - folder 1
-     * - file1
-     * - folder 2
-     * - file2
+     *  - folder 1
+     *      - file 1
+     *  - folder 2
+     *  - file 2
+     *  - folder 3
+     *      - file 3
      */
     private TreeNode getRootNode() {
         ArrayList<File> listFile = new ArrayList<>();

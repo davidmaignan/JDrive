@@ -4,12 +4,12 @@ import database.Fields;
 import database.RelTypes;
 import org.configuration.Configuration;
 import org.model.tree.TreeNode;
-import org.neo4j.graphdb.DynamicLabel;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayDeque;
+import java.util.Queue;
 
 /**
  * File repository
@@ -23,6 +23,32 @@ public class FileRepository extends DatabaseService {
         super(graphDb, configuration);
     }
 
+    /**
+     * Get a queue of the unprocessed files/folders.
+     *
+     * @return queue of files/folders to be written ordered from the root.
+     */
+    public Queue<Node> getUnprocessedQueue() {
+        Queue<Node> queueResult = new ArrayDeque<>();
+
+        String query = "match (file:File {%s: %b}) optional match (file)<-[r:PARENT]-(m) " +
+                "with file, r order by r.id asc return distinct file";
+
+        try(Transaction tx = graphDB.beginTx()) {
+            Result result = graphDB.execute(String.format(query, Fields.PROCESSED, false));
+
+            while (result.hasNext()) {
+                Node node = (Node)result.next().get("file");
+                queueResult.add(node);
+            }
+
+            tx.success();
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        return queueResult;
+    }
 
     /**
      * Save a treeNode
