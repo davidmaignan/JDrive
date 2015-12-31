@@ -59,7 +59,7 @@ public class ChangeRepository extends DatabaseService {
         try (Transaction tx = graphDB.beginTx()) {
 
             //@todo: investigate why unique id in schema definition is not working.
-            if(this.getChangeById(change.getId()) != null) {
+            if (this.getChangeById(change.getId()) != null) {
                 return false;
             }
 
@@ -106,27 +106,22 @@ public class ChangeRepository extends DatabaseService {
      * @param nodeId
      * @return null | change node
      */
-    private Node getInsertPoint(String nodeId){
-
-        String query = "match (file {identifier:'%s'}) match (file)<-[r:CHANGE*]-(m) " +
-                "with m, count(r) AS length order by length desc limit 1  return  m;";
+    private Node getInsertPoint(String nodeId) {
+        String query = "match (file {%s:'%s'}) match (file)<-[r:%s*]-(m) " +
+                "with m, count(r) AS length order by length desc limit 1 return  m";
 
         try (Transaction tx = graphDB.beginTx()) {
-            Result result = graphDB.execute(String.format(query, nodeId));
+            Result result = graphDB.execute(String.format(query, Fields.ID, RelTypes.CHANGE, nodeId));
 
             tx.success();
 
-
-            if(result.hasNext()) {
-                return (Node) result.next().get("m");
-            }
-
-            return null;
+            return (result.hasNext()) ? (Node) result.next().get("m") : null;
 
         } catch (Exception exception) {
             logger.error(exception.getMessage());
-            return null;
         }
+
+        return null;
     }
 
     /**
