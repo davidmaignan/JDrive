@@ -12,7 +12,15 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 
 /**
- * File repository
+ * File repository.
+ *
+ * Files & Folders are saved as a 'file' node in a tree structure.
+ * The link between them is defined as a parent RelTypes.PARENT
+ * The owner (start node) of the relation is the child, the end node (obviously a folder)
+ * is the parent.
+ *
+ * Eg: create (root:Node {n:"root"}), (a:Node {n:"a"}), (b:Node {n:"b"}), (c:Node {n:"c"}),
+ *      root<-[:PARENT]-a, root<-[:PARENT]-b, a<-[:PARENT]-c;
  *
  * David Maignan <davidmaignan@gmail.com>
  */
@@ -21,6 +29,37 @@ public class FileRepository extends DatabaseService {
 
     public FileRepository(GraphDatabaseService graphDb, Configuration configuration) {
         super(graphDb, configuration);
+    }
+
+    /**
+     * Set processed as true
+     * @param id
+     * @return processed value updated
+     */
+    public boolean markAsProcessed(String id) {
+        String query = "match (file {%s: '%s'}) set file.%s = %s return file.%s";
+
+        try (
+                Transaction tx = graphDB.beginTx();
+                Result queryResult = graphDB.execute(String.format(query, Fields.ID, id,
+                        Fields.PROCESSED, true, Fields.PROCESSED));
+        ) {
+
+            boolean result = false;
+
+            if(queryResult.hasNext()) {
+                result = (boolean)queryResult.next().get(String.format("file.%s", Fields.PROCESSED));
+            }
+
+            tx.success();
+
+            return result;
+
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        return false;
     }
 
     /**

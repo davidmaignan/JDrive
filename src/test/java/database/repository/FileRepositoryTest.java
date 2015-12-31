@@ -73,6 +73,13 @@ public class FileRepositoryTest {
         }
     }
 
+    @Test(timeout = 100000)
+    public void testMarkFileAsProcessed(){
+        fileRepository.save(this.getRootNode());
+
+        assertTrue(fileRepository.markAsProcessed("file1"));
+    }
+
     @Test(timeout = 10000)
     public void testSave() {
         fileRepository.save(this.getRootNode());
