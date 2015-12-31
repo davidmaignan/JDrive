@@ -25,6 +25,7 @@ import org.writer.FileModule;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 
 import static org.junit.Assert.*;
 
@@ -52,6 +53,71 @@ public class ChangeRepositoryTest {
     @After
     public void tearDown() throws Exception {
         graphDb.shutdown();
+    }
+
+    @Test(timeout = 10000)
+    public void testUnprocessed(){
+        repository.save(this.getRootNode());
+
+        repository.addChange(this.generateChange(1l, "folder1"));
+        repository.addChange(this.generateChange(2l, "folder1"));
+        repository.addChange(this.generateChange(3l, "folder1"));
+        repository.addChange(this.generateChange(4l, "file1"));
+        repository.addChange(this.generateChange(5l, "folder2"));
+        repository.addChange(this.generateChange(6l, "file3"));
+
+        Queue<Node> result = repository.getUnprocessed();
+
+        assertEquals(6, result.size());
+
+        try(Transaction tx = graphDb.beginTx()) {
+            Node node = result.remove();
+            assertEquals(1l, node.getProperty(Fields.ID));
+            assertEquals("folder1", node.getProperty(Fields.FILE_ID));
+
+            node = result.remove();
+            assertEquals(2l, node.getProperty(Fields.ID));
+            assertEquals("folder1", node.getProperty(Fields.FILE_ID));
+
+            node = result.remove();
+            assertEquals(3l, node.getProperty(Fields.ID));
+            assertEquals("folder1", node.getProperty(Fields.FILE_ID));
+
+            node = result.remove();
+            assertEquals(4l, node.getProperty(Fields.ID));
+            assertEquals("file1", node.getProperty(Fields.FILE_ID));
+
+            node = result.remove();
+            assertEquals(5l, node.getProperty(Fields.ID));
+            assertEquals("folder2", node.getProperty(Fields.FILE_ID));
+
+            node = result.remove();
+            assertEquals(6l, node.getProperty(Fields.ID));
+            assertEquals("file3", node.getProperty(Fields.FILE_ID));
+        }
+    }
+
+    private Change generateChange(long id, String fileId) {
+        Change change = new Change();
+        change.setId(id);
+        change.setModificationDate(new DateTime(1L));
+        change.setDeleted(false);
+        change.setSelfLink("mockSelfLink");
+        change.setFileId(fileId);
+
+        File file1 = new File();
+        file1.setTitle(fileId);
+        file1.setId(fileId);
+        file1.setMimeType(MimeType.FOLDER);
+
+        file1.setParents(this.getParentReferenceList(
+                "folder2",
+                false
+        ));
+
+        change.setFile(file1);
+
+        return change;
     }
 
     @Test(timeout = 10000)
@@ -197,7 +263,6 @@ public class ChangeRepositoryTest {
             tx.success();
         }
     }
-
 
     /**
      * Get a list from an iterable

@@ -363,30 +363,7 @@ public class DatabaseService implements DatabaseServiceInterface {
         return true;
     }
 
-    public Node getLastNodeOfTheQueueChange(String nodeId){
 
-        String query = "match (file {identifier:'%s'}) match (file)<-[r:CHANGE*]-(m) " +
-                "with m, count(r) AS length order by length desc limit 1  return  m;";
-
-
-        try (Transaction tx = graphDB.beginTx()) {
-            Result result = graphDB.execute(String.format(query, nodeId));
-
-            tx.success();
-
-
-            if(result.hasNext()) {
-                return (Node) result.next().get("m");
-            }
-
-            return null;
-
-
-        } catch (Exception exception) {
-            logger.error(exception.getMessage());
-            return null;
-        }
-    }
 
 //    match (n)<-[r:CHANGE*]-(m) where n.n = 'a' with m, count(r) AS length order by length desc limit 1  return  m;
 
