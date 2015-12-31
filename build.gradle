@@ -30,9 +30,7 @@ dependencies {
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.+'
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.+'
 
-
-
-    compile "org.repository:repository:${neo4jVersion}"
+    compile "org.neo4j:neo4j:${neo4jVersion}"
 
 //    compile     'net.java.dev.jna:jna:4.1.0'
 //    compile     'net.java.dev.jna:jna-platform:4.1.0'
@@ -41,8 +39,8 @@ dependencies {
     compile     fileTree( dir: 'libs', include: '*.jar')
 
     testCompile group: 'junit', name: 'junit', version: '4.+'
-    testCompile 'org.repository:repository-kernel:2.2.4'
-    testCompile 'org.repository:repository-io:2.2.4'
+    testCompile 'org.neo4j:neo4j-kernel:2.2.4'
+    testCompile 'org.neo4j:neo4j-io:2.2.4'
     testCompile 'org.hamcrest:hamcrest-all:1.3'
     testCompile 'org.jukito:jukito:1.4.1'
     testCompile 'org.mockito:mockito-all:1.10.19'
