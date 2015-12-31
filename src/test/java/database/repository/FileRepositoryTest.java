@@ -1,19 +1,20 @@
 package database.repository;
 
 import com.google.api.client.util.DateTime;
-import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.ParentReference;
 import com.google.api.services.drive.model.User;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import database.Fields;
 import database.RelTypes;
 import org.configuration.Configuration;
-import database.Fields;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.model.tree.TreeBuilder;
 import org.model.tree.TreeNode;
-import org.model.types.MimeType;
 import org.neo4j.graphdb.*;
 import org.neo4j.test.TestGraphDatabaseFactory;
 import org.neo4j.tooling.GlobalGraphOperations;
@@ -27,7 +28,10 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-public class DatabaseServiceTest {
+/**
+ * Created by david on 2015-12-31.
+ */
+public class FileRepositoryTest {
     protected GraphDatabaseService graphDb;
     private DatabaseService dbService;
     private static Logger logger;
@@ -135,33 +139,6 @@ public class DatabaseServiceTest {
     }
 
     @Test(timeout = 10000)
-    public void testGetPropertyById() {
-        dbService.save(this.getRootNode());
-
-        try (Transaction tx = graphDb.beginTx()) {
-            assertEquals("folder1", dbService.getNodePropertyById("folder1", Fields.ID));
-            assertEquals("folder1", dbService.getNodePropertyById("folder1", Fields.TITLE));
-
-            tx.success();
-        } catch (Exception exception) {
-
-        }
-    }
-
-    @Test(timeout = 10000)
-    public void testGetNodeById() {
-        dbService.save(this.getRootNode());
-
-        try (Transaction tx = graphDb.beginTx()) {
-            assertNotNull(dbService.getNodeById("folder1"));
-            assertNull(dbService.getNodeById("notExistingNode"));
-            tx.success();
-        } catch (Exception exception) {
-
-        }
-    }
-
-    @Test(timeout = 10000)
     public void testSetNodeProperties() {
         dbService.save(this.getRootNode());
 
@@ -174,40 +151,9 @@ public class DatabaseServiceTest {
             assertEquals(1420643650751L, node.getProperty(Fields.CREATED_DATE));
             assertFalse((boolean)node.getProperty(Fields.PROCESSED));
 
-
             tx.success();
         } catch (Exception exception) {
 
-        }
-    }
-
-    @Test(timeout = 100000)
-    public void testDeleteFolderNode() {
-        dbService.save(this.getRootNode());
-        dbService.delete("folder2");
-
-        try (Transaction tx = graphDb.beginTx()) {
-            GlobalGraphOperations globalGraphOp = GlobalGraphOperations.at(graphDb);
-
-            assertEquals(3, getResultAsList(globalGraphOp.getAllNodes()).size());
-            assertEquals(2, getResultAsList(globalGraphOp.getAllRelationships()).size());
-
-            //relationship between root and folder 1 is deleted (child and parent)
-            Node rootNode = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "root");
-            assertEquals(1, getResultAsList(rootNode.getRelationships()).size());
-
-            assertNotNull(graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "folder1"));
-            assertNotNull(graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "file1"));
-
-            assertNull(graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "folder2"));
-            assertNull(graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "file2"));
-
-            assertNull(graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "folder3"));
-            assertNull(graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "file3"));
-
-            tx.success();
-        } catch (Exception exception) {
-            exception.printStackTrace();
         }
     }
 
@@ -235,123 +181,6 @@ public class DatabaseServiceTest {
         } catch (Exception exception) {
 
         }
-    }
-
-    @Test(timeout = 100000)
-    public void testUpdateProperty() {
-        dbService.save(this.getRootNode());
-
-        try (Transaction tx = graphDb.beginTx()) {
-            Node parentNode = dbService.update("folder1", Fields.CREATED_DATE, "999");
-            assertEquals("999", parentNode.getProperty(Fields.CREATED_DATE));
-
-            tx.success();
-        } catch (Exception exception) {
-
-        }
-    }
-
-    @Test(timeout = 10000)
-    public void testUpdateChangeFile() throws Exception {
-        dbService.save(this.getRootNode());
-
-        Change change = new Change();
-        change.setFileId("file1");
-        File file1 = new File();
-        file1.setTitle("file1");
-        file1.setId("file1");
-        file1.setMimeType("application/vnd.google-apps.document");
-
-        file1.setParents(this.getParentReferenceList(
-                "folder2",
-                false
-        ));
-
-        file1.setOwners(this.getOwnerList("David Maignan", true));
-        change.setFile(file1);
-
-        dbService.update(change);
-
-        try (Transaction tx = graphDb.beginTx()) {
-            Node node = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "file1");
-
-            List<Relationship> result = getResultAsList(node.getRelationships());
-
-            assertEquals("/folder2/file1", dbService.getNodeAbsolutePath("file1"));
-            assertEquals("file1", result.get(0).getStartNode().getProperty(Fields.ID).toString());
-            assertEquals("folder2", result.get(0).getEndNode().getProperty(Fields.ID).toString());
-        }
-    }
-
-    @Test(timeout = 10000)
-    public void testUpdateChangeFolder() {
-        dbService.save(this.getRootNode());
-
-        Change change = new Change();
-        change.setFileId("folder1");
-        File file1 = new File();
-        file1.setTitle("folder1");
-        file1.setId("folder1");
-        file1.setMimeType(MimeType.FOLDER);
-
-        file1.setParents(this.getParentReferenceList(
-                "folder2",
-                false
-        ));
-
-        file1.setOwners(this.getOwnerList("David Maignan", true));
-        change.setFile(file1);
-
-        dbService.update(change);
-
-        try (Transaction tx = graphDb.beginTx()) {
-            Node node = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "folder1");
-
-            List<Relationship> result = getResultAsList(node.getRelationships(RelTypes.PARENT, Direction.OUTGOING));
-
-            assertEquals(1, result.size());
-            assertEquals("folder2", result.get(0).getEndNode().getProperty(Fields.ID));
-            assertEquals("folder1", result.get(0).getStartNode().getProperty(Fields.ID));
-
-            Node parentNode = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "folder2");
-
-            List<Relationship> resultParent = getResultAsList(parentNode.getRelationships());
-
-            assertEquals(4, resultParent.size());
-        }
-    }
-
-    private void debugDb(){
-        GlobalGraphOperations globalGraphOp = GlobalGraphOperations.at(graphDb);
-
-        List<Node> nodeList = getResultAsList(globalGraphOp.getAllNodes());
-
-        for(Node node : nodeList) {
-            System.out.printf("%s\n", node.getProperty(Fields.ID));
-        }
-
-        List<Relationship> relationshipList = getResultAsList(globalGraphOp.getAllRelationships());
-
-        for (Relationship rel : relationshipList) {
-            System.out.printf("Type: %s - Start: %s - End :%s\n", rel.getType(), rel.getStartNode(), rel.getEndNode());
-        }
-    }
-
-    /**
-     * Get a list from an iterable
-     *
-     * @param iterable
-     * @param <E>
-     * @return
-     */
-    private <E> List<E> getResultAsList(Iterable<E> iterable) {
-        List<E> result = new ArrayList<E>();
-
-        iterable.forEach(s -> {
-            result.add(s);
-        });
-
-        return result;
     }
 
     /**
@@ -490,5 +319,38 @@ public class DatabaseServiceTest {
     private void assertRelation(Relationship relation, String startNode, String endNode) {
         assertEquals(startNode, relation.getStartNode().getProperty(Fields.ID).toString());
         assertEquals(endNode, relation.getEndNode().getProperty(Fields.ID).toString());
+    }
+
+    private void debugDb(){
+        GlobalGraphOperations globalGraphOp = GlobalGraphOperations.at(graphDb);
+
+        List<Node> nodeList = getResultAsList(globalGraphOp.getAllNodes());
+
+        for(Node node : nodeList) {
+            System.out.printf("%s\n", node.getProperty(Fields.ID));
+        }
+
+        List<Relationship> relationshipList = getResultAsList(globalGraphOp.getAllRelationships());
+
+        for (Relationship rel : relationshipList) {
+            System.out.printf("Type: %s - Start: %s - End :%s\n", rel.getType(), rel.getStartNode(), rel.getEndNode());
+        }
+    }
+
+    /**
+     * Get a list from an iterable
+     *
+     * @param iterable
+     * @param <E>
+     * @return
+     */
+    private <E> List<E> getResultAsList(Iterable<E> iterable) {
+        List<E> result = new ArrayList<E>();
+
+        iterable.forEach(s -> {
+            result.add(s);
+        });
+
+        return result;
     }
 }
