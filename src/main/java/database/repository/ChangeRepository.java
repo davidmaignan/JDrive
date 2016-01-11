@@ -138,11 +138,11 @@ public class ChangeRepository extends DatabaseService {
      * @return null | change node
      */
     private Node getInsertPoint(String nodeId) {
-        String query = "match (file {%s:'%s'}) match (file)<-[r:%s*]-(m) " +
-                "with m, count(r) AS length order by length desc limit 1 return  m";
+        String query = "match (file {%s:'%s'}) optional match (file)<-[r:%s*]-(m) " +
+                "with file, m, count(r) AS length order by length desc limit 1 return  file, m";
 
         try (Transaction tx = graphDB.beginTx()) {
-            Result result = graphDB.execute(String.format(query, Fields.ID, RelTypes.CHANGE, nodeId));
+            Result result = graphDB.execute(String.format(query, Fields.ID, nodeId, RelTypes.CHANGE, nodeId));
 
             tx.success();
 

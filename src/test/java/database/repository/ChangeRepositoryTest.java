@@ -198,17 +198,7 @@ public class ChangeRepositoryTest {
         change2.setSelfLink("mockSelfLink");
         change2.setFileId("folder1");
 
-        File file2 = new File();
-        file2.setTitle("folder1");
-        file2.setId("folder1");
-        file2.setMimeType(MimeType.FOLDER);
-
-        file2.setParents(this.getParentReferenceList(
-                "folder2",
-                false
-        ));
-
-        change2.setFile(file2);
+        change2.setFile(file1);
 
         repository.addChange(change2);
 
