@@ -1,4 +1,4 @@
-package org.model.tree;
+package model.tree;
 
 import com.google.inject.AbstractModule;
 

@@ -1,6 +1,6 @@
 package database;
 
-import org.model.tree.TreeNode;
+import model.tree.TreeNode;
 
 /**
  * JDrive

@@ -1,7 +1,7 @@
 package org.writer.node;
 
 import com.google.inject.Inject;
-import org.model.tree.TreeNode;
+import model.tree.TreeNode;
 import org.api.DriveService;
 import org.writer.WriterInterface;
 

@@ -6,11 +6,10 @@ import com.google.api.services.drive.model.ParentReference;
 import com.google.api.services.drive.model.User;
 import com.google.inject.*;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.model.tree.TreeBuilder;
-import org.model.tree.TreeModule;
-import org.model.tree.TreeNode;
+import model.tree.TreeBuilder;
+import model.tree.TreeModule;
+import model.tree.TreeNode;
 import java.util.ArrayList;
 
 import static org.junit.Assert.*;

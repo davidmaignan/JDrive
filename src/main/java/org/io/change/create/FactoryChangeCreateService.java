@@ -3,7 +3,7 @@ package org.io.change.create;
 import com.google.api.services.drive.model.Change;
 import com.google.inject.Guice;
 import org.io.ChangeInterface;
-import org.model.types.MimeType;
+import model.types.MimeType;
 
 /**
  * JDrive

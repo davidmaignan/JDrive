@@ -14,7 +14,7 @@ import org.junit.Test;
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
 
-import org.model.types.MimeType;
+import model.types.MimeType;
 import org.neo4j.graphdb.*;
 import org.writer.FactoryProducer;
 

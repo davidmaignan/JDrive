@@ -1,7 +1,7 @@
 package org.writer;
 
 import com.google.api.services.drive.model.Change;
-import org.model.tree.TreeNode;
+import model.tree.TreeNode;
 import org.neo4j.graphdb.Node;
 
 /**

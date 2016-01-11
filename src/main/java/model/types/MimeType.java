@@ -1,4 +1,4 @@
-package org.model.types;
+package model.types;
 
 /**
  * Google api mime types

@@ -1,6 +1,5 @@
 package org.writer.file;
 
-import org.model.tree.TreeNode;
 import org.writer.WriterInterface;
 
 import java.io.File;

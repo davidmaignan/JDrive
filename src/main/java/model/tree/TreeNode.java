@@ -1,4 +1,4 @@
-package org.model.tree;
+package model.tree;
 
 import java.util.*;
 
@@ -6,7 +6,7 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.ParentReference;
 import com.google.api.services.drive.model.User;
-import org.model.types.MimeType;
+import model.types.MimeType;
 
 /**
  *  Tree structure to represent the Drive file structure

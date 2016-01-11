@@ -3,7 +3,7 @@ package database.repository;
 import database.Fields;
 import database.RelTypes;
 import org.configuration.Configuration;
-import org.model.tree.TreeNode;
+import model.tree.TreeNode;
 import org.neo4j.graphdb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

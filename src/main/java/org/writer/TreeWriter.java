@@ -1,7 +1,7 @@
 package org.writer;
 
-import org.model.tree.TreeNode;
-import java.io.IOException;
+import model.tree.TreeNode;
+
 import java.util.List;
 
 /**

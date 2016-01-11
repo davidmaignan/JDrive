@@ -8,7 +8,7 @@ import database.repository.DatabaseService;
 import org.io.*;
 import org.io.change.create.FactoryChangeCreateService;
 import org.io.change.move.FactoryChangeMoveService;
-import org.model.tree.TreeNode;
+import model.tree.TreeNode;
 import org.neo4j.graphdb.Node;
 
 import java.util.List;

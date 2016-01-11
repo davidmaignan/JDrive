@@ -13,7 +13,7 @@ import database.DatabaseModule;
 import database.repository.DatabaseService;
 import org.io.ChangeExecutor;
 import org.io.ChangeInterface;
-import org.model.tree.TreeBuilder;
+import model.tree.TreeBuilder;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
