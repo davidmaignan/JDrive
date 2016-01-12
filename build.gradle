@@ -7,7 +7,7 @@ apply plugin: 'idea'
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-mainClassName = 'org.main.JDriveMain'
+mainClassName = 'main.JDriveMain'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 version = '1.0'
