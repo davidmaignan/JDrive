@@ -27,6 +27,8 @@ import java.util.Queue;
 public class FileRepository extends DatabaseService {
     private Logger logger = LoggerFactory.getLogger(FileRepository.class);
 
+    public FileRepository(){}
+
     public FileRepository(GraphDatabaseService graphDb, Configuration configuration) {
         super(graphDb, configuration);
     }

@@ -24,6 +24,8 @@ import java.util.Queue;
 public class ChangeRepository extends DatabaseService {
     private static Logger logger = LoggerFactory.getLogger(ChangeRepository.class);
 
+    public ChangeRepository(){}
+
     public ChangeRepository(GraphDatabaseService graphDb, Configuration configuration) {
         super(graphDb, configuration);
     }
