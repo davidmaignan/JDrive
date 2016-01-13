@@ -200,21 +200,6 @@ public class FileRepositoryTest {
         }
     }
 
-    @Test(timeout = 100000)
-    public void testNodeAbsolutePath() {
-        fileRepository.save(this.getRootNode());
-
-        try (Transaction tx = graphDb.beginTx()) {
-            assertEquals("/folder1/file1", fileRepository.getNodeAbsolutePath("file1"));
-            assertEquals("/folder2/folder3/file3", fileRepository.getNodeAbsolutePath("file3"));
-
-            tx.success();
-
-        } catch (Exception exception) {
-
-        }
-    }
-
     /**
      * - root
      *  - folder 1

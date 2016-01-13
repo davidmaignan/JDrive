@@ -230,8 +230,12 @@ public class DatabaseServiceTest {
         dbService.save(this.getRootNode());
 
         try (Transaction tx = graphDb.beginTx()) {
-            assertEquals("/folder1/file1", dbService.getNodeAbsolutePath("file1"));
-            assertEquals("/folder2/folder3/file3", dbService.getNodeAbsolutePath("file3"));
+
+            Node node1 = dbService.getNodeById("file1");
+            Node node2 = dbService.getNodeById("file3");
+
+            assertEquals("/folder1/file1", dbService.getNodeAbsolutePath(node1));
+            assertEquals("/folder2/folder3/file3", dbService.getNodeAbsolutePath(node2));
         } catch (Exception exception) {
 
         }
@@ -277,7 +281,6 @@ public class DatabaseServiceTest {
 
             List<Relationship> result = getResultAsList(node.getRelationships());
 
-            assertEquals("/folder2/file1", dbService.getNodeAbsolutePath("file1"));
             assertEquals("file1", result.get(0).getStartNode().getProperty(Fields.ID).toString());
             assertEquals("folder2", result.get(0).getEndNode().getProperty(Fields.ID).toString());
         }
