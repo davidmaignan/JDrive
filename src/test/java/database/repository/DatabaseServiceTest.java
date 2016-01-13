@@ -234,8 +234,8 @@ public class DatabaseServiceTest {
             Node node1 = dbService.getNodeById("file1");
             Node node2 = dbService.getNodeById("file3");
 
-            assertEquals("/folder1/file1", dbService.getNodeAbsolutePath(node1));
-            assertEquals("/folder2/folder3/file3", dbService.getNodeAbsolutePath(node2));
+            assertEquals("/Test/Path/folder1/file1", dbService.getNodeAbsolutePath(node1));
+            assertEquals("/Test/Path/folder2/folder3/file3", dbService.getNodeAbsolutePath(node2));
         } catch (Exception exception) {
 
         }
