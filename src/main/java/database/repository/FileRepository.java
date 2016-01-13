@@ -1,5 +1,8 @@
 package database.repository;
 
+import com.google.inject.Inject;
+import database.Connection;
+import database.DatabaseConfiguration;
 import database.Fields;
 import database.RelTypes;
 import org.configuration.Configuration;
@@ -31,6 +34,11 @@ public class FileRepository extends DatabaseService {
 
     public FileRepository(GraphDatabaseService graphDb, Configuration configuration) {
         super(graphDb, configuration);
+    }
+
+    @Inject
+    public FileRepository(DatabaseConfiguration dbConfig, Configuration configuration) {
+        super(dbConfig, configuration);
     }
 
     /**
@@ -65,11 +73,45 @@ public class FileRepository extends DatabaseService {
     }
 
     /**
+     * Set processed as true
+     * @param node
+     * @return processed value updated
+     */
+    public boolean markAsProcessed(Node node) {
+        String query = "match (file:File {%s: '%s'}) set file.%s = %s return file.%s";
+
+        try (
+                Transaction tx = graphDB.beginTx();
+                Result queryResult = graphDB.execute(String.format(query, Fields.ID, node.getProperty(Fields.ID),
+                        Fields.PROCESSED, true, Fields.PROCESSED));
+        ) {
+
+            boolean result = false;
+
+            if(queryResult.hasNext()) {
+                result = (boolean)queryResult.next().get(String.format("file.%s", Fields.PROCESSED));
+            }
+
+            tx.success();
+
+            return result;
+
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        return false;
+    }
+
+    /**
      * Get a queue of the unprocessed files/folders.
      *
      * @return queue of files/folders to be written ordered from the root.
      */
     public Queue<Node> getUnprocessedQueue() {
+
+        logger.debug("test");
+
         Queue<Node> queueResult = new ArrayDeque<>();
 
         String query = "match (file:File {%s: %b}) optional match (file)<-[r:PARENT]-(m) " +
@@ -85,7 +127,8 @@ public class FileRepository extends DatabaseService {
 
             tx.success();
         } catch (Exception exception) {
-            logger.error(exception.getMessage());
+//            logger.error(exception.getMessage());
+            exception.printStackTrace();
         }
 
         return queueResult;

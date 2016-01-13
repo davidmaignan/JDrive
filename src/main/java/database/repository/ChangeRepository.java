@@ -1,6 +1,8 @@
 package database.repository;
 
 import com.google.api.services.drive.model.Change;
+import com.google.inject.Inject;
+import database.DatabaseConfiguration;
 import database.Fields;
 import database.RelTypes;
 import org.configuration.Configuration;
@@ -28,6 +30,11 @@ public class ChangeRepository extends DatabaseService {
 
     public ChangeRepository(GraphDatabaseService graphDb, Configuration configuration) {
         super(graphDb, configuration);
+    }
+
+    @Inject
+    public ChangeRepository(DatabaseConfiguration dbConfig, Configuration configuration) {
+        super(dbConfig, configuration);
     }
 
     /**

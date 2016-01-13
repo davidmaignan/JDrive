@@ -40,7 +40,7 @@ public class DatabaseService implements DatabaseServiceInterface {
                     .create();
             tx.success();
         } catch (Exception exception) {
-            logger.error(exception.getMessage());
+//            logger.error(exception.getMessage());
         }
 
         try (Transaction tx = graphDB.beginTx()) {
@@ -50,7 +50,7 @@ public class DatabaseService implements DatabaseServiceInterface {
                     .create();
             tx.success();
         } catch (Exception exception) {
-            logger.error(exception.getMessage());
+//            logger.error(exception.getMessage());
         }
     }
 
@@ -71,7 +71,7 @@ public class DatabaseService implements DatabaseServiceInterface {
                     .create();
             tx.success();
         } catch (Exception exception) {
-            logger.error(exception.getMessage());
+//            logger.error(exception.getMessage());
         }
 
         try (Transaction tx = graphDB.beginTx()) {
@@ -81,7 +81,7 @@ public class DatabaseService implements DatabaseServiceInterface {
                     .create();
             tx.success();
         } catch (Exception exception) {
-            logger.error(exception.getMessage());
+//            logger.error(exception.getMessage());
         }
     }
 
@@ -234,21 +234,18 @@ public class DatabaseService implements DatabaseServiceInterface {
      * @return
      * @throws Exception
      */
-    public String getNodeAbsolutePath(String nodeId) throws Exception {
+    public String getNodeAbsolutePath(Node node) throws Exception {
         StringBuilder pathBuilder = new StringBuilder();
-        Node node = this.getNodeById(nodeId);
 
-        if (node == null) {
-            logger.error("Cannot get an absolute path for a non existing node:" + nodeId);
-            throw new Exception("Cannot get an absolute path for a non existing node:" + nodeId);
-        }
+        String query = "match (file {identifier:'%s'}) match (file)-[r*]->(m {IsRoot:true}) return r";
 
-        String query = "match (file {identifier:'%s'}) match (file)-[r*]->(m {identifier:'root'}) return r";
+        try (Transaction tx = graphDB.beginTx())
+        {
+            Result result = graphDB.execute(String.format(query, node.getProperty(Fields.ID).toString()));
 
-        try (
-                Transaction tx = graphDB.beginTx()) {
-            Result result = graphDB.execute(String.format(query, nodeId)
-            );
+            if ( ! result.hasNext()) {
+                return configuration.getRootFolder();
+            }
 
             Map<String, Object> row = result.next();
 
@@ -268,7 +265,40 @@ public class DatabaseService implements DatabaseServiceInterface {
             logger.error(exception.getMessage());
         }
 
-        return pathBuilder.substring(1).toString();
+        return String.format("%s%s",
+                configuration.getRootFolder(),
+                pathBuilder.substring(1).toString()
+        );
+    }
+
+    public String getMimeType(Node node) {
+        try(Transaction tx = graphDB.beginTx()) {
+
+            String type = String.valueOf(node.getProperty(Fields.MIME_TYPE));
+
+            tx.success();
+
+            return type;
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        return null;
+    }
+
+    public String getFileId(Node node) {
+        try(Transaction tx = graphDB.beginTx()) {
+
+            String type = String.valueOf(node.getProperty(Fields.ID));
+
+            tx.success();
+
+            return type;
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        return null;
     }
 
     /**
