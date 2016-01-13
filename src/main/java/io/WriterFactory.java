@@ -10,7 +10,7 @@ import model.types.MimeType;
  */
 public class WriterFactory {
 
-    public static WriterInterface getWriter(String mimeType) throws Exception {
+    public static WriterInterface getWriter(String mimeType) {
         if(mimeType.equals(MimeType.FOLDER)) {
             return new Folder();
         } else if (! MimeType.all().contains(mimeType)) {
