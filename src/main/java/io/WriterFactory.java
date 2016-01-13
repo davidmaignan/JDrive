@@ -11,7 +11,6 @@ import model.types.MimeType;
 public class WriterFactory {
 
     public static WriterInterface getWriter(String mimeType) throws Exception {
-        System.out.printf(mimeType);
         if(mimeType.equals(MimeType.FOLDER)) {
             return new Folder();
         } else if (! MimeType.all().contains(mimeType)) {

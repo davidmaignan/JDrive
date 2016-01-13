@@ -75,6 +75,7 @@ public class TreeBuilderTest {
         folder1.setId("0B3mMPOF_fWirfk9xWW5iX09fWkdwR3I4dnV5cnV3Y1l4NDNkVUd6TzJfdGJHRVFSc2ctdkE");
         folder1.setMimeType("application/vnd.google-apps.folder");
         folder1.setCreatedDate(new DateTime("2015-01-07T15:14:10.751Z"));
+        folder1.setVersion(0l);
 
         folder1.setParents(this.getParentReferenceList(
                 "0AHRgC7jH8BP_Uk9PVA", true
@@ -88,6 +89,7 @@ public class TreeBuilderTest {
         file1.setTitle("file1");
         file1.setId("1K2T_qDWBhlyk_OVL9Q6JYmQZVcIo-Y9HSKz54RAMPhM");
         file1.setMimeType("application/vnd.google-apps.document");
+        file1.setVersion(0l);
 
         file1.setParents(this.getParentReferenceList(
                 "0B3mMPOF_fWirfk9xWW5iX09fWkdwR3I4dnV5cnV3Y1l4NDNkVUd6TzJfdGJHRVFSc2ctdkE",
@@ -103,6 +105,7 @@ public class TreeBuilderTest {
         folder2.setId("0B3mMPOF_fWirfnc5QXhhR2l4SXMyeVBraGRoZVYtdVVZVEt3SnFZcVZEU2wwQ0FsSGQtZUU");
         folder2.setMimeType("application/vnd.google-apps.folder");
         folder2.setCreatedDate(new DateTime("2015-01-07T15:14:10.751Z"));
+        folder2.setVersion(0l);
 
         folder2.setParents(this.getParentReferenceList(
                 "0B3mMPOF_fWirfk9xWW5iX09fWkdwR3I4dnV5cnV3Y1l4NDNkVUd6TzJfdGJHRVFSc2ctdkE", false
@@ -116,6 +119,7 @@ public class TreeBuilderTest {
         file2.setTitle("file2");
         file2.setId("1dnzyHctDRyZVZztz7RX20i9u0TVnd7G-X5sP0BSU_QM");
         file2.setMimeType("application/vnd.google-apps.document");
+        file2.setVersion(0l);
 
         file2.setParents(this.getParentReferenceList(
                 "0B3mMPOF_fWirfnc5QXhhR2l4SXMyeVBraGRoZVYtdVVZVEt3SnFZcVZEU2wwQ0FsSGQtZUU",
@@ -151,6 +155,7 @@ public class TreeBuilderTest {
         file1.setTitle("file1");
         file1.setId("1K2T_qDWBhlyk_OVL9Q6JYmQZVcIo-Y9HSKz54RAMPhM");
         file1.setMimeType("application/vnd.google-apps.document");
+        file1.setVersion(0l);
 
         file1.setParents(this.getParentReferenceList(
                 "0AHRgC7jH8BP_Uk9PVA",
@@ -166,6 +171,7 @@ public class TreeBuilderTest {
         file2.setTitle("file2");
         file2.setId("0B3mMPOF_fWirfk9xWW5iX09fWkdwR3I4dnV5cnV3Y1l4NDNkVUd6TzJfdGJHRVFSc2ctdkE");
         file2.setMimeType("application/vnd.google-apps.folder");
+        file2.setVersion(0l);
 
         file2.setParents(this.getParentReferenceList(
                 "0AHRgC7jH8BP_Uk9PVA",
@@ -192,6 +198,7 @@ public class TreeBuilderTest {
         folder1.setId("0B3mMPOF_fWirfk9xWW5iX09fWkdwR3I4dnV5cnV3Y1l4NDNkVUd6TzJfdGJHRVFSc2ctdkE");
         folder1.setMimeType("application/vnd.google-apps.folder");
         folder1.setCreatedDate(new DateTime("2015-01-07T15:14:10.751Z"));
+        folder1.setVersion(0l);
 
         folder1.setParents(this.getParentReferenceList(
                 "0AHRgC7jH8BP_Uk9PVA", true
@@ -205,6 +212,7 @@ public class TreeBuilderTest {
         file1.setTitle("file1");
         file1.setId("1K2T_qDWBhlyk_OVL9Q6JYmQZVcIo-Y9HSKz54RAMPhM");
         file1.setMimeType("application/vnd.google-apps.document");
+        file1.setVersion(0l);
 
         file1.setParents(this.getParentReferenceList(
                 "0B3mMPOF_fWirfk9xWW5iX09fWkdwR3I4dnV5cnV3Y1l4NDNkVUd6TzJfdGJHRVFSc2ctdkE",

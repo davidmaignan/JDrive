@@ -116,7 +116,10 @@ public class ChangeRepository extends DatabaseService {
             return true;
 
         } catch (Exception exception) {
-            logger.error(exception.getMessage());
+            logger.error("Change: " + change.getId()
+                    + " - " + change.getFileId()
+                    + " - " +exception.getMessage()
+            );
         }
 
         return false;

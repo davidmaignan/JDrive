@@ -463,6 +463,7 @@ public class DatabaseService implements DatabaseServiceInterface {
         dbNode.setProperty(Fields.MIME_TYPE, tNode.getMimeType());
         dbNode.setProperty(Fields.IS_ROOT, tNode.isSuperRoot());
         dbNode.setProperty(Fields.PROCESSED, false);
+        dbNode.setProperty(Fields.VERSION, tNode.getVersion());
 
         if (tNode.getCreatedDate() != null) {
             dbNode.setProperty(Fields.CREATED_DATE, tNode.getCreatedDate().getValue());

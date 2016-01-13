@@ -202,12 +202,10 @@ public class FileRepositoryTest {
 
     /**
      * - root
-     *  - folder 1
-     *      - file 1
-     *  - folder 2
-     *  - file 2
-     *  - folder 3
-     *      - file 3
+     * - folder 1
+     * - file1
+     * - folder 2
+     * - file2
      */
     private TreeNode getRootNode() {
         ArrayList<File> listFile = new ArrayList<>();
@@ -218,6 +216,7 @@ public class FileRepositoryTest {
         folder1.setId("folder1");
         folder1.setMimeType("application/vnd.google-apps.folder");
         folder1.setCreatedDate(new DateTime("2015-01-07T15:14:10.751Z"));
+        folder1.setVersion(0l);
 
         folder1.setParents(this.getParentReferenceList(
                 "root", true
@@ -231,6 +230,8 @@ public class FileRepositoryTest {
         file1.setTitle("file1");
         file1.setId("file1");
         file1.setMimeType("application/vnd.google-apps.document");
+        file1.setCreatedDate(new DateTime("2015-01-07T15:14:10.751Z"));
+        file1.setVersion(0l);
 
         file1.setParents(this.getParentReferenceList(
                 "folder1",
@@ -246,6 +247,7 @@ public class FileRepositoryTest {
         folder2.setId("folder2");
         folder2.setMimeType("application/vnd.google-apps.folder");
         folder2.setCreatedDate(new DateTime("2015-01-07T15:14:10.751Z"));
+        folder2.setVersion(0l);
 
         folder2.setParents(this.getParentReferenceList(
                 "root", false
@@ -259,6 +261,8 @@ public class FileRepositoryTest {
         file2.setTitle("file2");
         file2.setId("file2");
         file2.setMimeType("application/vnd.google-apps.document");
+        file2.setCreatedDate(new DateTime("2015-01-07T15:14:10.751Z"));
+        file2.setVersion(0l);
 
         file2.setParents(this.getParentReferenceList(
                 "folder2",
@@ -274,6 +278,7 @@ public class FileRepositoryTest {
         folder3.setId("folder3");
         folder3.setMimeType("application/vnd.google-apps.folder");
         folder3.setCreatedDate(new DateTime("2015-01-07T15:14:10.751Z"));
+        folder3.setVersion(0l);
 
         folder3.setParents(this.getParentReferenceList(
                 "folder2", false
@@ -287,6 +292,8 @@ public class FileRepositoryTest {
         file3.setTitle("file3");
         file3.setId("file3");
         file3.setMimeType("application/vnd.google-apps.document");
+        file3.setCreatedDate(new DateTime("2015-01-07T15:14:10.751Z"));
+        file3.setVersion(0l);
 
         file3.setParents(this.getParentReferenceList(
                 "folder3",

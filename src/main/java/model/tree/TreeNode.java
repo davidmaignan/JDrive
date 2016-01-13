@@ -28,6 +28,7 @@ public class TreeNode {
     private DateTime createdDate;
     private DateTime modifiedDate;
     private boolean isTrashed;
+    private long version;
 
     /**
      * No args constructor
@@ -42,6 +43,7 @@ public class TreeNode {
         this.children            = new ArrayList<>();
         this.data                = new File();
         this.isTrashed           = false;
+        this.version             = 0l;
         data.setMimeType(MimeType.FOLDER);
     }
 
@@ -63,6 +65,7 @@ public class TreeNode {
         this.modifiedDate        = this.data.getModifiedDate();
         this.createdDate         = this.data.getCreatedDate();
         this.isTrashed           = false;
+        this.version             = this.data.getVersion();
 
         if (file.getLabels() != null && file.getLabels().size() > 0) {
             this.isTrashed = file.getLabels().getTrashed().booleanValue();
@@ -185,6 +188,14 @@ public class TreeNode {
 
     public DateTime getModifiedDate() {
         return modifiedDate;
+    }
+
+    public long getVersion() {
+        return version;
+    }
+
+    public boolean isTrashed() {
+        return isTrashed;
     }
 
     @Override
