@@ -140,6 +140,7 @@ public class ChangeRepository extends DatabaseService {
         changeNode.setProperty(Fields.SELF_LINK, change.getSelfLink());
         changeNode.setProperty(Fields.DELETED, change.getDeleted());
         changeNode.setProperty(Fields.PROCESSED, false);
+        changeNode.setProperty(Fields.VERSION, change.getFile().getVersion());
 
         return changeNode;
     }
