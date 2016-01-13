@@ -45,10 +45,14 @@ public class ChangeRepository extends DatabaseService {
     public boolean markAsProcessed(long id) {
         String query = "match (change:Change {%s: %d}) set change.%s = %s return change.%s";
 
+        query = String.format(query, Fields.ID, id,
+                Fields.PROCESSED, true, Fields.PROCESSED);
+
+        logger.debug(query);
+
         try (
                 Transaction tx = graphDB.beginTx();
-                Result queryResult = graphDB.execute(String.format(query, Fields.ID, id,
-                        Fields.PROCESSED, true, Fields.PROCESSED))
+                Result queryResult = graphDB.execute(query)
         ) {
 
             boolean result = false;

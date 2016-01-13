@@ -230,7 +230,7 @@ public class DatabaseService implements DatabaseServiceInterface {
     /**
      * Get absolutePath for a node by Id
      *
-     * @param nodeId
+     * @param node
      * @return
      * @throws Exception
      */

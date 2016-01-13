@@ -43,6 +43,7 @@ public class JDriveMain {
     private static ChangeRepository changeRepository;
     private static FileRepository fileRepository;
     private static ChangeExecutor changeExecutor;
+    private static Configuration configReader;
 
     private static Logger logger = LoggerFactory.getLogger(JDriveMain.class);
 
@@ -57,34 +58,58 @@ public class JDriveMain {
         initJDrive();
         initServices();
 
-        boolean setUpSuccess = false;
-        try {
-            setUpSuccess = setUpJDrive();
-        } catch (Exception exception) {
-            logger.error(exception.getMessage());
-        }
+//        boolean setUpSuccess = false;
+//        try {
+//            setUpSuccess = setUpJDrive();
+//        } catch (Exception exception) {
+//            logger.error(exception.getMessage());
+//        }
+//
+//        try{
+//            initWrite();
+//        }catch (Exception exception) {
+//            logger.error(exception.getMessage());
+//        }
+//
+//        try {
+//            setUpChanges();
+//        } catch (Exception exception) {
+//            logger.error(exception.getMessage());
+//        }
+//
+//        try {
+//            initChanges();
+//        } catch (Exception exception) {
+//            logger.error(exception.getMessage());
+//        }
 
         try{
-            initWrite();
-        }catch (Exception exception) {
-            logger.error(exception.getMessage());
-        }
-
-        try {
-            setUpChanges();
+            run();
         } catch (Exception exception) {
             logger.error(exception.getMessage());
         }
-
-        try {
-            initChanges();
-        } catch (Exception exception) {
-            logger.error(exception.getMessage());
-        }
-
-        
 
         registerShutdownHook(dbService.getGraphDB());
+    }
+
+    private static void run() throws Exception{
+        Long lastChangeId = null;
+
+        try {
+            lastChangeId = Long.valueOf(configReader.getProperty("lastChangeId"));
+        } catch (NumberFormatException exception) {
+
+        }
+
+        ChangeService changeService = injector.getInstance(ChangeService.class);
+        List<Change> changeList = changeService.getAll(lastChangeId);
+
+        System.out.println("Change size: " + changeList.size());
+
+        for (Change change : changeList){
+            lastChangeId = (lastChangeId == null)? change.getId() : Math.max(lastChangeId, change.getId());
+            changeRepository.addChange(change);
+        }
     }
 
     private static void initChanges() throws Exception {
@@ -96,21 +121,17 @@ public class JDriveMain {
             GraphDatabaseService graphDB = dbService.getGraphDB();
 
             try (Transaction tx = graphDB.beginTx()) {
-
                 Node fileNode = fileRepository.getNodeById(node.getProperty(Fields.FILE_ID).toString());
 
                 String changeVersion = node.getProperty(Fields.VERSION).toString();
+                Long changeId = ((long) node.getProperty(Fields.ID));
                 String fileVersion = fileNode.getProperty(Fields.VERSION).toString();
 
                 if(changeVersion.compareTo(fileVersion) <= 0) {
-                    logger.debug("Same version");
-                    changeRepository.markAsProcessed(node.getId());
+                    changeRepository.markAsProcessed(changeId);
                 } else {
                     logger.debug("Need to apply the change");
                 }
-
-//                logger.debug("Change version: " + node.getProperty(Fields.VERSION));
-//                logger.debug("File version: " + fileNode.getProperty(Fields.VERSION));
 
                 tx.success();
 
@@ -118,10 +139,7 @@ public class JDriveMain {
                 logger.error("Cannot save the tree of nodes");
                 logger.error(exception.getMessage());
             }
-
         }
-
-
     }
 
     private static void initWrite() throws Exception{
@@ -172,6 +190,13 @@ public class JDriveMain {
         changeRepository = injector.getInstance(ChangeRepository.class);
         fileRepository   = injector.getInstance(FileRepository.class);
         changeExecutor   = injector.getInstance(ChangeExecutor.class);
+
+        try{
+            configReader = new Configuration();
+        } catch (IOException exception) {
+            logger.error(exception.getMessage());
+        }
+
     }
 
     private static boolean setUpJDrive() throws Exception{
@@ -199,7 +224,6 @@ public class JDriveMain {
     }
 
     private static void setUpChanges() throws IOException, Exception{
-        Configuration configReader = new Configuration();
 
         Long lastChangeId = null;
 
