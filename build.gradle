@@ -62,7 +62,7 @@ sourceSets {
 }
 
 test {
-    println "Test task"
+    println "Test"
     // enable TestNG support (default is JUnit)
     useJUnit() {
         environment 'env', 'test'
@@ -102,10 +102,14 @@ run {
     systemProperty 'logback.configurationFile', 'logback.xml'
 }
 
-task('hello') <<
+task('clean') <<
 {
+    println("Clean")
     delete "db"
-    println "hello"
+    delete "/Users/david/JDrive"
 }
+
+defaultTasks 'clean', 'run'
+
 
 //gradle -Dtest.single=TreeBuilderTest test
