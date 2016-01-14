@@ -160,7 +160,7 @@ public class FileRepository extends DatabaseService {
             return true;
 
         } catch (Exception exception) {
-            logger.error(String.format("Cannot create node for file %d already exists", file.getId()));
+            logger.error(exception.getMessage());
         }
 
         return false;

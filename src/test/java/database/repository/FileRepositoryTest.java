@@ -178,7 +178,7 @@ public class FileRepositoryTest {
             assertEquals("folder1", node.getProperty(Fields.ID));
             assertEquals("application/vnd.google-apps.folder", node.getProperty(Fields.MIME_TYPE));
             assertEquals(1420643650751L, node.getProperty(Fields.CREATED_DATE));
-            assertFalse((boolean)node.getProperty(Fields.PROCESSED));
+            assertFalse((boolean) node.getProperty(Fields.PROCESSED));
 
             tx.success();
         } catch (Exception exception) {
@@ -201,8 +201,45 @@ public class FileRepositoryTest {
     }
 
     @Test(timeout = 1000)
-    public void testCreateIfNotExists(){
-        fail("Not yet implemented");
+    public void testCreateIfNotExistsFailure(){
+        fileRepository.save(this.getRootNode());
+
+        File file = new File();
+        file.setTitle("file1");
+        file.setId("file1");
+        file.setMimeType("application/vnd.google-apps.document");
+        file.setCreatedDate(new DateTime("2015-01-07T15:14:10.751Z"));
+        file.setVersion(0l);
+
+        file.setParents(this.getParentReferenceList(
+                "folder1",
+                false
+        ));
+
+        file.setOwners(this.getOwnerList("David Maignan", true));
+
+        assertFalse(fileRepository.createIfNotExists(file));
+    }
+
+    @Test(timeout = 1000)
+    public void testCreateIfNotExistsSuccess(){
+        fileRepository.save(this.getRootNode());
+
+        File file = new File();
+        file.setTitle("newFile");
+        file.setId("newFile");
+        file.setMimeType("application/vnd.google-apps.document");
+        file.setCreatedDate(new DateTime("2015-01-07T15:14:10.751Z"));
+        file.setVersion(0l);
+
+        file.setParents(this.getParentReferenceList(
+                "folder1",
+                false
+        ));
+
+        file.setOwners(this.getOwnerList("David Maignan", true));
+
+        assertTrue(fileRepository.createIfNotExists(file));
     }
 
     /**
