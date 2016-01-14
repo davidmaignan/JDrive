@@ -26,3 +26,5 @@ gradle-app.setting
 #logs
 logs/*.log
 
+#out
+out/
