@@ -106,6 +106,22 @@ public class ChangeRepositoryTest {
         }
     }
 
+    @Test(timeout = 1000)
+    public void testGetLastChangeId(){
+        repository.save(this.getRootNode());
+
+        repository.addChange(this.generateChange(1l, "folder1"));
+        repository.addChange(this.generateChange(2l, "folder1"));
+        repository.addChange(this.generateChange(3l, "folder1"));
+        repository.addChange(this.generateChange(4l, "file1"));
+        repository.addChange(this.generateChange(5l, "folder2"));
+        repository.addChange(this.generateChange(6l, "file3"));
+
+        long result = repository.getLastChangeId();
+
+        assertEquals(6l, result);
+    }
+
     private Change generateChange(long id, String fileId) {
         Change change = new Change();
         change.setId(id);
@@ -118,6 +134,7 @@ public class ChangeRepositoryTest {
         file1.setTitle(fileId);
         file1.setId(fileId);
         file1.setMimeType(MimeType.FOLDER);
+        file1.setVersion(0l);
 
         file1.setParents(this.getParentReferenceList(
                 "folder2",
@@ -144,6 +161,7 @@ public class ChangeRepositoryTest {
         file1.setTitle("folder1");
         file1.setId("folder1");
         file1.setMimeType(MimeType.FOLDER);
+        file1.setVersion(0l);
 
         file1.setParents(this.getParentReferenceList(
                 "folder2",
@@ -181,6 +199,7 @@ public class ChangeRepositoryTest {
         file1.setTitle("folder1");
         file1.setId("folder1");
         file1.setMimeType(MimeType.FOLDER);
+        file1.setVersion(0l);
 
         file1.setParents(this.getParentReferenceList(
                 "folder2",
@@ -239,6 +258,7 @@ public class ChangeRepositoryTest {
         file1.setTitle("folder1");
         file1.setId("folder1");
         file1.setMimeType(MimeType.FOLDER);
+        file1.setVersion(0l);
 
         file1.setParents(this.getParentReferenceList(
                 "folder2",

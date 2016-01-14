@@ -43,7 +43,7 @@ public class ChangeRepository extends DatabaseService {
      * @return processed value updated
      */
     public boolean markAsProcessed(long id) {
-        String query = "match (change:Change {%s: %d}) set change.%s = %s return change.%s";
+        String query = "match (change {%s:%d}) set change.%s=%b return change.%s";
 
         query = String.format(query, Fields.ID, id,
                 Fields.PROCESSED, true, Fields.PROCESSED);
@@ -70,6 +70,31 @@ public class ChangeRepository extends DatabaseService {
         }
 
         return false;
+    }
+
+    public long getLastChangeId() {
+        long result = 0;
+
+        String query = "match (change:Change) with change.%s as id ORDER BY id DESC LIMIT 1 RETURN id";
+
+        query = String.format(query, Fields.ID);
+
+        try(Transaction tx = graphDB.beginTx();
+            Result queryResult = graphDB.execute(query))
+        {
+            if(queryResult.hasNext()) {
+                result =  (long)queryResult.next().get("id");
+            }
+
+            tx.success();
+
+            return result;
+
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        return result;
     }
 
     public Node getChangeById(long value) {
