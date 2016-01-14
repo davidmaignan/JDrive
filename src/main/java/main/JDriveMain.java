@@ -57,38 +57,60 @@ public class JDriveMain {
         initJDrive();
         initServices();
 
-//        boolean setUpSuccess = false;
-//        try {
-//            setUpSuccess = setUpJDrive();
-//        } catch (Exception exception) {
-//            logger.error(exception.getMessage());
-//        }
-//
-//        try{
-//            initWrite();
-//        }catch (Exception exception) {
-//            logger.error(exception.getMessage());
-//        }
+        boolean setUpSuccess = false;
+        try {
+            setUpSuccess = setUpJDrive();
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
 
-//        try {
-//            setUpChanges();
-//        } catch (Exception exception) {
-//            logger.error(exception.getMessage());
-//        }
+        try{
+            initWrite();
+        }catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
 
-//        try {
-//            initChanges();
-//        } catch (Exception exception) {
-//            logger.error(exception.getMessage());
-//        }
-//
+        try {
+            setUpChanges();
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        try {
+            initChanges();
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
         try{
             getLastChanges();
         } catch (Exception exception) {
             logger.error(exception.getMessage());
         }
 
+        try{
+            applyLastChanges();
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
         registerShutdownHook(dbService.getGraphDB());
+    }
+
+    private static void applyLastChanges(){
+        Queue<Node> changeQueue = changeRepository.getUnprocessed();
+
+        for (Node change : changeQueue) {
+            // File node.processed = false -> new file
+
+            //File node.proccessed = true
+                // - Trashed
+                // - deleted
+                // - different parent
+                // - update content
+                // - none of these ignore then mark as processed
+
+        }
     }
 
     private static void getLastChanges() throws Exception{
