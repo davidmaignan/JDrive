@@ -9,7 +9,6 @@ import database.repository.ChangeRepository;
 import database.repository.FileRepository;
 import io.WriterFactory;
 import io.WriterInterface;
-import model.tree.TreeNode;
 import org.api.change.ChangeService;
 import org.api.UpdateService;
 import org.configuration.Configuration;
@@ -17,7 +16,6 @@ import org.api.FileService;
 import database.DatabaseModule;
 import database.repository.DatabaseService;
 import org.io.ChangeExecutor;
-import org.io.ChangeInterface;
 import model.tree.TreeBuilder;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -38,6 +36,7 @@ public class JDriveMain {
     private static Injector injector;
     private static TreeBuilder treeBuilder;
     private static FileService fileService;
+    private static ChangeService changeService;
     private static UpdateService updateService;
     private static DatabaseService dbService;
     private static ChangeRepository changeRepository;
@@ -70,21 +69,21 @@ public class JDriveMain {
 //        }catch (Exception exception) {
 //            logger.error(exception.getMessage());
 //        }
-//
+
 //        try {
 //            setUpChanges();
 //        } catch (Exception exception) {
 //            logger.error(exception.getMessage());
 //        }
-//
+
 //        try {
 //            initChanges();
 //        } catch (Exception exception) {
 //            logger.error(exception.getMessage());
 //        }
-
+//
         try{
-            run();
+            getLastChanges();
         } catch (Exception exception) {
             logger.error(exception.getMessage());
         }
@@ -92,23 +91,22 @@ public class JDriveMain {
         registerShutdownHook(dbService.getGraphDB());
     }
 
-    private static void run() throws Exception{
-        Long lastChangeId = null;
-
-        try {
-            lastChangeId = Long.valueOf(configReader.getProperty("lastChangeId"));
-        } catch (NumberFormatException exception) {
-
-        }
+    private static void getLastChanges() throws Exception{
+        Long lastChangeId = changeRepository.getLastChangeId();
 
         ChangeService changeService = injector.getInstance(ChangeService.class);
-        List<Change> changeList = changeService.getAll(lastChangeId);
-
-        System.out.println("Change size: " + changeList.size());
+        List<Change> changeList = changeService.getAll(++lastChangeId);
 
         for (Change change : changeList){
-            lastChangeId = (lastChangeId == null)? change.getId() : Math.max(lastChangeId, change.getId());
-            changeRepository.addChange(change);
+            logger.debug("Change id: " + change.getId());
+
+            boolean result = fileRepository.createIfNotExists(change.getFile());
+
+            logger.debug("Result file: " + result);
+
+            result = changeRepository.addChange(change);
+
+            logger.debug("Result file: " + result);
         }
     }
 
@@ -124,11 +122,16 @@ public class JDriveMain {
                 Node fileNode = fileRepository.getNodeById(node.getProperty(Fields.FILE_ID).toString());
 
                 String changeVersion = node.getProperty(Fields.VERSION).toString();
-                Long changeId = ((long) node.getProperty(Fields.ID));
-                String fileVersion = fileNode.getProperty(Fields.VERSION).toString();
+                Long changeId        = ((long) node.getProperty(Fields.ID));
+                String fileVersion   = fileNode.getProperty(Fields.VERSION).toString();
 
                 if(changeVersion.compareTo(fileVersion) <= 0) {
-                    changeRepository.markAsProcessed(changeId);
+                    boolean result = changeRepository.markAsProcessed(changeId);
+                    logger.debug(String.format(
+                            "Change: %d is marded as processed %b",
+                            changeId, result)
+                    );
+
                 } else {
                     logger.debug("Need to apply the change");
                 }
@@ -164,20 +167,6 @@ public class JDriveMain {
         }
     }
 
-    private static void applyChanges(){
-        Queue<Node> changeQueue = changeRepository.getUnprocessed();
-
-        while ( ! changeQueue.isEmpty()) {
-            Node node = changeQueue.remove();
-
-            //file or folder
-
-            //new parent / new file
-
-            //Trashed or deleted
-        }
-    }
-
     private static void initJDrive() {
         injector = Guice.createInjector(new DatabaseModule());
     }
@@ -185,6 +174,7 @@ public class JDriveMain {
     private static void initServices() {
         treeBuilder      = injector.getInstance(TreeBuilder.class);
         fileService      = injector.getInstance(FileService.class);
+        changeService    = injector.getInstance(ChangeService.class);
         updateService    = injector.getInstance(UpdateService.class);
         dbService        = injector.getInstance(DatabaseService.class);
         changeRepository = injector.getInstance(ChangeRepository.class);
@@ -224,44 +214,14 @@ public class JDriveMain {
     }
 
     private static void setUpChanges() throws IOException, Exception{
-
-        Long lastChangeId = null;
-
-        try {
-            lastChangeId = Long.valueOf(configReader.getProperty("lastChangeId"));
-        } catch (NumberFormatException exception) {
-
-        }
-
-        ChangeService changeService = injector.getInstance(ChangeService.class);
-        List<Change> changeList = changeService.getAll(lastChangeId);
-
-        System.out.println(changeList.size());
-
-        int index = 0;
+//        Long lastChangeId = changeRepository.getLastChangeId();
+        List<Change> changeList = changeService.getAll(null);
 
         for (Change change : changeList){
-            System.out.println("index: " + index++);
-            lastChangeId = (lastChangeId == null)? change.getId() : Math.max(lastChangeId, change.getId());
-
-
-            changeRepository.addChange(change);
-
-//            ChangeInterface service = updateService.update(change);
-//            changeExecutor.addChange(service);
+            if(changeRepository.addChange(change)){
+                logger.debug("Change: " + change.getId() + " added");
+            }
         }
-
-//        System.out.println(changeExecutor.size());
-//        changeExecutor.clean();
-//        changeExecutor.debug();
-//        changeExecutor.execute();
-
-        for (ChangeInterface service : changeExecutor.getChangeListFailed()) {
-            System.out.println("Failed to create: " + service.getChange().getFile().getTitle());
-        }
-
-        configReader.writeProperty("lastChangeId", lastChangeId);
-//        System.out.println(lastChangeId);
     }
 
     private static Configuration setConfiguration() throws IOException{

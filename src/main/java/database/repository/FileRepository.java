@@ -1,5 +1,6 @@
 package database.repository;
 
+import com.google.api.services.drive.model.File;
 import com.google.inject.Inject;
 import database.Connection;
 import database.DatabaseConfiguration;
@@ -127,11 +128,42 @@ public class FileRepository extends DatabaseService {
 
             tx.success();
         } catch (Exception exception) {
-//            logger.error(exception.getMessage());
-            exception.printStackTrace();
+            logger.error(exception.getMessage());
+//            exception.printStackTrace();
         }
 
         return queueResult;
+    }
+
+    public boolean createIfNotExists(File file) {
+        try(Transaction tx = graphDB.beginTx()) {
+            Node dbNode = graphDB.createNode(DynamicLabel.label("File"));
+
+            dbNode.addLabel(DynamicLabel.label("File"));
+            dbNode.setProperty(Fields.ID, file.getId());
+            dbNode.setProperty(Fields.TITLE, file.getTitle());
+            dbNode.setProperty(Fields.MIME_TYPE, file.getMimeType());
+            dbNode.setProperty(Fields.IS_ROOT, false);
+            dbNode.setProperty(Fields.PROCESSED, false);
+            dbNode.setProperty(Fields.VERSION, file.getVersion());
+
+            if (file.getCreatedDate() != null) {
+                dbNode.setProperty(Fields.CREATED_DATE, file.getCreatedDate().getValue());
+            }
+
+            if (file.getModifiedDate() != null) {
+                dbNode.setProperty(Fields.MODIFIED_DATE, file.getModifiedDate().getValue());
+            }
+
+            tx.success();
+
+            return true;
+
+        } catch (Exception exception) {
+            logger.error(String.format("Cannot create node for file %d already exists", file.getId()));
+        }
+
+        return false;
     }
 
     /**

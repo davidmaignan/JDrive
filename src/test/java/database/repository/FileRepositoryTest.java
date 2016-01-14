@@ -200,6 +200,11 @@ public class FileRepositoryTest {
         }
     }
 
+    @Test(timeout = 1000)
+    public void testCreateIfNotExists(){
+        fail("Not yet implemented");
+    }
+
     /**
      * - root
      * - folder 1
