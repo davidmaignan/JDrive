@@ -18,9 +18,9 @@ import java.util.Queue;
 /**
  * File repository.
  *
- * Files & Folders are saved as a 'file' node in a tree structure.
+ * Files & Folders are saved as a 'file' node in the graph database
  * The link between them is defined as a parent RelTypes.PARENT
- * The owner (start node) of the relation is the child, the end node (obviously a folder)
+ * The owner (start node) of the relation is the child, the end node (the folder)
  * is the parent.
  *
  * Eg: create (root:Node {n:"root"}), (a:Node {n:"a"}), (b:Node {n:"b"}), (c:Node {n:"c"}),
@@ -42,9 +42,60 @@ public class FileRepository extends DatabaseService {
         super(dbConfig, configuration);
     }
 
+    /**
+     * Modifiy Parent relation when file/folder is moved to another directory
+     *
+     * @param childId
+     * @param parentId
+     * @return
+     */
+    public boolean updateRelationship(String childId, String parentId) {
+        String queryCreateRelation = "match (child:File {%s:'%s'}), (parent:File {%s:'%s'})" +
+                " CREATE (child)-[r:%s]->(parent) return child, parent, r";
+
+        queryCreateRelation = String.format(
+                queryCreateRelation,
+                Fields.ID,
+                childId,
+                Fields.ID,
+                parentId,
+                RelTypes.PARENT
+        );
+
+        String queryDeleteRelation = "match (child:File {%s:'%s'})-[r:%s]->() delete r";
+
+        queryDeleteRelation = String.format(
+                queryDeleteRelation,
+                Fields.ID,
+                childId,
+                RelTypes.PARENT
+        );
+
+        try(Transaction tx = graphDB.beginTx()) {
+            graphDB.execute(queryDeleteRelation);
+            graphDB.execute(queryCreateRelation);
+
+            tx.success();
+
+            return true;
+
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        return false;
+    }
+
+    /**
+     * Update delete property recursively to all files and folders children
+     * @param id
+     * @return
+     */
     public boolean markasDeleted(String id) {
-        String query = "match (file {identifier:'%s'})<-[:PARENT*]-(m) set file.deleted=true, m.deleted=true return file, m";
-        query = String.format(query, id);
+        String query = "match (file {%s:'%s'})<-[:%s*]-(m) " +
+                "set file.deleted=true, m.deleted=true return file, m";
+
+        query = String.format(query, Fields.ID, id, RelTypes.PARENT);
 
         try(Transaction tx = graphDB.beginTx())
         {
@@ -62,7 +113,7 @@ public class FileRepository extends DatabaseService {
     }
 
     /**
-     * Set processed as true
+     * Set processed field as true
      * @param id
      * @return processed value updated
      */
@@ -145,7 +196,6 @@ public class FileRepository extends DatabaseService {
             tx.success();
         } catch (Exception exception) {
             logger.error(exception.getMessage());
-//            exception.printStackTrace();
         }
 
         return queueResult;

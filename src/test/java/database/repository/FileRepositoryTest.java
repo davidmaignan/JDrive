@@ -55,6 +55,36 @@ public class FileRepositoryTest {
     }
 
     @Test(timeout = 10000)
+    public void testUpdateRelationship(){
+        fileRepository.save(this.getRootNode());
+
+        assertTrue(fileRepository.updateRelationship("file2", "folder3"));
+
+        try(Transaction tx = graphDb.beginTx()) {
+
+            Node file2 = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "file2");
+            Node folder3 = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "folder3");
+
+            assertEquals("folder3",
+                    file2.getSingleRelationship(RelTypes.PARENT, Direction.OUTGOING)
+                            .getEndNode()
+                            .getProperty(Fields.ID));
+
+            Node folder2 = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "folder2");
+
+            List<Relationship> relationshipList = getResultAsList(folder2.getRelationships(RelTypes.PARENT, Direction.INCOMING));
+
+            assertEquals(1, relationshipList.size());
+            assertEquals("folder3", relationshipList.get(0).getStartNode().getProperty(Fields.ID));
+            assertEquals("folder2", relationshipList.get(0).getEndNode().getProperty(Fields.ID));
+
+            tx.success();
+        } catch (Exception exception){
+
+        }
+    }
+
+    @Test(timeout = 10000)
     public void testMarkAsDeleted(){
         fileRepository.save(this.getRootNode());
 
