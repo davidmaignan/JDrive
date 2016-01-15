@@ -54,6 +54,28 @@ public class FileRepositoryTest {
         graphDb.shutdown();
     }
 
+    @Test(timeout = 10000)
+    public void testMarkAsDeleted(){
+        fileRepository.save(this.getRootNode());
+
+        assertTrue(fileRepository.markasDeleted("folder2"));
+
+        try(Transaction tx = graphDb.beginTx()) {
+            Node folder2 = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "folder2");
+            Node file2 = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "file2");
+            Node folder3 = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "folder3");
+            Node file3 = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "file3");
+
+            assertTrue((boolean)folder2.getProperty(Fields.DELETED));
+            assertTrue((boolean)file2.getProperty(Fields.DELETED));
+            assertTrue((boolean)folder3.getProperty(Fields.DELETED));
+            assertTrue((boolean)file3.getProperty(Fields.DELETED));
+
+        } catch (Exception exception) {
+
+        }
+    }
+
     @Test(timeout = 100000)
     public void testGetUnProcessedFile(){
         fileRepository.save(this.getRootNode());

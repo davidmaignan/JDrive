@@ -42,6 +42,25 @@ public class FileRepository extends DatabaseService {
         super(dbConfig, configuration);
     }
 
+    public boolean markasDeleted(String id) {
+        String query = "match (file {identifier:'%s'})<-[:PARENT*]-(m) set file.deleted=true, m.deleted=true return file, m";
+        query = String.format(query, id);
+
+        try(Transaction tx = graphDB.beginTx())
+        {
+            Result result = graphDB.execute(query);
+
+            tx.success();
+
+            return true;
+
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        return false;
+    }
+
     /**
      * Set processed as true
      * @param id
@@ -110,9 +129,6 @@ public class FileRepository extends DatabaseService {
      * @return queue of files/folders to be written ordered from the root.
      */
     public Queue<Node> getUnprocessedQueue() {
-
-        logger.debug("test");
-
         Queue<Node> queueResult = new ArrayDeque<>();
 
         String query = "match (file:File {%s: %b}) optional match (file)<-[r:PARENT]-(m) " +
