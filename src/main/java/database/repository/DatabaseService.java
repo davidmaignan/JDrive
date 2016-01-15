@@ -393,8 +393,6 @@ public class DatabaseService implements DatabaseServiceInterface {
         return true;
     }
 
-
-
 //    match (n)<-[r:CHANGE*]-(m) where n.n = 'a' with m, count(r) AS length order by length desc limit 1  return  m;
 
     /**

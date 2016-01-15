@@ -240,6 +240,15 @@ public class FileRepositoryTest {
         file.setOwners(this.getOwnerList("David Maignan", true));
 
         assertTrue(fileRepository.createIfNotExists(file));
+
+        try (Transaction tx = graphDb.beginTx()) {
+            Node node = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "newFile");
+
+            Relationship relationship = node.getSingleRelationship(RelTypes.PARENT, Direction.OUTGOING);
+
+            assertEquals("folder1", relationship.getEndNode().getProperty(Fields.ID));
+            assertEquals("newFile", relationship.getStartNode().getProperty(Fields.ID));
+        }
     }
 
     /**

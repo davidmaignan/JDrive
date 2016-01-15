@@ -155,6 +155,14 @@ public class FileRepository extends DatabaseService {
                 dbNode.setProperty(Fields.MODIFIED_DATE, file.getModifiedDate().getValue());
             }
 
+            Node parent = graphDB.findNode(
+                    DynamicLabel.label("File"),
+                    Fields.ID,
+                    file.getParents().get(0).getId()
+            );
+
+            dbNode.createRelationshipTo(parent, RelTypes.PARENT);
+
             tx.success();
 
             return true;
