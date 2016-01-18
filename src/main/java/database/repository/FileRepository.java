@@ -1,5 +1,6 @@
 package database.repository;
 
+import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.File;
 import com.google.inject.Inject;
 import database.Connection;
@@ -45,33 +46,34 @@ public class FileRepository extends DatabaseService {
     /**
      * Modifiy Parent relation when file/folder is moved to another directory
      *
-     * @param childId
-     * @param parentId
+     * @param child
+     * @param parent
      * @return
      */
-    public boolean updateRelationship(String childId, String parentId) {
-        String queryCreateRelation = "match (child:File {%s:'%s'}), (parent:File {%s:'%s'})" +
-                " CREATE (child)-[r:%s]->(parent) return child, parent, r";
-
-        queryCreateRelation = String.format(
-                queryCreateRelation,
-                Fields.ID,
-                childId,
-                Fields.ID,
-                parentId,
-                RelTypes.PARENT
-        );
-
-        String queryDeleteRelation = "match (child:File {%s:'%s'})-[r:%s]->() delete r";
-
-        queryDeleteRelation = String.format(
-                queryDeleteRelation,
-                Fields.ID,
-                childId,
-                RelTypes.PARENT
-        );
+    public boolean updateParentRelation(Node child, Node parent) {
 
         try(Transaction tx = graphDB.beginTx()) {
+            String queryCreateRelation = "match (child {%s:'%s'}), (parent {%s:'%s'})" +
+                    " CREATE (child)-[r:%s]->(parent) return child, parent, r";
+
+            queryCreateRelation = String.format(
+                    queryCreateRelation,
+                    Fields.ID,
+                    child.getProperty(Fields.ID),
+                    Fields.ID,
+                    parent.getProperty(Fields.ID),
+                    RelTypes.PARENT
+            );
+
+            String queryDeleteRelation = "match (child {%s:'%s'})-[r:%s]->() delete r";
+
+            queryDeleteRelation = String.format(
+                    queryDeleteRelation,
+                    Fields.ID,
+                    child.getProperty(Fields.ID),
+                    RelTypes.PARENT
+            );
+
             graphDB.execute(queryDeleteRelation);
             graphDB.execute(queryCreateRelation);
 
@@ -203,6 +205,11 @@ public class FileRepository extends DatabaseService {
 
     public boolean createIfNotExists(File file) {
         try(Transaction tx = graphDB.beginTx()) {
+
+            if(this.getNodeById(file.getId()) != null) {
+                return false;
+            }
+
             Node dbNode = graphDB.createNode(DynamicLabel.label("File"));
 
             dbNode.addLabel(DynamicLabel.label("File"));
@@ -221,11 +228,7 @@ public class FileRepository extends DatabaseService {
                 dbNode.setProperty(Fields.MODIFIED_DATE, file.getModifiedDate().getValue());
             }
 
-            Node parent = graphDB.findNode(
-                    DynamicLabel.label("File"),
-                    Fields.ID,
-                    file.getParents().get(0).getId()
-            );
+            Node parent = this.getNodeById(file.getParents().get(0).getId());
 
             dbNode.createRelationshipTo(parent, RelTypes.PARENT);
 
@@ -238,6 +241,45 @@ public class FileRepository extends DatabaseService {
         }
 
         return false;
+    }
+
+    public Node createNode(File file) throws Exception{
+        try(Transaction tx = graphDB.beginTx()) {
+
+            Node dbNode = graphDB.createNode(DynamicLabel.label("File"));
+
+            dbNode.addLabel(DynamicLabel.label("File"));
+            dbNode.setProperty(Fields.ID, file.getId());
+            dbNode.setProperty(Fields.TITLE, file.getTitle());
+            dbNode.setProperty(Fields.MIME_TYPE, file.getMimeType());
+            dbNode.setProperty(Fields.IS_ROOT, false);
+            dbNode.setProperty(Fields.PROCESSED, false);
+            dbNode.setProperty(Fields.VERSION, file.getVersion());
+
+            if (file.getCreatedDate() != null) {
+                dbNode.setProperty(Fields.CREATED_DATE, file.getCreatedDate().getValue());
+            }
+
+            if (file.getModifiedDate() != null) {
+                dbNode.setProperty(Fields.MODIFIED_DATE, file.getModifiedDate().getValue());
+            }
+
+            tx.success();
+
+            return dbNode;
+        }
+    }
+
+    public boolean createParentRelation(Node child, Node parent){
+        try(Transaction tx = graphDB.beginTx()) {
+            child.createRelationshipTo(parent, RelTypes.PARENT);
+            tx.success();
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+            return false;
+        }
+
+        return true;
     }
 
     /**

@@ -20,7 +20,7 @@
         <file>logs/Debug.log</file>
         <append>true</append>
         <encoder>
-            <pattern>%-4r %-5level %logger{35}: %msg%n</pattern>
+            <pattern>%-4r %-5level [%thread]  %logger{35}: %msg%n</pattern>
         </encoder>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>DEBUG</level>
@@ -32,7 +32,7 @@
         <file>logs/Error.log</file>
         <append>true</append>
         <encoder>
-            <pattern>%-4r %-5level %logger{35}: %msg%n</pattern>
+            <pattern>%-4r %-5level [%thread]  %logger{35}: %msg%n</pattern>
         </encoder>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>ERROR</level>
