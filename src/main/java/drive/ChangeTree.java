@@ -39,10 +39,12 @@ public class ChangeTree {
 
             if (result) {
                 result = changeRepository.addChange(change);
+            } else {
+                result = changeRepository.createLonelyChange(change);
             }
 
             if (!result) {
-                changeList.add(change);
+                logger.error("Change: %d is not admissible\n", change.getId());
             }
         }
 

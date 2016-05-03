@@ -149,6 +149,27 @@ public class ChangeRepository extends DatabaseService {
         return false;
     }
 
+    public boolean createLonelyChange(Change change){
+        try (Transaction tx = graphDB.beginTx()) {
+
+            createChangeNode(change);
+
+            tx.success();
+
+            return true;
+
+        } catch (Exception exception) {
+            logger.error("Change: " + change.getId()
+                            + " - " + change.getFileId()
+                            + " - " +exception.getMessage()
+            );
+
+            exception.printStackTrace();
+        }
+
+        return false;
+    }
+
     /**
      * Create a db change node from a drive change
      * @param change
