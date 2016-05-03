@@ -4,6 +4,7 @@ target/
 
 #Ignore libs
 libs/
+neo4j/
 
 #db
 db/*

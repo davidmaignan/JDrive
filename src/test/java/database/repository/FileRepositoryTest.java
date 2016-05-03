@@ -58,7 +58,10 @@ public class FileRepositoryTest {
     public void testUpdateRelationship(){
         fileRepository.save(this.getRootNode());
 
-        assertTrue(fileRepository.updateRelationship("file2", "folder3"));
+        Node nodeChild = fileRepository.getNodeById("file2");
+        Node nodeParent = fileRepository.getNodeById("folder3");
+
+        assertTrue(fileRepository.updateParentRelation(nodeChild, nodeParent));
 
         try(Transaction tx = graphDb.beginTx()) {
 
@@ -252,7 +255,7 @@ public class FileRepositoryTest {
         }
     }
 
-    @Test(timeout = 1000)
+    @Test(timeout = 10000)
     public void testCreateIfNotExistsFailure(){
         fileRepository.save(this.getRootNode());
 
@@ -273,7 +276,7 @@ public class FileRepositoryTest {
         assertFalse(fileRepository.createIfNotExists(file));
     }
 
-    @Test(timeout = 1000)
+    @Test(timeout = 10000)
     public void testCreateIfNotExistsSuccess(){
         fileRepository.save(this.getRootNode());
 

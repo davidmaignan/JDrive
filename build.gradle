@@ -14,6 +14,7 @@ applicationDefaultJvmArgs = ["-Dgreeting.language=en"]
 repositories {
     mavenCentral()
     mavenLocal()
+    jcenter()
 }
 
 dependencies {
