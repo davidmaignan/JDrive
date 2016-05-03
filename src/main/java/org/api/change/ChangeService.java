@@ -5,6 +5,8 @@ import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.ChangeList;
 import com.google.inject.Inject;
 import org.api.DriveService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
@@ -16,6 +18,8 @@ import java.util.ArrayList;
  * David Maignan <davidmaignan@gmail.com>
  */
 public class ChangeService {
+
+    private static Logger logger = LoggerFactory.getLogger(ChangeService.class);
 
     private DriveService driveService;
 
@@ -50,6 +54,20 @@ public class ChangeService {
             }
         } while (request.getPageToken() != null &&
                 request.getPageToken().length() > 0);
+
+        return result;
+    }
+
+    public Change get(String changeId) {
+        Change result = null;
+
+        try {
+            Change change = driveService.getDrive().changes().get(changeId).execute();
+
+            result = change;
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        }
 
         return result;
     }

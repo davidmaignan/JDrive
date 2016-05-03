@@ -64,7 +64,7 @@ public class FileService {
             return driveService.getDrive().files().get(fileId).execute();
         } catch (IOException e) {
             Logger logger = LoggerFactory.getLogger(this.getClass().getName());
-            logger.error("Error: Cannot retrieve the file %s", fileId);
+            logger.error("Error: Cannot retrieve the file: " + fileId);
         }
         return null;
     }

@@ -37,23 +37,16 @@ public class ChangeRepository extends DatabaseService {
         super(dbConfig, configuration);
     }
 
-    /**
-     * Set processed as true
-     * @param id
-     * @return processed value updated
-     */
-    public boolean markAsProcessed(long id) {
-        String query = "match (change {%s:%d}) set change.%s=%b return change.%s";
-
-        query = String.format(query, Fields.ID, id,
-                Fields.PROCESSED, true, Fields.PROCESSED);
-
-        logger.debug(query);
+    public boolean markAsProcessed(Node change) {
+        String query = "match (change {%s:%d})-[r:CHANGE*]->(m) set change.%s=%b, m.processed=true return change.%s";
 
         try (
                 Transaction tx = graphDB.beginTx();
-                Result queryResult = graphDB.execute(query)
         ) {
+            query = String.format(query, Fields.ID, change.getProperty(Fields.ID),
+                    Fields.PROCESSED, true, Fields.PROCESSED);
+
+            Result queryResult = graphDB.execute(query);
 
             boolean result = false;
 
@@ -149,6 +142,29 @@ public class ChangeRepository extends DatabaseService {
                     + " - " + change.getFileId()
                     + " - " +exception.getMessage()
             );
+
+            exception.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public boolean createLonelyChange(Change change){
+        try (Transaction tx = graphDB.beginTx()) {
+
+            createChangeNode(change);
+
+            tx.success();
+
+            return true;
+
+        } catch (Exception exception) {
+            logger.error("Change: " + change.getId()
+                            + " - " + change.getFileId()
+                            + " - " +exception.getMessage()
+            );
+
+            exception.printStackTrace();
         }
 
         return false;

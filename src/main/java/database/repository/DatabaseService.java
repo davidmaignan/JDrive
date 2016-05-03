@@ -20,6 +20,9 @@ import java.util.*;
  */
 @Singleton
 public class DatabaseService implements DatabaseServiceInterface {
+
+    private static boolean init = false;
+
     private DatabaseConfiguration dbConfig;
     private Configuration configuration;
     protected GraphDatabaseService graphDB;
@@ -64,24 +67,29 @@ public class DatabaseService implements DatabaseServiceInterface {
 
         graphDB = object.getGraphDB();
 
-        try (Transaction tx = graphDB.beginTx()) {
-            graphDB.schema()
-                    .constraintFor(DynamicLabel.label("File"))
-                    .assertPropertyIsUnique(Fields.ID)
-                    .create();
-            tx.success();
-        } catch (Exception exception) {
+        if( ! init) {
+            try (Transaction tx = graphDB.beginTx()) {
+                graphDB.schema()
+                        .constraintFor(DynamicLabel.label("File"))
+                        .assertPropertyIsUnique(Fields.ID)
+                        .create();
+                tx.success();
+            } catch (Exception exception) {
 //            logger.error(exception.getMessage());
-        }
+            }
 
-        try (Transaction tx = graphDB.beginTx()) {
-            graphDB.schema()
-                    .constraintFor(DynamicLabel.label("Change"))
-                    .assertPropertyIsUnique(Fields.ID)
-                    .create();
-            tx.success();
-        } catch (Exception exception) {
+            try (Transaction tx = graphDB.beginTx()) {
+                graphDB.schema()
+                        .constraintFor(DynamicLabel.label("Change"))
+                        .assertPropertyIsUnique(Fields.ID)
+                        .create();
+                tx.success();
+
+            } catch (Exception exception) {
 //            logger.error(exception.getMessage());
+            }
+
+            init = true;
         }
     }
 
@@ -198,6 +206,27 @@ public class DatabaseService implements DatabaseServiceInterface {
         return node;
     }
 
+    public Node getFileNodeFromChange(Node change) {
+        Node result = null;
+
+        String query = "match (file {identifier:'%s'}) return file";
+
+        try (Transaction tx = graphDB.beginTx()) {
+            Result resultQuery = graphDB.execute(String.format(query, change.getProperty(Fields.FILE_ID)));
+
+            tx.success();
+
+            if(resultQuery.hasNext()) {
+                return (Node) resultQuery.next().get("file");
+            }
+
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        return result;
+    }
+
 
     /**
      * Get property for a node by it's identifier
@@ -234,7 +263,7 @@ public class DatabaseService implements DatabaseServiceInterface {
      * @return
      * @throws Exception
      */
-    public String getNodeAbsolutePath(Node node) throws Exception {
+    public String getNodeAbsolutePath(Node node) {
         StringBuilder pathBuilder = new StringBuilder();
 
         String query = "match (file {identifier:'%s'}) match (file)-[r*]->(m {IsRoot:true}) return r";
@@ -462,6 +491,7 @@ public class DatabaseService implements DatabaseServiceInterface {
         dbNode.setProperty(Fields.IS_ROOT, tNode.isSuperRoot());
         dbNode.setProperty(Fields.PROCESSED, false);
         dbNode.setProperty(Fields.VERSION, tNode.getVersion());
+        dbNode.setProperty(Fields.DELETED, false);
 
         if (tNode.getCreatedDate() != null) {
             dbNode.setProperty(Fields.CREATED_DATE, tNode.getCreatedDate().getValue());
