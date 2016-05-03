@@ -24,6 +24,7 @@ import org.neo4j.graphdb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
 
@@ -76,18 +77,18 @@ public class JDriveMain {
 //        } catch (Exception exception) {
 //            logger.error(exception.getMessage());
 //        }
-//
+
 //        try {
 //            initChanges();
 //        } catch (Exception exception) {
 //            logger.error(exception.getMessage());
 //        }
 
-        try{
-            getLastChanges();
-        } catch (Exception exception) {
-            logger.error(exception.getMessage());
-        }
+//        try{
+//            getLastChanges();
+//        } catch (Exception exception) {
+//            logger.error(exception.getMessage());
+//        }
 
         try {
             applyLastChanges();
@@ -104,94 +105,111 @@ public class JDriveMain {
         Queue<Node> changeQueue = changeRepository.getUnprocessed();
 
         for (Node changeNode : changeQueue) {
-            logger.debug(changeNode.toString());
+
             Node fileNode = fileRepository.getFileNodeFromChange(changeNode);
-            String path =  dbService.getNodeAbsolutePath(fileNode);
+//            String path =  dbService.getNodeAbsolutePath(fileNode);
+
             boolean result = false;
 
             try(Transaction tx = graphDB.beginTx()){
 
-                Boolean isProcessed = (boolean) fileNode.getProperty(Fields.PROCESSED);
+//                String fileVersion = fileNode.getProperty(Fields.VERSION);
+//                Boolean isProcessed = (boolean) fileNode.getProperty(Fields.PROCESSED);
 
                 //Check if same parent
                 Node previousParentNode = fileRepository.getParent(changeNode.getProperty(Fields.FILE_ID).toString());
 
                 Change change = changeService.get(changeNode.getProperty(Fields.ID).toString());
 
-                logger.debug(change.getFile().getMimeType());
-
                 String newParent = change.getFile().getParents().get(0).getId();
                 String previousParent = previousParentNode.getProperty(Fields.ID).toString();
 
+                logger.debug("newparent: " + newParent + " - previous:  " + previousParent);
 
-                if ( ! isProcessed) {
-                    logger.debug("NEW FILE TO CREATE");
-                    WriterInterface writer = WriterFactory.getWriter(dbService.getMimeType(fileNode));
-                    writer.setNode(fileNode);
+//                if ( ! isProcessed) {
+//                    logger.debug("NEW FILE TO CREATE");
+//                    WriterInterface writer = WriterFactory.getWriter(dbService.getMimeType(fileNode));
+//                    writer.setNode(fileNode);
+//
+//
+//                    result = writer.write(path);
+//
+//                    if (result) {
+//                        logger.info("Success to create new File: " + path);
+//                    } else {
+//                        logger.error("Failed to create new file: " + path);
+//                    }
+//                } else
 
-
-                    result = writer.write(path);
-
-                    if (result) {
-                        logger.info("Success to create new File: " + path);
-                    } else {
-                        logger.error("Failed to create new file: " + path);
-                    }
-                } else if ( ! newParent.equals(previousParent)) {
+                if ( ! newParent.equals(previousParent)) {
                     logger.debug("FILE/FOLDER TO MOVE");
 
-                    Node newParentNode = fileRepository.getNodeById(newParent);
-
-                    String newPath =
-                            String.format("%s/%s",
-                                    fileRepository.getNodeAbsolutePath(newParentNode),
-                                    change.getFile().getTitle()
-                                    );
-
-                    MoveService service = new MoveService(path, newPath);
-
-                    result = service.execute();
-
-                    if (result && fileRepository.updateParentRelation(fileNode, newParentNode)) {
-                        logger.info("Success to move file: " + path);
-
-                    } else {
-                        logger.error("Failed to move file: " + path);
-                    }
+//                    Node newParentNode = fileRepository.getNodeById(newParent);
+//
+//                    String newPath =
+//                            String.format("%s/%s",
+//                                    fileRepository.getNodeAbsolutePath(newParentNode),
+//                                    change.getFile().getTitle()
+//                                    );
+//
+//                    MoveService service = new MoveService(path, newPath);
+//
+//                    result = service.execute();
+//
+//                    if (result && fileRepository.updateParentRelation(fileNode, newParentNode)) {
+//                        logger.info("Success to move file: " + path);
+//
+//                    } else {
+//                        logger.error("Failed to move file: " + path);
+//                    }
 
                 } else if( change.getDeleted() || change.getFile().getLabels().getTrashed()) {
                     logger.debug("DELETE FILE");
-                    DeleteService service = new DeleteService(path);
-
-                    result = service.execute();
+//                    DeleteService service = new DeleteService(path);
+//
+//                    result = service.execute();
 
                 } else if( ! MimeType.all().contains(change.getFile().getMimeType())) {
                     logger.debug("UPDATE FILE");
 
-                    WriterInterface writer = WriterFactory.getWriter(change.getFile().getMimeType());
-
-                    writer.setNode(fileNode);
-                    result = writer.write(path);
-                    if (result) {
-                        logger.info("Success to update file: " + path);
-                    } else {
-                        logger.error("Failed to update file: " + path);
-                    }
+//                    WriterInterface writer = WriterFactory.getWriter(change.getFile().getMimeType());
+//
+//                    writer.setNode(fileNode);
+//                    result = writer.write(path);
+//                    if (result) {
+//                        logger.info("Success to update file: " + path);
+//                    } else {
+//                        logger.error("Failed to update file: " + path);
+//                    }
                 } else{
                     result = true;
                 }
 
-                if(result) {
-                    changeNode.setProperty(Fields.MODIFIED_DATE, change.getFile().getModifiedDate().getValue());
-                    fileNode.setProperty(Fields.VERSION, change.getFile().getVersion());
-                    fileNode.setProperty(Fields.PROCESSED, true);
-                    fileNode.setProperty(Fields.TITLE, change.getFile().getTitle());
-                    changeNode.setProperty(Fields.PROCESSED, true);
-                }
+//                if(result) {
+//                    changeNode.setProperty(Fields.MODIFIED_DATE, change.getFile().getModifiedDate().getValue());
+//                    fileNode.setProperty(Fields.VERSION, change.getFile().getVersion());
+//                    fileNode.setProperty(Fields.PROCESSED, true);
+//                    fileNode.setProperty(Fields.TITLE, change.getFile().getTitle());
+//                    changeNode.setProperty(Fields.PROCESSED, true);
+//                }
 
                 tx.success();
 
             } catch (Exception exception) {
+
+                try(Transaction tx = graphDB.beginTx()){
+//                    changeNode.setProperty(Fields.MODIFIED_DATE, );
+                    fileNode.setProperty(Fields.VERSION, changeNode.getProperty(Fields.VERSION));
+                    fileNode.setProperty(Fields.PROCESSED, true);
+                    changeNode.setProperty(Fields.PROCESSED, true);
+
+                    tx.success();
+
+
+                }catch(Exception e){
+
+                }
+
                 logger.error("Icit: " + exception.getMessage());
             }
 
@@ -287,18 +305,6 @@ public class JDriveMain {
         List<Change> changeList = changeService.getAll(++lastChangeId);
 
         boolean result = changeTree.execute(changeList);
-
-//        for (Change change : changeList) {
-//            logger.debug("Change id: " + change.getId());
-//
-//            boolean result = fileRepository.createIfNotExists(change.getFile());
-//
-//            logger.debug(String.format("New file %s: %b", change.getFile().getTitle(), result));
-////
-//            result = changeRepository.addChange(change);
-//
-//            logger.debug(String.format("New change: %b", result));
-//        }
     }
 
     private static void initChanges() throws Exception {
@@ -317,11 +323,7 @@ public class JDriveMain {
                 String fileVersion = fileNode.getProperty(Fields.VERSION).toString();
 
                 if (changeVersion.compareTo(fileVersion) <= 0) {
-//                    boolean result = changeRepository.markAsProcessed(changeId);
-//                    logger.debug(String.format(
-//                                    "Change: %d is marded as processed %b",
-//                                    changeId, result)
-//                    );
+                    boolean result = changeRepository.markAsProcessed(node);
 
                 } else {
                     logger.debug("Need to apply the change");
