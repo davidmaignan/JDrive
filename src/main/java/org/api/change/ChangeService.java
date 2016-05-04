@@ -23,6 +23,8 @@ public class ChangeService {
 
     private DriveService driveService;
 
+    public ChangeService(){}
+
     @Inject
     public ChangeService(DriveService driveService){
         this.driveService = driveService;
