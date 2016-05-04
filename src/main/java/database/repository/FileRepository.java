@@ -43,6 +43,15 @@ public class FileRepository extends DatabaseService {
         super(dbConfig, configuration);
     }
 
+    public Long getVersion(Node node){
+        try(Transaction tx = graphDB.beginTx()) {
+            return new Long((long)node.getProperty(Fields.VERSION));
+
+        } catch (Exception exception){
+            return null;
+        }
+    }
+
     /**
      * Modifiy Parent relation when file/folder is moved to another directory
      *
@@ -339,6 +348,7 @@ public class FileRepository extends DatabaseService {
         dbNode.setProperty(Fields.MIME_TYPE, tNode.getMimeType());
         dbNode.setProperty(Fields.IS_ROOT, tNode.isSuperRoot());
         dbNode.setProperty(Fields.PROCESSED, false);
+        dbNode.setProperty(Fields.VERSION, tNode.getVersion());
 
         if (tNode.getCreatedDate() != null) {
             dbNode.setProperty(Fields.CREATED_DATE, tNode.getCreatedDate().getValue());

@@ -1,6 +1,7 @@
 package database.repository;
 
 import com.google.api.client.util.DateTime;
+import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.ParentReference;
 import com.google.api.services.drive.model.User;
@@ -34,7 +35,7 @@ import static org.junit.Assert.*;
  */
 public class FileRepositoryTest {
     protected GraphDatabaseService graphDb;
-    private FileRepository fileRepository;
+    private FileRepository repository;
     private static Logger logger;
 
     @BeforeClass
@@ -46,7 +47,7 @@ public class FileRepositoryTest {
     public void setUp() throws Exception {
         graphDb = new TestGraphDatabaseFactory().newImpermanentDatabase();
         Configuration configuration = new Configuration();
-        fileRepository = new FileRepository(graphDb, configuration);
+        repository = new FileRepository(graphDb, configuration);
     }
 
     @After
@@ -55,13 +56,27 @@ public class FileRepositoryTest {
     }
 
     @Test(timeout = 10000)
+    public void testGetProperties(){
+        repository.save(this.getRootNode());
+
+        try{
+            Node node = repository.getNodeById("folder1");
+
+           assertEquals(new Long(100l), repository.getVersion(node));
+
+        }catch (Exception exception){
+
+        }
+    }
+
+    @Test(timeout = 10000)
     public void testUpdateRelationship(){
-        fileRepository.save(this.getRootNode());
+        repository.save(this.getRootNode());
 
-        Node nodeChild = fileRepository.getNodeById("file2");
-        Node nodeParent = fileRepository.getNodeById("folder3");
+        Node nodeChild = repository.getNodeById("file2");
+        Node nodeParent = repository.getNodeById("folder3");
 
-        assertTrue(fileRepository.updateParentRelation(nodeChild, nodeParent));
+        assertTrue(repository.updateParentRelation(nodeChild, nodeParent));
 
         try(Transaction tx = graphDb.beginTx()) {
 
@@ -89,9 +104,9 @@ public class FileRepositoryTest {
 
     @Test(timeout = 10000)
     public void testMarkAsDeleted(){
-        fileRepository.save(this.getRootNode());
+        repository.save(this.getRootNode());
 
-        assertTrue(fileRepository.markasDeleted("folder2"));
+        assertTrue(repository.markasDeleted("folder2"));
 
         try(Transaction tx = graphDb.beginTx()) {
             Node folder2 = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "folder2");
@@ -111,9 +126,9 @@ public class FileRepositoryTest {
 
     @Test(timeout = 100000)
     public void testGetUnProcessedFile(){
-        fileRepository.save(this.getRootNode());
+        repository.save(this.getRootNode());
 
-        Queue<Node> result = fileRepository.getUnprocessedQueue();
+        Queue<Node> result = repository.getUnprocessedQueue();
 
         assertEquals(7, result.size());
 
@@ -130,14 +145,14 @@ public class FileRepositoryTest {
 
     @Test(timeout = 100000)
     public void testMarkFileAsProcessed(){
-        fileRepository.save(this.getRootNode());
+        repository.save(this.getRootNode());
 
-        assertTrue(fileRepository.markAsProcessed("file1"));
+        assertTrue(repository.markAsProcessed("file1"));
     }
 
     @Test(timeout = 10000)
     public void testSave() {
-        fileRepository.save(this.getRootNode());
+        repository.save(this.getRootNode());
 
         try (Transaction tx = graphDb.beginTx()) {
             GlobalGraphOperations globalGraphOp = GlobalGraphOperations.at(graphDb);
@@ -153,7 +168,7 @@ public class FileRepositoryTest {
 
     @Test(timeout = 10000)
     public void testRelationShipRoot() {
-        fileRepository.save(this.getRootNode());
+        repository.save(this.getRootNode());
 
         try (Transaction tx = graphDb.beginTx()) {
             Node rootNode = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "root");
@@ -182,7 +197,7 @@ public class FileRepositoryTest {
 
     @Test(timeout = 10000)
     public void testRelationShipFolder() {
-        fileRepository.save(this.getRootNode());
+        repository.save(this.getRootNode());
 
         try (Transaction tx = graphDb.beginTx()) {
             Node rootNode = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "folder3");
@@ -210,7 +225,7 @@ public class FileRepositoryTest {
 
     @Test(timeout = 10000)
     public void testLeaf() {
-        fileRepository.save(this.getRootNode());
+        repository.save(this.getRootNode());
 
         try (Transaction tx = graphDb.beginTx()) {
             Node file1 = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "file1");
@@ -224,7 +239,7 @@ public class FileRepositoryTest {
 
     @Test(timeout = 10000)
     public void testSetNodeProperties() {
-        fileRepository.save(this.getRootNode());
+        repository.save(this.getRootNode());
 
         try (Transaction tx = graphDb.beginTx()) {
             Node node = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "folder1");
@@ -243,10 +258,10 @@ public class FileRepositoryTest {
 
     @Test(timeout = 10000)
     public void testGetParent() {
-        fileRepository.save(this.getRootNode());
+        repository.save(this.getRootNode());
 
         try (Transaction tx = graphDb.beginTx()) {
-            Node parentNode = fileRepository.getParent("folder1");
+            Node parentNode = repository.getParent("folder1");
             assertEquals("root", parentNode.getProperty(Fields.ID));
 
             tx.success();
@@ -257,7 +272,7 @@ public class FileRepositoryTest {
 
     @Test(timeout = 10000)
     public void testCreateIfNotExistsFailure(){
-        fileRepository.save(this.getRootNode());
+        repository.save(this.getRootNode());
 
         File file = new File();
         file.setTitle("file1");
@@ -273,12 +288,12 @@ public class FileRepositoryTest {
 
         file.setOwners(this.getOwnerList("David Maignan", true));
 
-        assertFalse(fileRepository.createIfNotExists(file));
+        assertFalse(repository.createIfNotExists(file));
     }
 
     @Test(timeout = 10000)
     public void testCreateIfNotExistsSuccess(){
-        fileRepository.save(this.getRootNode());
+        repository.save(this.getRootNode());
 
         File file = new File();
         file.setTitle("newFile");
@@ -294,7 +309,7 @@ public class FileRepositoryTest {
 
         file.setOwners(this.getOwnerList("David Maignan", true));
 
-        assertTrue(fileRepository.createIfNotExists(file));
+        assertTrue(repository.createIfNotExists(file));
 
         try (Transaction tx = graphDb.beginTx()) {
             Node node = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "newFile");
@@ -322,7 +337,7 @@ public class FileRepositoryTest {
         folder1.setId("folder1");
         folder1.setMimeType("application/vnd.google-apps.folder");
         folder1.setCreatedDate(new DateTime("2015-01-07T15:14:10.751Z"));
-        folder1.setVersion(0l);
+        folder1.setVersion(100l);
 
         folder1.setParents(this.getParentReferenceList(
                 "root", true
