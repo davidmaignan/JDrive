@@ -144,7 +144,7 @@ public class ChangeRepository extends DatabaseService {
      *
      * @return boolean
      */
-    private boolean getTrashed(Change change) {
+    public boolean getTrashed(Change change) {
         return  change.getDeleted()
                 || (change.getFile() != null
                                 && change.getFile().getExplicitlyTrashed() != null
