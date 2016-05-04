@@ -62,16 +62,13 @@ public class ChangeRepository extends DatabaseService {
     }
 
     /**
-     * Update a node with the latest change from google api
+     * Update change node once applied
      *
      * @param change Change
      * @return true on success
      */
     public boolean update(Change change) {
-        String query = "match (change: {'%s': '%d'}) " +
-                "set change.processed=true, " +
-                "change.deleted=%b " +
-                "return change";
+        String query = "match (change: {'%s': '%d'}) set change.processed=true, change.deleted=%b return change";
 
         try(Transaction tx = graphDB.beginTx()){
             boolean deleted = getTrashed(change);
