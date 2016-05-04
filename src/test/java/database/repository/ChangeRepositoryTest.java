@@ -79,6 +79,27 @@ public class ChangeRepositoryTest {
     }
 
     @Test(timeout = 10000)
+    public void testGetProperties(){
+        repository.save(this.getRootNode());
+
+        Change change = this.generateChange(1l, "folder1");
+
+        repository.addChange(change);
+
+        try{
+            Node node = repository.getChangeById(1l);
+
+            assertFalse(repository.getProcessed(node));
+            assertFalse(repository.getDeleted(node));
+            assertEquals("folder1", repository.getFileId(node));
+            assertEquals(new Long(0l), repository.getVersion(node));
+
+        }catch (Exception exception){
+
+        }
+    }
+
+    @Test(timeout = 10000)
     public void testUnprocessed(){
         repository.save(this.getRootNode());
 
@@ -476,4 +497,5 @@ public class ChangeRepositoryTest {
             System.out.printf("Type: %s - Start: %s - End :%s\n", rel.getType(), rel.getStartNode(), rel.getEndNode());
         }
     }
+
 }

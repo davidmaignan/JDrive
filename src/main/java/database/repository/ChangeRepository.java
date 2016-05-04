@@ -37,6 +37,57 @@ public class ChangeRepository extends DatabaseService {
         super(dbConfig, configuration);
     }
 
+    public boolean delete(Node changeNode){
+
+        logger.error("Implement delete method");
+
+        return true;
+    }
+
+    public String getId(Node node){
+        try(Transaction tx = graphDB.beginTx()) {
+            return node.getProperty(Fields.ID).toString();
+
+        } catch (Exception exception){
+            return null;
+        }
+    }
+
+    public Boolean getDeleted(Node node){
+        try(Transaction tx = graphDB.beginTx()) {
+            return Boolean.valueOf(node.getProperty(Fields.DELETED).toString());
+        } catch (Exception exception){
+            return false;
+        }
+    }
+
+    public Boolean getProcessed(Node node){
+        try(Transaction tx = graphDB.beginTx()) {
+            return Boolean.valueOf(node.getProperty(Fields.PROCESSED).toString());
+        } catch (Exception exception){
+            return false;
+        }
+    }
+
+    public String getFileId(Node node){
+        try(Transaction tx = graphDB.beginTx()) {
+            return node.getProperty(Fields.FILE_ID).toString();
+
+        } catch (Exception exception){
+            return null;
+        }
+    }
+
+    public Long getVersion(Node node){
+        try(Transaction tx = graphDB.beginTx()) {
+            return new Long((long)node.getProperty(Fields.VERSION));
+
+        } catch (Exception exception){
+            return null;
+        }
+    }
+
+
     /**
      * Get all the unprocessed changes
      *
