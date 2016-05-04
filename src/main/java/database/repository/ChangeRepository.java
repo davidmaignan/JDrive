@@ -37,32 +37,73 @@ public class ChangeRepository extends DatabaseService {
         super(dbConfig, configuration);
     }
 
-    public boolean markAsProcessed(Node change) {
-        String query = "match (change {%s:%d})-[r:CHANGE*]->(m) set change.%s=%b, m.processed=true return change.%s";
+    /**
+     * Get all the unprocessed changes
+     *
+     * @return queue of changes order by id asc.
+     */
+    public Queue<Node> getUnprocessed() {
+        Queue<Node> queueResult = new ArrayDeque<>();
 
-        try (
-                Transaction tx = graphDB.beginTx();
-        ) {
-            query = String.format(query, Fields.ID, change.getProperty(Fields.ID),
-                    Fields.PROCESSED, true, Fields.PROCESSED);
+        String query = "match (n)<-[r:CHANGE]-(m {%s: %b}) with r, m order by m.identifier asc return m";
 
-            Result queryResult = graphDB.execute(query);
+        try(Transaction tx = graphDB.beginTx()) {
+            Result result = graphDB.execute(String.format(query, Fields.PROCESSED, false));
 
-            boolean result = false;
-
-            if(queryResult.hasNext()) {
-                result = (boolean)queryResult.next().get(String.format("change.%s", Fields.PROCESSED));
+            while(result.hasNext()){
+                Node node = (Node)result.next().get("m");
+                queueResult.add(node);
             }
 
             tx.success();
+        }
 
-            return result;
+        return queueResult;
+    }
 
-        } catch (Exception exception) {
-            logger.error(exception.getMessage());
+    /**
+     * Update a node with the latest change from google api
+     *
+     * @param change Change
+     * @return true on success
+     */
+    public boolean update(Change change) {
+        String query = "match (change: {'%s': '%d'}) " +
+                "set change.processed=true, " +
+                "change.deleted=%b " +
+                "return change";
+
+        try(Transaction tx = graphDB.beginTx()){
+            boolean deleted = getTrashed(change);
+            query = String.format(query, Fields.ID, deleted);
+
+            graphDB.execute(query);
+
+            tx.success();
+
+            return true;
+        }catch (QueryExecutionException exception){
+            logger.error("Failed to update change: %d", change.getId());
         }
 
         return false;
+    }
+
+    /**
+     * Get trashed label value if available
+     *
+     * @param change Change
+     *
+     * @return boolean
+     */
+    private boolean getTrashed(Change change) {
+        return  change.getDeleted()
+                || (change.getFile() != null
+                                && change.getFile().getExplicitlyTrashed() != null
+                                && change.getFile().getExplicitlyTrashed())
+                || (change.getFile() != null
+                                    && change.getFile().getLabels() != null
+                                    && change.getFile().getLabels().getTrashed());
     }
 
     public long getLastChangeId() {
@@ -113,7 +154,8 @@ public class ChangeRepository extends DatabaseService {
     }
 
     /**
-     * Add change node to a queue/linkedList of changes starting from a file node
+     * Add change node to the linked list
+     *
      * @param change
      * @return true on success
      */
@@ -196,11 +238,11 @@ public class ChangeRepository extends DatabaseService {
      * @return null | change node
      */
     private Node getInsertPoint(String nodeId) {
-        String query = "match (file {%s:'%s'}) optional match (file)<-[r:%s*]-(m) " +
-                "with file, m, count(r) AS length order by length desc limit 1 return  file, m";
+        String query = "match (file {identifier: '%s'}) optional match (file)<-[r:CHANGE*]-(m) " +
+                "with m order by m.identifier DESC limit 1 return m";
 
         try (Transaction tx = graphDB.beginTx()) {
-            Result result = graphDB.execute(String.format(query, Fields.ID, nodeId, RelTypes.CHANGE, nodeId));
+            Result result = graphDB.execute(String.format(query, nodeId));
 
             tx.success();
 
@@ -211,28 +253,5 @@ public class ChangeRepository extends DatabaseService {
         }
 
         return null;
-    }
-
-    /**
-     * Get unprocessed changes queue
-     * @return queue of changes to be apply from the oldest to newest
-     */
-    public Queue<Node> getUnprocessed() {
-        Queue<Node> queueResult = new ArrayDeque<>();
-
-        String query = "match (n)<-[r:CHANGE]-(m {%s: %b}) with r, m order by m.identifier asc return m";
-
-        try(Transaction tx = graphDB.beginTx()) {
-            Result result = graphDB.execute(String.format(query, Fields.PROCESSED, false));
-
-            while(result.hasNext()){
-                Node node = (Node)result.next().get("m");
-                queueResult.add(node);
-            }
-
-            tx.success();
-        }
-
-        return queueResult;
     }
 }

@@ -9,8 +9,6 @@ import org.api.FileService;
 import org.neo4j.graphdb.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
 import java.util.List;
 
 public class ChangeTree {
@@ -43,7 +41,7 @@ public class ChangeTree {
                 result = changeRepository.createLonelyChange(change);
             }
 
-            if (!result) {
+            if ( ! result) {
                 logger.error("Change: %d is not admissible\n", change.getId());
             }
         }
