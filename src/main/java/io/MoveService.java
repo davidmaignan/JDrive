@@ -31,8 +31,6 @@ public class MoveService extends ModifiedService implements ChangeInterface {
         Path oldPath = FileSystems.getDefault().getPath(oldPathString);
         Path newPath = FileSystems.getDefault().getPath(newPathString);
 
-        System.out.println(oldPathString + " : " + newPathString);
-
         Files.move(oldPath, newPath, StandardCopyOption.REPLACE_EXISTING);
 
         return true;

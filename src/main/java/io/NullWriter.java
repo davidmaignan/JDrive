@@ -14,7 +14,7 @@ public class NullWriter implements WriterInterface {
     public boolean write(String path) {
         logger.error("Writer for " + path + " is not implemented");
 
-        return false;
+        return true;
     }
 
     @Override
