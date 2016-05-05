@@ -73,28 +73,55 @@ public class ChangeInterpreted {
         }
 
         //Check if deleted
-        boolean deleted = changeRepository.getTrashed(change);
+        boolean deleted = getTrashed(change);
         changeStruct.setDeleted(deleted);
 
         if(deleted) {
             return changeStruct;
         }
 
-        //Check if moved
-        String path = fileRepository.getNodeAbsolutePath(fileNode);
-
         String newParent = change.getFile().getParents().get(0).getId();
         String oldParent = fileRepository.getParent(change.getFileId()).toString();
 
-        logger.debug("Path: " + path);
-        logger.debug("newParent: " + newParent);
-        logger.debug("oldParent: " + oldParent);
+        changeStruct.setOldParent(oldParent);
+        changeStruct.setNewParent(newParent);
 
+        String oldParentPath = fileRepository.getNodeAbsolutePath(oldParent);
 
+        changeStruct.setOldParent(oldParent);
+        changeStruct.setNewParent(newParent);
+        changeStruct.setOldParentPath(oldParentPath);
+        changeStruct.setNewParentPath(oldParentPath);
 
-        //Check if new content
+        if(! oldParent.equals(newParent)) {
+            String newParentPath = fileRepository.getNodeAbsolutePath(newParent);
+            changeStruct.setNewParentPath(newParentPath);
+        }
 
+        //Check if renamed
+        String originalTitle = fileRepository.getTitle(fileNode);
+        String newTitle = change.getFile().getTitle();
+
+        changeStruct.setOldName(originalTitle);
+        changeStruct.setNewName(newTitle);
 
         return changeStruct;
+    }
+
+    /**
+     * Get trashed label value if available
+     *
+     * @param change Change
+     *
+     * @return boolean
+     */
+    public boolean getTrashed(Change change) {
+        return  change.getDeleted()
+                || (change.getFile() != null
+                && change.getFile().getExplicitlyTrashed() != null
+                && change.getFile().getExplicitlyTrashed())
+                || (change.getFile() != null
+                && change.getFile().getLabels() != null
+                && change.getFile().getLabels().getTrashed());
     }
 }

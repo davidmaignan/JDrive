@@ -16,12 +16,15 @@ public class ChangeStruct {
     private Node changeNode;
     private Node fileNode;
     private Change change;
-    private String fileName;
-    private String path;
-    private String newPath;
+    private String oldName;
+    private String newName;
+    private String oldParentPath;
+    private String newParentPath;
     private Boolean deleted;
     private Long changeVersion;
     private Long fileVersion;
+    private String oldParent;
+    private String newParent;
 
     public ChangeStruct(){
     }
@@ -35,9 +38,21 @@ public class ChangeStruct {
             return ChangeTypes.DELETE;
         } else if(changeVersion != null && changeVersion.equals(fileVersion) == true) {
             return ChangeTypes.VERSION;
+        } else if(! this.oldParent.equals(newParent)){
+            return ChangeTypes.MOVE;
+        } else if (!this.oldName.equals(newName)) {
+            return ChangeTypes.MOVE;
         } else {
-            return null;
+            return ChangeTypes.UPDATE;
         }
+    }
+
+    public String getNewPath(){
+        return String.format("%s/%s", this.getNewParentPath(), newName);
+    }
+
+    public String getOldPath(){
+        return String.format("%s/%s", this.getOldParentPath(), oldName);
     }
 
     public void setChangeNode(Node changeNode) {
@@ -52,16 +67,20 @@ public class ChangeStruct {
         this.change = change;
     }
 
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public void setNewName(String newName) {
+        this.newName = newName;
     }
 
-    public void setPath(String path) {
-        this.path = path;
+    public void setOldName(String oldName) {
+        this.oldName = oldName;
     }
 
-    public void setNewPath(String newPath) {
-        this.newPath = newPath;
+    public void setOldParentPath(String oldParentPath) {
+        this.oldParentPath = oldParentPath;
+    }
+
+    public void setNewParentPath(String newParentPath) {
+        this.newParentPath = newParentPath;
     }
 
     public void setDeleted(Boolean deleted) {
@@ -74,5 +93,68 @@ public class ChangeStruct {
 
     public void setFileVersion(Long fileVersion) {
         this.fileVersion = fileVersion;
+    }
+
+    public void setOldParent(String oldParent) {
+        this.oldParent = oldParent;
+    }
+
+    public void setNewParent(String newParent) {
+        this.newParent = newParent;
+    }
+
+    public Change getChange() {
+        return change;
+    }
+
+    public String getOldName() {
+        return oldName;
+    }
+
+    public String getNewName() {
+        return newName;
+    }
+
+    public String getOldParentPath() {
+        return oldParentPath;
+    }
+
+    public String getNewParentPath() {
+        return newParentPath;
+    }
+
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    public Long getChangeVersion() {
+        return changeVersion;
+    }
+
+    public Long getFileVersion() {
+        return fileVersion;
+    }
+
+    public String getOldParent() {
+        return oldParent;
+    }
+
+    public String getNewParent() {
+        return newParent;
+    }
+
+    @Override
+    public String toString() {
+        return "ChangeStruct{" +
+                "oldName='" + oldName + '\'' +
+                ", newName='" + newName + '\'' +
+                ", oldParentPath='" + oldParentPath + '\'' +
+                ", newParentPath='" + newParentPath + '\'' +
+                ", deleted=" + deleted +
+                ", changeVersion=" + changeVersion +
+                ", fileVersion=" + fileVersion +
+                ", oldParent='" + oldParent + '\'' +
+                ", newParent='" + newParent + '\'' +
+                '}';
     }
 }
