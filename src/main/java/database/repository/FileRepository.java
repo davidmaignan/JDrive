@@ -43,6 +43,15 @@ public class FileRepository extends DatabaseService {
         super(dbConfig, configuration);
     }
 
+    public String getTitle(Node node){
+        try(Transaction tx = graphDB.beginTx()) {
+            return node.getProperty(Fields.TITLE).toString();
+
+        } catch (Exception exception){
+            return null;
+        }
+    }
+
     public Long getVersion(Node node){
         try(Transaction tx = graphDB.beginTx()) {
             return new Long((long)node.getProperty(Fields.VERSION));

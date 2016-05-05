@@ -62,8 +62,8 @@ public class FileRepositoryTest {
         try{
             Node node = repository.getNodeById("folder1");
 
-           assertEquals(new Long(100l), repository.getVersion(node));
-
+            assertEquals(new Long(100l), repository.getVersion(node));
+            assertEquals("folder1", repository.getTitle(node));
         }catch (Exception exception){
 
         }
