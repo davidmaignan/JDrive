@@ -300,6 +300,50 @@ public class DatabaseService implements DatabaseServiceInterface {
         );
     }
 
+    /**
+     * Get absolutePath for a node by Id
+     *
+     * @param  nodeId
+     * @return
+     * @throws Exception
+     */
+    public String getNodeAbsolutePath(String nodeId) {
+        StringBuilder pathBuilder = new StringBuilder();
+
+        String query = "match (file {identifier:'%s'}) match (file)-[r*]->(m {IsRoot:true}) return r";
+
+        try (Transaction tx = graphDB.beginTx())
+        {
+            Result result = graphDB.execute(String.format(query, nodeId));
+
+            if ( ! result.hasNext()) {
+                return configuration.getRootFolder();
+            }
+
+            Map<String, Object> row = result.next();
+
+            List<Relationship> relationshipList = (List<Relationship>) row.get("r");
+
+            for (Relationship rel : relationshipList) {
+                pathBuilder.insert(0, rel.getEndNode().getProperty(Fields.TITLE).toString());
+                pathBuilder.insert(0, "/");
+            }
+
+            pathBuilder.append("/");
+            pathBuilder.append(nodeId);
+
+            tx.success();
+
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        return String.format("%s%s",
+                configuration.getRootFolder(),
+                pathBuilder.substring(1).toString()
+        );
+    }
+
     public String getMimeType(Node node) {
         try(Transaction tx = graphDB.beginTx()) {
 
