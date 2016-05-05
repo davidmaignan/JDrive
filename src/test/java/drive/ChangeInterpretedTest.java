@@ -8,6 +8,7 @@ import org.api.change.ChangeService;
 import org.configuration.Configuration;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.kernel.impl.core.NodeProxy;
@@ -42,7 +43,6 @@ public class ChangeInterpretedTest {
         spyFileRepository = mock(FileRepository.class);
         spyChangeService = mock(ChangeService.class);
 
-
         service = new ChangeInterpreted(spyFileRepository, spyChangeRepository, spyChangeService);
     }
 
@@ -54,7 +54,8 @@ public class ChangeInterpretedTest {
         when(spyChangeService.get("mockNodeId")).thenReturn(null);
         when(spyChangeRepository.delete(spyNode)).thenReturn(true);
 
-        assertTrue(service.execute(spyNode));
+        ChangeStruct result = service.execute(spyNode);
+        assertEquals(ChangeTypes.NULL, result.getType());
     }
 
     @Test(timeout = 10000)
@@ -67,7 +68,8 @@ public class ChangeInterpretedTest {
         when(spyFileRepository.getFileNodeFromChange(spyNode)).thenReturn(null);
         when(spyChangeRepository.update(change)).thenReturn(true);
 
-        assertTrue(service.execute(spyNode));
+        ChangeStruct result = service.execute(spyNode);
+        assertEquals(ChangeTypes.NULL, result.getType());
     }
 
     @Test(timeout = 10000)
@@ -89,7 +91,8 @@ public class ChangeInterpretedTest {
 
         when(spyChangeRepository.update(change)).thenReturn(true);
 
-        assertTrue(service.execute(changeNode));
+        ChangeStruct result = service.execute(changeNode);
+        assertEquals(ChangeTypes.VERSION, result.getType());
     }
 
     @Test(timeout = 10000)
@@ -111,8 +114,30 @@ public class ChangeInterpretedTest {
 
         when(spyChangeRepository.getTrashed(change)).thenReturn(true);
 
-//        assertTrue(service.execute(changeNode));
+        ChangeStruct result = service.execute(changeNode);
+
+        assertEquals(ChangeTypes.DELETE, result.getType());
+
     }
 
+    @Test(timeout = 10000)
+    public void testFileRenamed(){
+
+    }
+
+    @Test(timeout = 10000)
+    public void testFileMoved(){
+
+    }
+
+    @Test(timeout = 10000)
+    public void testFileNewContent(){
+
+    }
+
+    @Test(timeout = 10000)
+    public void testFileDriveMimeType(){
+
+    }
 
 }

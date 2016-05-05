@@ -26,6 +26,7 @@ public class ChangeInterpreted {
     private String path;
     private String newPath;
 
+    private ChangeStruct changeStruct;
 
     private static Logger logger = LoggerFactory.getLogger(ChangeInterpreted.class);
 
@@ -34,58 +35,66 @@ public class ChangeInterpreted {
         this.fileRepository = fileRepository;
         this.changeRepository = changeRepository;
         this.changeService = changeService;
+
+        changeStruct = new ChangeStruct();
     }
 
     public void setChange(Node changeNode){
         this.changeNode = changeNode;
     }
 
-    public boolean execute(Node changeNode){
-        this.setChange(changeNode);
+    public ChangeStruct execute(Node changeNode){
+        changeStruct.setChangeNode(changeNode);
 
         String changeId = changeRepository.getId(changeNode);
 
         change = changeService.get(changeId);
+        changeStruct.setChange(change);
 
         if(change == null){
-            return changeRepository.delete(changeNode);
+            return changeStruct;
         }
 
         fileNode = fileRepository.getFileNodeFromChange(changeNode);
+        changeStruct.setFileNode(fileNode);
 
         if(fileNode == null){
-            return changeRepository.update(change);
+            return changeStruct;
         }
 
         Long changeVersion = changeRepository.getVersion(changeNode);
         Long fileVersion = fileRepository.getVersion(fileNode);
 
-        if(changeVersion.equals(fileVersion)){
-            return changeRepository.update(change);
-        }
+        changeStruct.setFileVersion(fileVersion);
+        changeStruct.setChangeVersion(changeVersion);
 
+        if(changeVersion.equals(fileVersion)){
+            return changeStruct;
+        }
 
         //Check if deleted
         boolean deleted = changeRepository.getTrashed(change);
+        changeStruct.setDeleted(deleted);
 
         if(deleted) {
-            DeleteService service = new DeleteService(path);
-
-            boolean result = service.execute();
-
-            if(result){
-                return changeRepository.update(change);
-            }
+            return changeStruct;
         }
 
         //Check if moved
+        String path = fileRepository.getNodeAbsolutePath(fileNode);
 
+        String newParent = change.getFile().getParents().get(0).getId();
+        String oldParent = fileRepository.getParent(change.getFileId()).toString();
+
+        logger.debug("Path: " + path);
+        logger.debug("newParent: " + newParent);
+        logger.debug("oldParent: " + oldParent);
 
 
 
         //Check if new content
 
 
-        return false;
+        return changeStruct;
     }
 }
