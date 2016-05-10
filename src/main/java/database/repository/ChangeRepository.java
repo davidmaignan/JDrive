@@ -113,25 +113,50 @@ public class ChangeRepository extends DatabaseService {
     }
 
     /**
+     * Set processed as true
+     * @param node
+     * @return processed value updated
+     */
+    public boolean markAsProcessed(Node node) {
+        try (Transaction tx = graphDB.beginTx()) {
+
+            node.setProperty(Fields.PROCESSED, true);
+
+            tx.success();
+
+            return true;
+
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        return false;
+    }
+
+    /**
      * Update change node once applied
      *
      * @param change Change
      * @return true on success
      */
     public boolean update(Change change) {
-        String query = "match (change: {'%s': '%d'}) set change.processed=true, change.deleted=%b return change";
+
+        String query = "match (change:Change {%s: '%s'}) set change.processed=true, change.deleted=%b return change";
 
         try(Transaction tx = graphDB.beginTx()){
             boolean deleted = getTrashed(change);
-            query = String.format(query, Fields.ID, deleted);
+            query = String.format(query, Fields.ID, change.getId(), deleted);
 
-            graphDB.execute(query);
+            Result result = graphDB.execute(query);
 
             tx.success();
 
             return true;
         }catch (QueryExecutionException exception){
+            exception.printStackTrace();
             logger.error("Failed to update change: %d", change.getId());
+        }catch (Exception exception){
+            logger.error(exception.getMessage());
         }
 
         return false;
@@ -146,10 +171,10 @@ public class ChangeRepository extends DatabaseService {
      */
     public boolean getTrashed(Change change) {
         return  change.getDeleted()
-                || (change.getFile() != null
+                && (change.getFile() != null
                                 && change.getFile().getExplicitlyTrashed() != null
                                 && change.getFile().getExplicitlyTrashed())
-                || (change.getFile() != null
+                && (change.getFile() != null
                                     && change.getFile().getLabels() != null
                                     && change.getFile().getLabels().getTrashed());
     }
@@ -275,7 +300,8 @@ public class ChangeRepository extends DatabaseService {
         changeNode.setProperty(Fields.SELF_LINK, change.getSelfLink());
         changeNode.setProperty(Fields.DELETED, change.getDeleted());
         changeNode.setProperty(Fields.PROCESSED, false);
-        changeNode.setProperty(Fields.VERSION, change.getFile().getVersion());
+        if(change.getFile() != null)
+            changeNode.setProperty(Fields.VERSION, change.getFile().getVersion());
 
         return changeNode;
     }

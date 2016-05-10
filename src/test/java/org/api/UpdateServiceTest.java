@@ -42,9 +42,9 @@ public class UpdateServiceTest {
         spyDbService              = spy(dbService);
         spyFileService            = spy(fileService);
         spyFactoryProducer        = spy(FactoryProducer.class);
-//        service                   = new UpdateService(new FactoryChangeService());
+//        service                   = new FileUpdateService(new FactoryChangeService());
 
-//        service                   = new UpdateService(
+//        service                   = new FileUpdateService(
 //                spyDbService, spyFileService, deleteService,
 //                moveService, modifiedService, createService, spyFactoryProducer
 //        );

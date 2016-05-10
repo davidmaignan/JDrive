@@ -1,4 +1,4 @@
-package drive;
+package drive.change;
 
 import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.File;
@@ -41,9 +41,7 @@ public class ChangeTree {
                 result = changeRepository.createLonelyChange(change);
             }
 
-            if ( ! result) {
-                logger.error("Change: %d is not admissible\n", change.getId());
-            }
+            logger.debug("Result: " + result);
         }
 
         return true;
@@ -52,13 +50,13 @@ public class ChangeTree {
     private boolean createNode(Change change) throws Exception{
         String parentId = change.getFile().getParents().get(0).getId();
 
-        Node newNode = fileRepository.createNode(change.getFile());
-
         Node parentNode = fileRepository.getNodeById(parentId);
 
         if (parentNode == null) {
             parentNode = createParentNode(parentId);
         }
+
+        Node newNode = fileRepository.createNode(change.getFile());
 
         return fileRepository.createParentRelation(newNode, parentNode);
     }
@@ -79,6 +77,8 @@ public class ChangeTree {
         if (parentNode == null) {
             parentNode = createParentNode(parentId);
         }
+
+        logger.debug("HERE 4");
 
         boolean result = fileRepository.createParentRelation(node, parentNode);
 

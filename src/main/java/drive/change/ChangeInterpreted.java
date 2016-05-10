@@ -1,11 +1,9 @@
-package drive;
+package drive.change;
 
 import com.google.api.services.drive.model.Change;
 import com.google.inject.Inject;
-import database.Fields;
 import database.repository.ChangeRepository;
 import database.repository.FileRepository;
-import io.DeleteService;
 import org.api.change.ChangeService;
 import org.neo4j.graphdb.Node;
 import org.slf4j.Logger;
@@ -68,33 +66,30 @@ public class ChangeInterpreted {
         changeStruct.setFileVersion(fileVersion);
         changeStruct.setChangeVersion(changeVersion);
 
-        if(changeVersion.equals(fileVersion)){
-            return changeStruct;
-        }
-
         //Check if deleted
-        boolean deleted = getTrashed(change);
-        changeStruct.setDeleted(deleted);
-
-        if(deleted) {
-            return changeStruct;
-        }
+        changeStruct.setDeleted(change.getDeleted());
+        changeStruct.setTrashed(getTrashed(change));
 
         String newParent = change.getFile().getParents().get(0).getId();
-        String oldParent = fileRepository.getParent(change.getFileId()).toString();
+        Node newParentNode = fileRepository.getNodeById(newParent);
+        Node oldParentNode = fileRepository.getParent(change.getFileId());
 
-        changeStruct.setOldParent(oldParent);
-        changeStruct.setNewParent(newParent);
+        changeStruct.setNewParentNode(newParentNode);
 
-        String oldParentPath = fileRepository.getNodeAbsolutePath(oldParent);
+        logger.debug(oldParentNode + ":" +newParentNode);
 
-        changeStruct.setOldParent(oldParent);
-        changeStruct.setNewParent(newParent);
+        logger.debug(fileRepository.getFileId(oldParentNode) + ": " + newParent);
+
+//        changeStruct.setOldParent(oldParent);
+//        changeStruct.setNewParent(newParent);
+
+        String oldParentPath = fileRepository.getNodeAbsolutePath(oldParentNode);
+
         changeStruct.setOldParentPath(oldParentPath);
         changeStruct.setNewParentPath(oldParentPath);
 
-        if(! oldParent.equals(newParent)) {
-            String newParentPath = fileRepository.getNodeAbsolutePath(newParent);
+        if(! oldParentNode.equals(newParentNode)) {
+            String newParentPath = fileRepository.getNodeAbsolutePath(newParentNode);
             changeStruct.setNewParentPath(newParentPath);
         }
 
@@ -116,12 +111,18 @@ public class ChangeInterpreted {
      * @return boolean
      */
     public boolean getTrashed(Change change) {
-        return  change.getDeleted()
-                || (change.getFile() != null
+        boolean result = false;
+        result =  (change.getFile() != null
                 && change.getFile().getExplicitlyTrashed() != null
                 && change.getFile().getExplicitlyTrashed())
                 || (change.getFile() != null
                 && change.getFile().getLabels() != null
                 && change.getFile().getLabels().getTrashed());
+
+        return result;
+    }
+
+    public boolean isDeleted(Change change){
+        return change.getDeleted();
     }
 }

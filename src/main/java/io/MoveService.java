@@ -1,11 +1,6 @@
 package io;
 
-import com.google.api.services.drive.model.Change;
-import database.Fields;
-import org.io.ChangeInterface;
-import org.io.ModifiedService;
-import org.neo4j.graphdb.Node;
-
+import drive.change.ChangeStruct;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -17,27 +12,27 @@ import java.nio.file.StandardCopyOption;
  *
  * David Maignan <davidmaignan@gmail.com>
  */
-public class MoveService extends ModifiedService implements ChangeInterface {
-    private String oldPathString;
-    private String newPathString;
-
-    public MoveService(String oldPathString, String newPathString){
-        this.oldPathString = oldPathString;
-        this.newPathString = newPathString;
+public class MoveService extends AbstractChangeService{
+    public MoveService(ChangeStruct structure){
+        super(structure);
+        logger.debug(this.getClass().getSimpleName().toString());
     }
 
     @Override
-    public boolean execute() throws IOException {
-        Path oldPath = FileSystems.getDefault().getPath(oldPathString);
-        Path newPath = FileSystems.getDefault().getPath(newPathString);
+    public boolean execute() {
+        try {
+            Path oldPath = FileSystems.getDefault().getPath(structure.getOldPath());
+            Path newPath = FileSystems.getDefault().getPath(structure.getNewPath());
 
-        Files.move(oldPath, newPath, StandardCopyOption.REPLACE_EXISTING);
+            Files.move(oldPath, newPath, StandardCopyOption.REPLACE_EXISTING);
+            return true;
 
-        return true;
-    }
+        }catch (IOException exception){
+            logger.error(exception.getMessage());
+        } catch (Exception exception){
+            logger.error(exception.getMessage());
+        }
 
-    @Override
-    public Change getChange() {
-        return null;
+        return false;
     }
 }

@@ -61,6 +61,29 @@ public class FileRepository extends DatabaseService {
         }
     }
 
+    public Node getRootNode(){
+        Node result = null;
+        try(Transaction tx = graphDB.beginTx()) {
+
+            String query = "match (file:File {IsRoot: true}) return file";
+
+            Result queryResult = graphDB.execute(query);
+
+//            logger.debug(queryResult.resultAsString());
+
+            if(queryResult.hasNext()){
+                result = (Node)queryResult.next().get("file");
+            }
+
+            tx.success();
+
+            return result;
+
+        } catch (Exception exception){
+            return null;
+        }
+    }
+
     /**
      * Modifiy Parent relation when file/folder is moved to another directory
      *
@@ -94,6 +117,27 @@ public class FileRepository extends DatabaseService {
 
             graphDB.execute(queryDeleteRelation);
             graphDB.execute(queryCreateRelation);
+
+            tx.success();
+
+            return true;
+
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        return false;
+    }
+
+    /**
+     * Update delete property recursively to all files and folders children
+     * @param fileNode
+     * @return true
+     */
+    public boolean markasDeleted(Node fileNode) {
+        try(Transaction tx = graphDB.beginTx())
+        {
+            fileNode.setProperty(Fields.DELETED, true);
 
             tx.success();
 
@@ -171,22 +215,32 @@ public class FileRepository extends DatabaseService {
     public boolean markAsProcessed(Node node) {
         String query = "match (file:File {%s: '%s'}) set file.%s = %s return file.%s";
 
-        try (
-                Transaction tx = graphDB.beginTx();
-                Result queryResult = graphDB.execute(String.format(query, Fields.ID, node.getProperty(Fields.ID),
-                        Fields.PROCESSED, true, Fields.PROCESSED));
-        ) {
+        try (Transaction tx = graphDB.beginTx()){
 
-            boolean result = false;
-
-            if(queryResult.hasNext()) {
-                result = (boolean)queryResult.next().get(String.format("file.%s", Fields.PROCESSED));
-            }
+            node.setProperty(Fields.PROCESSED, true);
 
             tx.success();
 
-            return result;
+            return true;
 
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        return false;
+    }
+
+    public boolean update(Node fileNode, File file){
+        try(Transaction tx = graphDB.beginTx()) {
+            fileNode.setProperty(Fields.VERSION, file.getVersion());
+            fileNode.setProperty(Fields.TITLE, file.getTitle());
+            fileNode.setProperty(Fields.MIME_TYPE, file.getMimeType());
+            fileNode.setProperty(Fields.PROCESSED, true);
+            fileNode.setProperty(Fields.MODIFIED_DATE, file.getModifiedDate().getValue());
+
+            tx.success();
+
+            return true;
         } catch (Exception exception) {
             logger.error(exception.getMessage());
         }

@@ -7,6 +7,10 @@ import com.google.api.services.drive.model.ParentReference;
 import com.google.api.services.drive.model.User;
 import database.repository.ChangeRepository;
 import database.repository.FileRepository;
+import drive.change.ChangeInterpreted;
+import drive.change.ChangeStruct;
+import drive.change.ChangeTypes;
+import model.types.MimeType;
 import org.api.change.ChangeService;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -239,6 +243,7 @@ public class ChangeInterpretedTest {
         String fileName = "mockFile";
 
         File file = createFile(fileName, newParent);
+        file.setMimeType("image/png");
         change.setFile(file);
         change.setFileId(file.getId());
 
@@ -260,7 +265,7 @@ public class ChangeInterpretedTest {
         assertEquals(fileName, result.getNewName());
         assertEquals(oldParentPath+ "/" + fileName, result.getNewPath());
         assertEquals(oldParentPath+ "/" + fileName, result.getOldPath());
-        assertEquals(ChangeTypes.UPDATE, result.getType());
+        assertEquals(ChangeTypes.FILE_UPDATE, result.getType());
     }
 
     private File createFile(String title, String parent){

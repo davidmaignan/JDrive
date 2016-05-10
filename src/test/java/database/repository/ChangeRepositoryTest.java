@@ -497,5 +497,4 @@ public class ChangeRepositoryTest {
             System.out.printf("Type: %s - Start: %s - End :%s\n", rel.getType(), rel.getStartNode(), rel.getEndNode());
         }
     }
-
 }

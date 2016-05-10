@@ -1,6 +1,7 @@
-package drive;
+package drive.change;
 
 import com.google.api.services.drive.model.Change;
+import model.types.MimeType;
 import org.neo4j.graphdb.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,12 +16,14 @@ public class ChangeStruct {
 
     private Node changeNode;
     private Node fileNode;
+    private Node newParentNode;
     private Change change;
     private String oldName;
     private String newName;
     private String oldParentPath;
     private String newParentPath;
     private Boolean deleted;
+    private Boolean trashed;
     private Long changeVersion;
     private Long fileVersion;
     private String oldParent;
@@ -36,14 +39,18 @@ public class ChangeStruct {
             return ChangeTypes.NULL;
         } else if(deleted != null && deleted){
             return ChangeTypes.DELETE;
-        } else if(changeVersion != null && changeVersion.equals(fileVersion) == true) {
-            return ChangeTypes.VERSION;
-        } else if(! this.oldParent.equals(newParent)){
+        } else if (trashed != null && trashed){
+            return ChangeTypes.TRASHED;
+        } else if(! this.oldParentPath.equals(newParentPath)){
             return ChangeTypes.MOVE;
         } else if (!this.oldName.equals(newName)) {
             return ChangeTypes.MOVE;
+        } else if(change.getFile().getMimeType().equals(MimeType.FOLDER)){
+            return ChangeTypes.FOLDER_UPDATE;
+        } else if (MimeType.all().contains(change.getFile().getMimeType())) {
+            return ChangeTypes.GOOGLE_TYPE_UPDATE;
         } else {
-            return ChangeTypes.UPDATE;
+            return ChangeTypes.FILE_UPDATE;
         }
     }
 
@@ -103,6 +110,22 @@ public class ChangeStruct {
         this.newParent = newParent;
     }
 
+    public Node getNewParentNode() {
+        return newParentNode;
+    }
+
+    public void setNewParentNode(Node newParentNode) {
+        this.newParentNode = newParentNode;
+    }
+
+    public Boolean getTrashed() {
+        return trashed;
+    }
+
+    public void setTrashed(Boolean trashed) {
+        this.trashed = trashed;
+    }
+
     public Change getChange() {
         return change;
     }
@@ -141,6 +164,14 @@ public class ChangeStruct {
 
     public String getNewParent() {
         return newParent;
+    }
+
+    public Node getFileNode() {
+        return fileNode;
+    }
+
+    public Node getChangeNode() {
+        return changeNode;
     }
 
     @Override

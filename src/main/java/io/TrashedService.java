@@ -1,9 +1,6 @@
 package io;
 
-import com.google.api.services.drive.model.Change;
 import drive.change.ChangeStruct;
-import drive.change.NeedNameInterface;
-import org.slf4j.Logger;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -16,8 +13,8 @@ import java.nio.file.Path;
  *
  * David Maignan <davidmaignan@gmail.com>
  */
-public class DeleteService extends AbstractChangeService {
-    public DeleteService(ChangeStruct structure){
+public class TrashedService extends AbstractChangeService {
+    public TrashedService(ChangeStruct structure){
         super(structure);
         logger.debug(this.getClass().getSimpleName().toString());
     }
