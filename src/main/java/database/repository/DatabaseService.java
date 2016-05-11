@@ -151,6 +151,34 @@ public class DatabaseService implements DatabaseServiceInterface {
         return false;
     }
 
+
+    /**
+     * Delete a node by id
+     *
+     * @param node Node
+     * @return boolean
+     */
+    public boolean delete(Node node) {
+        String query = "match (file {identifier: '%s'}) match (file)<-[r*]-(m) " +
+                "foreach (rel in r | delete rel) delete m with file match (file)-[r]->(m) delete r, file";
+        try (Transaction tx = graphDB.beginTx()) {
+
+            query = String.format(query, node.getProperty(Fields.ID));
+
+            logger.debug("Query: " + query);
+
+            Result result = graphDB.execute(query);
+
+            tx.success();
+
+            return true;
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        return false;
+    }
+
     /**
      * Get parent for a file
      *

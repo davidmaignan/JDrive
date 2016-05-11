@@ -134,6 +134,48 @@ public class ChangeRepository extends DatabaseService {
     }
 
     /**
+     * Set processed as true
+     * @param node
+     * @return processed value updated
+     */
+    public boolean markAsDeleted(Node node) {
+        try (Transaction tx = graphDB.beginTx()) {
+
+            node.setProperty(Fields.DELETED, true);
+
+            tx.success();
+
+            return true;
+
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        return false;
+    }
+
+    /**
+     * Set processed as true
+     * @param node
+     * @return processed value updated
+     */
+    public boolean markAsTrashed(Node node) {
+        try (Transaction tx = graphDB.beginTx()) {
+
+            node.setProperty(Fields.TRASHED, true);
+
+            tx.success();
+
+            return true;
+
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        return false;
+    }
+
+    /**
      * Update change node once applied
      *
      * @param change Change
@@ -258,28 +300,7 @@ public class ChangeRepository extends DatabaseService {
                     + " - " +exception.getMessage()
             );
 
-            exception.printStackTrace();
-        }
-
-        return false;
-    }
-
-    public boolean createLonelyChange(Change change){
-        try (Transaction tx = graphDB.beginTx()) {
-
-            createChangeNode(change);
-
-            tx.success();
-
-            return true;
-
-        } catch (Exception exception) {
-            logger.error("Change: " + change.getId()
-                            + " - " + change.getFileId()
-                            + " - " +exception.getMessage()
-            );
-
-            exception.printStackTrace();
+//            exception.printStackTrace();
         }
 
         return false;
@@ -300,6 +321,7 @@ public class ChangeRepository extends DatabaseService {
         changeNode.setProperty(Fields.SELF_LINK, change.getSelfLink());
         changeNode.setProperty(Fields.DELETED, change.getDeleted());
         changeNode.setProperty(Fields.PROCESSED, false);
+        changeNode.setProperty(Fields.TRASHED, false);
         if(change.getFile() != null)
             changeNode.setProperty(Fields.VERSION, change.getFile().getVersion());
 

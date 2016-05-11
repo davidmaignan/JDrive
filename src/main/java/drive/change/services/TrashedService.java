@@ -1,10 +1,10 @@
-package io;
+package drive.change.services;
 
 import drive.change.ChangeStruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -13,28 +13,30 @@ import java.nio.file.Path;
  *
  * David Maignan <davidmaignan@gmail.com>
  */
-public class TrashedService extends AbstractChangeService {
-    public TrashedService(ChangeStruct structure){
-        super(structure);
-        logger.debug(this.getClass().getSimpleName().toString());
+public class TrashedService implements DriveChangeInterface {
+    private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
+    private ChangeStruct structure;
+
+    @Override
+    public void setStructure(ChangeStruct structure) {
+        this.structure = structure;
     }
 
     public final boolean execute(){
-        Path path = null;
-
-        try{
-            path = FileSystems.getDefault().getPath(structure.getNewPath());
-
-            Files.deleteIfExists(path);
-
-            return true;
-        } catch (FileNotFoundException exception) {
-            return true;
-        } catch (IOException exception) {
-//            exception.printStackTrace();
-            logger.error(exception.getMessage());
-            return false;
-        }
+        return true;
+//        try{
+//            Path path = FileSystems.getDefault().getPath(structure.getNewPath());
+//
+//            Files.deleteIfExists(path);
+//
+//            return true;
+//        } catch (FileNotFoundException exception) {
+//            return true;
+//        } catch (IOException exception) {
+////            exception.printStackTrace();
+//            logger.error(exception.getMessage());
+//            return false;
+//        }
     }
 
     /**

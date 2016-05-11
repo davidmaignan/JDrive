@@ -20,20 +20,18 @@ import java.io.OutputStream;
  */
 public class File implements WriterInterface {
     private final DriveService driveService;
-    private final FileService fileService;
     private final FileRepository fileRepository;
 
-    private Node node;
+    private String fileId;
 
     @Inject
-    public File(DriveService driveService, FileRepository fileRepository, FileService fileService) {
+    public File(DriveService driveService, FileRepository fileRepository) {
         this.driveService = driveService;
         this.fileRepository = fileRepository;
-        this.fileService = fileService;
     }
 
-    public void setNode(Node node) {
-        this.node = node;
+    public void setFileId(String fileId) {
+        this.fileId = fileId;
     }
 
     @Override
@@ -47,7 +45,7 @@ public class File implements WriterInterface {
     public boolean write(String path) {
         try {
             FileOutputStream fos      = new FileOutputStream(path);
-            InputStream inputStream   = this.downloadFile(driveService, fileRepository.getFileId(node));
+            InputStream inputStream   = this.downloadFile(driveService, fileId);
             OutputStream outputStream = new FileOutputStream(path);
 
             if (inputStream == null) {

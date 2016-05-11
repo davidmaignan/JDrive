@@ -14,6 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
 
 /**
@@ -134,10 +136,55 @@ public class FileRepository extends DatabaseService {
      * @param fileNode
      * @return true
      */
-    public boolean markasDeleted(Node fileNode) {
+    public boolean markAsDeleted(Node fileNode) {
         try(Transaction tx = graphDB.beginTx())
         {
             fileNode.setProperty(Fields.DELETED, true);
+            fileNode.setProperty(Fields.PROCESSED, false);
+
+            tx.success();
+
+            return true;
+
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        return false;
+    }
+
+    /**
+     * Update delete property recursively to all files and folders children
+     * @param fileNode
+     * @return true
+     */
+    public boolean markAsTrashed(Node fileNode) {
+        try(Transaction tx = graphDB.beginTx())
+        {
+            fileNode.setProperty(Fields.TRASHED, true);
+            fileNode.setProperty(Fields.PROCESSED, false);
+
+            tx.success();
+
+            return true;
+
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        return false;
+    }
+
+    /**
+     * Update delete property recursively to all files and folders children
+     * @param fileNode
+     * @return true
+     */
+    public boolean markAsUnTrashed(Node fileNode) {
+        try(Transaction tx = graphDB.beginTx())
+        {
+            fileNode.setProperty(Fields.TRASHED, false);
+            fileNode.setProperty(Fields.PROCESSED, false);
 
             tx.success();
 
@@ -182,7 +229,7 @@ public class FileRepository extends DatabaseService {
      * @return processed value updated
      */
     public boolean markAsProcessed(String id) {
-        String query = "match (file:File {%s: '%s'}) set file.%s = %s return file.%s";
+        String query = "match (file:File {%s: '%s'}) with file set file.%s = %s return file.%s";
 
         try (
                 Transaction tx = graphDB.beginTx();
@@ -237,6 +284,8 @@ public class FileRepository extends DatabaseService {
             fileNode.setProperty(Fields.MIME_TYPE, file.getMimeType());
             fileNode.setProperty(Fields.PROCESSED, true);
             fileNode.setProperty(Fields.MODIFIED_DATE, file.getModifiedDate().getValue());
+            fileNode.setProperty(Fields.DELETED, false);
+            fileNode.setProperty(Fields.TRASHED, false);
 
             tx.success();
 
@@ -260,7 +309,91 @@ public class FileRepository extends DatabaseService {
                 "with file, r order by r.id asc return distinct file";
 
         try(Transaction tx = graphDB.beginTx()) {
-            Result result = graphDB.execute(String.format(query, Fields.PROCESSED, false));
+            Result result = graphDB.execute(
+                    String.format(query, Fields.PROCESSED, false)
+            );
+
+            while (result.hasNext()) {
+                Node node = (Node)result.next().get("file");
+                queueResult.add(node);
+            }
+
+            tx.success();
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        return queueResult;
+    }
+
+    /**
+     * Get a queue of the trashed files/folders.
+     *
+     * @return queue of files/folders to be written ordered from the root.
+     */
+    public List<Node> getTrashedList() {
+        List<Node> list = new ArrayList<>();
+
+        String query = "match (file:File {%s: %b}) return distinct file";
+
+        try(Transaction tx = graphDB.beginTx()) {
+            Result result = graphDB.execute(String.format(query, Fields.TRASHED, true));
+
+            while (result.hasNext()) {
+                Node node = (Node)result.next().get("file");
+                list.add(node);
+            }
+
+            tx.success();
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        return list;
+    }
+
+    /**
+     * Get a queue of the trashed files/folders.
+     *
+     * @return queue of files/folders to be written ordered from the root.
+     */
+    public Queue<Node> getTrashedQueue() {
+        Queue<Node> queueResult = new ArrayDeque<>();
+
+        String query = "match (file:File {%s: %b, %s: %b}) optional match (file)<-[r:PARENT*]-(m:File {%s: %b})" +
+                " with file order by file.%s desc return distinct file;";
+
+        try(Transaction tx = graphDB.beginTx()) {
+            Result result = graphDB.execute(String.format(query, Fields.TRASHED, true, Fields.PROCESSED, false,
+                    Fields.IS_ROOT, true, Fields.CREATED_DATE));
+
+            while (result.hasNext()) {
+                Node node = (Node)result.next().get("file");
+                queueResult.add(node);
+            }
+
+            tx.success();
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        return queueResult;
+    }
+
+    /**
+     * Get a queue of the deleted files/folders.
+     *
+     * @return queue of files/folders to be written ordered from the root.
+     */
+    public Queue<Node> getDeletedQueue() {
+        Queue<Node> queueResult = new ArrayDeque<>();
+
+        String query = "match (file:File {%s: %b, %s: %b}) optional match (file)<-[r:PARENT*]-(m:File {%s: %b})" +
+                " with file order by file.%s desc return distinct file;";
+
+        try(Transaction tx = graphDB.beginTx()) {
+            Result result = graphDB.execute(String.format(query, Fields.DELETED, true, Fields.PROCESSED, false,
+                    Fields.IS_ROOT, true, Fields.CREATED_DATE));
 
             while (result.hasNext()) {
                 Node node = (Node)result.next().get("file");

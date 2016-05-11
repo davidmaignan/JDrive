@@ -17,12 +17,8 @@ public class ChangeInterpreted {
     private FileRepository fileRepository;
     private ChangeRepository changeRepository;
     private ChangeService changeService;
-    private Node changeNode;
     private Node fileNode;
     private Change change;
-    private String fileName;
-    private String path;
-    private String newPath;
 
     private ChangeStruct changeStruct;
 
@@ -35,10 +31,6 @@ public class ChangeInterpreted {
         this.changeService = changeService;
 
         changeStruct = new ChangeStruct();
-    }
-
-    public void setChange(Node changeNode){
-        this.changeNode = changeNode;
     }
 
     public ChangeStruct execute(Node changeNode){
@@ -56,49 +48,34 @@ public class ChangeInterpreted {
         fileNode = fileRepository.getFileNodeFromChange(changeNode);
         changeStruct.setFileNode(fileNode);
 
-        if(fileNode == null){
-            return changeStruct;
-        }
-
-        Long changeVersion = changeRepository.getVersion(changeNode);
-        Long fileVersion = fileRepository.getVersion(fileNode);
-
-        changeStruct.setFileVersion(fileVersion);
-        changeStruct.setChangeVersion(changeVersion);
+//        Long changeVersion = changeRepository.getVersion(changeNode);
+//        Long fileVersion = fileRepository.getVersion(fileNode);
+//        changeStruct.setFileVersion(fileVersion);
+//        changeStruct.setChangeVersion(changeVersion);
 
         //Check if deleted
         changeStruct.setDeleted(change.getDeleted());
+
+        if(change.getDeleted()) {
+            Node parentNode = fileRepository.getParent(change.getFileId());
+            changeStruct.setNewParentNode(parentNode);
+            changeStruct.setOldParentNode(parentNode);
+            String title = fileRepository.getTitle(fileNode);
+            changeStruct.setOldName(title);
+            changeStruct.setNewName(title);
+            return changeStruct;
+        }
+
         changeStruct.setTrashed(getTrashed(change));
 
-        String newParent = change.getFile().getParents().get(0).getId();
-        Node newParentNode = fileRepository.getNodeById(newParent);
+        Node newParentNode = fileRepository.getNodeById(change.getFile().getParents().get(0).getId());
         Node oldParentNode = fileRepository.getParent(change.getFileId());
 
         changeStruct.setNewParentNode(newParentNode);
+        changeStruct.setOldParentNode(oldParentNode);
 
-        logger.debug(oldParentNode + ":" +newParentNode);
-
-        logger.debug(fileRepository.getFileId(oldParentNode) + ": " + newParent);
-
-//        changeStruct.setOldParent(oldParent);
-//        changeStruct.setNewParent(newParent);
-
-        String oldParentPath = fileRepository.getNodeAbsolutePath(oldParentNode);
-
-        changeStruct.setOldParentPath(oldParentPath);
-        changeStruct.setNewParentPath(oldParentPath);
-
-        if(! oldParentNode.equals(newParentNode)) {
-            String newParentPath = fileRepository.getNodeAbsolutePath(newParentNode);
-            changeStruct.setNewParentPath(newParentPath);
-        }
-
-        //Check if renamed
-        String originalTitle = fileRepository.getTitle(fileNode);
-        String newTitle = change.getFile().getTitle();
-
-        changeStruct.setOldName(originalTitle);
-        changeStruct.setNewName(newTitle);
+        changeStruct.setOldName(fileRepository.getTitle(fileNode));
+        changeStruct.setNewName(change.getFile().getTitle());
 
         return changeStruct;
     }
@@ -111,7 +88,7 @@ public class ChangeInterpreted {
      * @return boolean
      */
     public boolean getTrashed(Change change) {
-        boolean result = false;
+        boolean result;
         result =  (change.getFile() != null
                 && change.getFile().getExplicitlyTrashed() != null
                 && change.getFile().getExplicitlyTrashed())
@@ -120,9 +97,5 @@ public class ChangeInterpreted {
                 && change.getFile().getLabels().getTrashed());
 
         return result;
-    }
-
-    public boolean isDeleted(Change change){
-        return change.getDeleted();
     }
 }

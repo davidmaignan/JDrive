@@ -12,25 +12,17 @@ import org.slf4j.LoggerFactory;
  * Created by david on 2016-05-04.
  */
 public class ChangeStruct {
-    private static Logger logger = LoggerFactory.getLogger(ChangeStruct.class);
-
     private Node changeNode;
     private Node fileNode;
     private Node newParentNode;
+    private Node oldParentNode;
     private Change change;
     private String oldName;
     private String newName;
-    private String oldParentPath;
-    private String newParentPath;
     private Boolean deleted;
     private Boolean trashed;
     private Long changeVersion;
     private Long fileVersion;
-    private String oldParent;
-    private String newParent;
-
-    public ChangeStruct(){
-    }
 
     public ChangeTypes getType(){
         if(change == null){
@@ -41,7 +33,7 @@ public class ChangeStruct {
             return ChangeTypes.DELETE;
         } else if (trashed != null && trashed){
             return ChangeTypes.TRASHED;
-        } else if(! this.oldParentPath.equals(newParentPath)){
+        } else if(! this.oldParentNode.equals(newParentNode)){
             return ChangeTypes.MOVE;
         } else if (!this.oldName.equals(newName)) {
             return ChangeTypes.MOVE;
@@ -52,14 +44,6 @@ public class ChangeStruct {
         } else {
             return ChangeTypes.FILE_UPDATE;
         }
-    }
-
-    public String getNewPath(){
-        return String.format("%s/%s", this.getNewParentPath(), newName);
-    }
-
-    public String getOldPath(){
-        return String.format("%s/%s", this.getOldParentPath(), oldName);
     }
 
     public void setChangeNode(Node changeNode) {
@@ -82,14 +66,6 @@ public class ChangeStruct {
         this.oldName = oldName;
     }
 
-    public void setOldParentPath(String oldParentPath) {
-        this.oldParentPath = oldParentPath;
-    }
-
-    public void setNewParentPath(String newParentPath) {
-        this.newParentPath = newParentPath;
-    }
-
     public void setDeleted(Boolean deleted) {
         this.deleted = deleted;
     }
@@ -102,16 +78,16 @@ public class ChangeStruct {
         this.fileVersion = fileVersion;
     }
 
-    public void setOldParent(String oldParent) {
-        this.oldParent = oldParent;
-    }
-
-    public void setNewParent(String newParent) {
-        this.newParent = newParent;
-    }
-
     public Node getNewParentNode() {
         return newParentNode;
+    }
+
+    public Node getOldParentNode() {
+        return oldParentNode;
+    }
+
+    public void setOldParentNode(Node oldParentNode) {
+        this.oldParentNode = oldParentNode;
     }
 
     public void setNewParentNode(Node newParentNode) {
@@ -138,14 +114,6 @@ public class ChangeStruct {
         return newName;
     }
 
-    public String getOldParentPath() {
-        return oldParentPath;
-    }
-
-    public String getNewParentPath() {
-        return newParentPath;
-    }
-
     public Boolean getDeleted() {
         return deleted;
     }
@@ -156,14 +124,6 @@ public class ChangeStruct {
 
     public Long getFileVersion() {
         return fileVersion;
-    }
-
-    public String getOldParent() {
-        return oldParent;
-    }
-
-    public String getNewParent() {
-        return newParent;
     }
 
     public Node getFileNode() {
@@ -177,15 +137,12 @@ public class ChangeStruct {
     @Override
     public String toString() {
         return "ChangeStruct{" +
-                "oldName='" + oldName + '\'' +
+                "oldParentNode=" + oldParentNode +
+                ", newParentNode=" + newParentNode +
+                ", oldName='" + oldName + '\'' +
                 ", newName='" + newName + '\'' +
-                ", oldParentPath='" + oldParentPath + '\'' +
-                ", newParentPath='" + newParentPath + '\'' +
                 ", deleted=" + deleted +
-                ", changeVersion=" + changeVersion +
-                ", fileVersion=" + fileVersion +
-                ", oldParent='" + oldParent + '\'' +
-                ", newParent='" + newParent + '\'' +
+                ", trashed=" + trashed +
                 '}';
     }
 }

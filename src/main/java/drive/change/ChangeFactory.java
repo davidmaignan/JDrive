@@ -1,41 +1,37 @@
 package drive.change;
 
-import io.*;
+import com.google.inject.Guice;
+import database.DatabaseModule;
+import drive.change.services.*;
 
-import static drive.change.ChangeTypes.*;
-
-/**
- * Created by david on 2016-05-05.
- */
 public class ChangeFactory {
-    public static NeedNameInterface getWriter(ChangeStruct structure){
-        NeedNameInterface service;
+    public static DriveChangeInterface getWriter(ChangeStruct structure){
+        DriveChangeInterface service;
         switch (structure.getType()){
             case DELETE:
-                service = new DeleteService(structure);
+                service = Guice.createInjector(new DatabaseModule()).getInstance(DeleteService.class);
                 break;
             case MOVE:
-                service = new MoveService(structure);
+                service = Guice.createInjector(new DatabaseModule()).getInstance(MoveService.class);
                 break;
             case FILE_UPDATE:
-                service = new FileUpdateService(structure);
+                service = Guice.createInjector(new DatabaseModule()).getInstance(FileUpdateService.class);
                 break;
             case FOLDER_UPDATE:
-                service = new FolderUpdateService(structure);
+                service = Guice.createInjector(new DatabaseModule()).getInstance(FolderUpdateService.class);
                 break;
             case GOOGLE_TYPE_UPDATE:
-                service = new DocumentUpdateService(structure);
+                service = Guice.createInjector(new DatabaseModule()).getInstance(DocumentUpdateService.class);
                 break;
             case TRASHED:
-                service = new TrashedService(structure);
+                service = Guice.createInjector(new DatabaseModule()).getInstance(TrashedService.class);
                 break;
-//            case VERSION:
-//                service = new VersionService(structure);
-//                break;
             default:
-                service = new NullWriter(structure);
+                service = Guice.createInjector(new DatabaseModule()).getInstance(NullWriter.class);
                 break;
         }
+
+        service.setStructure(structure);
 
         return service;
     }

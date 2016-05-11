@@ -9,6 +9,6 @@ import org.neo4j.graphdb.Node;
  */
 public interface WriterInterface {
     public boolean write(String path);
-    public void setNode(Node node);
+    public void setFileId(String fileId);
     public boolean delete(String path);
 }

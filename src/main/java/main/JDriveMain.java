@@ -4,12 +4,11 @@ import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.File;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import database.Fields;
 import database.repository.ChangeRepository;
 import database.repository.FileRepository;
 import drive.change.*;
+import drive.change.services.DriveChangeInterface;
 import io.*;
-import model.types.MimeType;
 import org.api.change.ChangeService;
 import org.api.UpdateService;
 import org.configuration.Configuration;
@@ -21,6 +20,7 @@ import org.neo4j.graphdb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.Path;
@@ -57,7 +57,36 @@ public class JDriveMain {
     public static void main(String[] args) throws IOException, Throwable {
         initJDrive();
         initServices();
+        setUp();
 
+        try{
+            getLastChanges();
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+
+        try {
+            applyLastChanges();
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+
+        try{
+            applyTrashed();
+        } catch (Exception exception){
+            exception.printStackTrace();
+        }
+
+        try{
+            applyDeleted();
+        } catch (Exception exception){
+            exception.printStackTrace();
+        }
+
+        registerShutdownHook(dbService.getGraphDB());
+    }
+
+    private static void setUp(){
         if( ! isSetUp()) {
             boolean setUpSuccess = false;
             try {
@@ -90,24 +119,9 @@ public class JDriveMain {
                 logger.error(exception.getMessage());
             }
         }
-
-        try{
-            getLastChanges();
-        } catch (Exception exception) {
-            logger.error(exception.getMessage());
-        }
-
-        try {
-            applyLastChanges();
-        } catch (Exception exception) {
-            logger.error(exception.getMessage());
-        }
-
-        registerShutdownHook(dbService.getGraphDB());
     }
 
-    private static boolean isSetUp()
-    {
+    private static boolean isSetUp(){
         Path rootPath = FileSystems.getDefault().getPath(configReader.getRootFolder());
 
         return Files.exists(rootPath);
@@ -120,8 +134,6 @@ public class JDriveMain {
             logger.error(exception.getMessage());
         }
 
-        GraphDatabaseService graphDB = dbService.getGraphDB();
-
         Queue<Node> changeQueue = changeRepository.getUnprocessed();
 
         logger.debug("Change queue: " + changeQueue.size());
@@ -130,47 +142,133 @@ public class JDriveMain {
 
             try {
                 ChangeStruct changeStruct = changeInterpreted.execute(changeNode);
-                NeedNameInterface service = ChangeFactory.getWriter(changeStruct);
+                DriveChangeInterface service = ChangeFactory.getWriter(changeStruct);
 
-                boolean result = false;
-
-                result = service.execute();
+                boolean result = service.execute();
 
                 if(result){
-                    result = changeRepository.markAsProcessed(changeNode);
-
-                    if(changeStruct.getChange() != null && changeStruct.getChange().getFile() != null) {
-                        result = fileRepository.update(changeStruct.getFileNode(), changeStruct.getChange().getFile());
-                        if(service instanceof MoveService){
-                            fileRepository.updateParentRelation(changeStruct.getFileNode(), changeStruct.getNewParentNode());
-                        } else if (service instanceof DeleteService) {
-                            fileRepository.delete(changeStruct.getChange().getFileId());
-                        } else if (service instanceof TrashedService){
-                            fileRepository.markasDeleted(changeStruct.getFileNode());
-                        }
-                    }
+                    UpdateChange updateChange = new UpdateChange(fileRepository, changeRepository);
+                    updateChange.execute(changeStruct);
                 }
-////
-//                logger.debug("Change: " + changeRepository.getId(changeNode) + " - Result: " + result);
-//
-//                if(result == false)
-//                    logger.error(changeStruct.toString());
+
+                if(result == false)
+                    logger.error(changeStruct.toString());
 
             }catch(Exception exception) {
                 exception.printStackTrace();
             }
-
-//            System.exit(0);
-//
-
         }
+    }
+
+    private static void applyTrashed(){
+        Queue<Node> queue = fileRepository.getTrashedQueue();
+
+        logger.debug("File to trashed: " + queue.size());
+
+        while (! queue.isEmpty()){
+            Node node = queue.remove();
+            boolean result;
+            try{
+                Path path = Paths.get(fileRepository.getNodeAbsolutePath(node));
+                if (Files.isDirectory(path)) {
+                    deleteDirectory(path);
+                }
+
+                result = Files.deleteIfExists(path);
+                result = true;
+
+            } catch (FileNotFoundException exception) {
+                result = true;
+            } catch (DirectoryNotEmptyException exception){
+                result = true;
+            } catch(IOException exception){
+                result = true;
+            }
+
+            logger.debug("Result trashed: " + result);
+
+            if(result){
+                fileRepository.markAsProcessed(node);
+            }
+        }
+
+        logger.debug(queue.size() + "");
+    }
+
+    private static void applyDeleted(){
+        Queue<Node> queue = fileRepository.getDeletedQueue();
+
+        logger.debug("File to deleted: " + queue.size());
+
+        while (! queue.isEmpty()){
+            Node node = queue.remove();
+            boolean result;
+            try{
+                Path path = Paths.get(fileRepository.getNodeAbsolutePath(node));
+                if (Files.isDirectory(path)) {
+                    deleteDirectory(path);
+                }
+
+                result = Files.deleteIfExists(path);
+                result = true;
+
+            } catch (FileNotFoundException exception) {
+                result = true;
+                exception.printStackTrace();
+            } catch (DirectoryNotEmptyException exception){
+                result = true;
+                exception.printStackTrace();
+            } catch(IOException exception){
+                result = true;
+                exception.printStackTrace();
+            }
+
+            logger.debug("Result deleted: " + result);
+
+            if(result){
+                result = fileRepository.delete(node);
+            }
+
+            if( ! result){
+                logger.error("Error while deleting node for file deleted: " + fileRepository.getTitle(node));
+            }
+        }
+
+        logger.debug(queue.size() + "");
+    }
+
+    private static void deleteDirectory(Path path) throws IOException {
+        //Delete files
+        Files.list(path).filter( s -> {
+            if (Files.isDirectory(s)) return false;
+            else return true;
+        }).forEach( s -> {
+            try {
+                Files.deleteIfExists(s);
+            } catch (IOException e) {
+                logger.error("Error when deleting %s", path);
+            }
+        });
+
+        //If directory - delete recursively
+        Files.list(path).filter( s -> {
+            if (Files.isDirectory(s)) return true;
+            else return false;
+        }).forEach( s -> {
+            try {
+                deleteDirectory(s);
+            } catch (IOException e) {
+                logger.error("Error when deleting %s", path);
+            }
+        });
+
+        Files.deleteIfExists(path);
     }
 
     private static void initRootFolder(){
         Node rootNode = fileRepository.getRootNode();
 
         WriterInterface writer = WriterFactory.getWriter(dbService.getMimeType(rootNode));
-        writer.setNode(rootNode);
 
         String path = dbService.getNodeAbsolutePath(rootNode);
 
@@ -190,7 +288,19 @@ public class JDriveMain {
         logger.debug("Lastest change id: " + lastChangeId);
         logger.debug("New changes total: " + changeList.size());
 
-        boolean result = changeTree.execute(changeList);
+        List<ValidChange> validChangeList = new ArrayList<>();
+
+        for(Change change : changeList){
+            ValidChange validChange = new ValidChange(fileRepository);
+            validChange.execute(change);
+
+            if(validChange.isValid())
+                validChangeList.add(validChange);
+        }
+
+        logger.debug("New valid changes total: " + validChangeList.size());
+
+        boolean result = changeTree.execute(validChangeList);
     }
 
     private static void initWrite() throws Exception {
@@ -202,7 +312,7 @@ public class JDriveMain {
             Node node = fileQueue.remove();
 
             WriterInterface writer = WriterFactory.getWriter(dbService.getMimeType(node));
-            writer.setNode(node);
+            writer.setFileId(fileRepository.getFileId(node));
 
             String path = dbService.getNodeAbsolutePath(node);
 
@@ -253,14 +363,6 @@ public class JDriveMain {
         dbService.save(treeBuilder.getRoot());
 
         return true;
-
-//        Boolean writeSuccess = injector.getInstance(TreeWriter.class).writeTree(treeBuilder.getRoot());
-//
-//        if (writeSuccess) {
-//            dbService.save(treeBuilder.getRoot());
-//        }
-//
-//        return writeSuccess;
     }
 
     private static void setUpMonitor() {
@@ -276,12 +378,6 @@ public class JDriveMain {
         //During initialiazation build list of changes which are already applied to the file
         changeList.forEach(changeRepository::update);
 
-    }
-
-    private static Configuration setConfiguration() throws IOException {
-        Configuration configConfiguration = new Configuration();
-
-        return configConfiguration;
     }
 
     private static void registerShutdownHook(final GraphDatabaseService graphDb) {

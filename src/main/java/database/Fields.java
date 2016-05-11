@@ -25,4 +25,5 @@ public class Fields {
     public static final String FILE_ID        = "fileId";
     public static final String SELF_LINK      = "selfLink";
     public static final String DELETED        = "deleted";
+    public static final String TRASHED        = "trashed";
 }

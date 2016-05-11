@@ -1,13 +1,10 @@
-package io;
+package drive.change.services;
 
-import com.google.api.services.drive.model.Change;
 import drive.change.ChangeStruct;
-import drive.change.NeedNameInterface;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -16,28 +13,32 @@ import java.nio.file.Path;
  *
  * David Maignan <davidmaignan@gmail.com>
  */
-public class DeleteService extends AbstractChangeService {
-    public DeleteService(ChangeStruct structure){
-        super(structure);
-        logger.debug(this.getClass().getSimpleName().toString());
+public class DeleteService implements DriveChangeInterface {
+    private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
+    private ChangeStruct changeStruct;
+
+    @Override
+    public void setStructure(ChangeStruct structure) {
+
     }
 
     public final boolean execute(){
-        Path path = null;
-
-        try{
-            path = FileSystems.getDefault().getPath(structure.getNewPath());
-
-            Files.deleteIfExists(path);
-
-            return true;
-        } catch (FileNotFoundException exception) {
-            return true;
-        } catch (IOException exception) {
-//            exception.printStackTrace();
-            logger.error(exception.getMessage());
-            return false;
-        }
+        return true;
+//        Path path = null;
+//
+//        try{
+//            path = FileSystems.getDefault().getPath(structure.getNewPath());
+//
+//            Files.deleteIfExists(path);
+//
+//            return true;
+//        } catch (FileNotFoundException exception) {
+//            return false;
+//        } catch (IOException exception) {
+////            exception.printStackTrace();
+//            logger.error(exception.getMessage());
+//            return false;
+//        }
     }
 
     /**
