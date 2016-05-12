@@ -44,6 +44,8 @@ public class JDriveMain {
     private static ChangeTree changeTree;
     private static ChangeInterpreted changeInterpreted;
     private static Configuration configReader;
+    private static Delete delete;
+    private static Trashed trashed;
 
     private static Logger logger = LoggerFactory.getLogger(JDriveMain.class);
 
@@ -166,33 +168,8 @@ public class JDriveMain {
         logger.debug("File to trashed: " + queue.size());
 
         while (! queue.isEmpty()){
-            Node node = queue.remove();
-            boolean result;
-            try{
-                Path path = Paths.get(fileRepository.getNodeAbsolutePath(node));
-                if (Files.isDirectory(path)) {
-                    deleteDirectory(path);
-                }
-
-                result = Files.deleteIfExists(path);
-                result = true;
-
-            } catch (FileNotFoundException exception) {
-                result = true;
-            } catch (DirectoryNotEmptyException exception){
-                result = true;
-            } catch(IOException exception){
-                result = true;
-            }
-
-            logger.debug("Result trashed: " + result);
-
-            if(result){
-                fileRepository.markAsProcessed(node);
-            }
+            trashed.execute(queue.remove());
         }
-
-        logger.debug(queue.size() + "");
     }
 
     private static void applyDeleted(){
@@ -201,69 +178,10 @@ public class JDriveMain {
         logger.debug("File to deleted: " + queue.size());
 
         while (! queue.isEmpty()){
-            Node node = queue.remove();
-            boolean result;
-            try{
-                Path path = Paths.get(fileRepository.getNodeAbsolutePath(node));
-                if (Files.isDirectory(path)) {
-                    deleteDirectory(path);
-                }
-
-                result = Files.deleteIfExists(path);
-                result = true;
-
-            } catch (FileNotFoundException exception) {
-                result = true;
-                exception.printStackTrace();
-            } catch (DirectoryNotEmptyException exception){
-                result = true;
-                exception.printStackTrace();
-            } catch(IOException exception){
-                result = true;
-                exception.printStackTrace();
-            }
-
-            logger.debug("Result deleted: " + result);
-
-            if(result){
-                result = fileRepository.delete(node);
-            }
-
-            if( ! result){
-                logger.error("Error while deleting node for file deleted: " + fileRepository.getTitle(node));
-            }
+            delete.execute(queue.remove());
         }
-
-        logger.debug(queue.size() + "");
     }
 
-    private static void deleteDirectory(Path path) throws IOException {
-        //Delete files
-        Files.list(path).filter( s -> {
-            if (Files.isDirectory(s)) return false;
-            else return true;
-        }).forEach( s -> {
-            try {
-                Files.deleteIfExists(s);
-            } catch (IOException e) {
-                logger.error("Error when deleting %s", path);
-            }
-        });
-
-        //If directory - delete recursively
-        Files.list(path).filter( s -> {
-            if (Files.isDirectory(s)) return true;
-            else return false;
-        }).forEach( s -> {
-            try {
-                deleteDirectory(s);
-            } catch (IOException e) {
-                logger.error("Error when deleting %s", path);
-            }
-        });
-
-        Files.deleteIfExists(path);
-    }
 
     private static void initRootFolder(){
         Node rootNode = fileRepository.getRootNode();
@@ -345,6 +263,8 @@ public class JDriveMain {
         fileRepository = injector.getInstance(FileRepository.class);
         changeTree = injector.getInstance(ChangeTree.class);
         changeInterpreted = injector.getInstance(ChangeInterpreted.class);
+        delete = injector.getInstance(Delete.class);
+        trashed = injector.getInstance(Trashed.class);
 
         try {
             configReader = new Configuration();
@@ -358,8 +278,6 @@ public class JDriveMain {
         List<File> result = fileService.getAll();
 
         treeBuilder.build(result);
-        TreeBuilder.printTree(treeBuilder.getRoot());
-
         dbService.save(treeBuilder.getRoot());
 
         return true;
