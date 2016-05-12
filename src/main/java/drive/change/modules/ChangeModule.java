@@ -1,9 +1,8 @@
 package drive.change.modules;
 
 import com.google.inject.AbstractModule;
-import drive.change.annotation.Trash;
 import drive.change.services.ChangeServiceInterface;
-import drive.change.annotation.Delete;
+import drive.change.annotations.Delete;
 import drive.change.services.DeleteService;
 import drive.change.services.update.ChangeUpdateInterface;
 import drive.change.services.update.DeleteChangeUpdate;

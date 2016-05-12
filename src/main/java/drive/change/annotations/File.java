@@ -1,4 +1,4 @@
-package drive.change.annotation;
+package drive.change.annotations;
 
 import com.google.inject.BindingAnnotation;
 
