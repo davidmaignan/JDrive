@@ -4,7 +4,7 @@ import drive.change.ChangeStruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class VersionService implements DriveChangeInterface {
+public class VersionService implements ChangeServiceInterface {
     private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
     private ChangeStruct structure;
 

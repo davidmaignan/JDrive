@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by david on 2016-01-12.
  */
-public class NullWriter implements DriveChangeInterface {
+public class NullWriter implements ChangeServiceInterface {
     private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
     private ChangeStruct structure;
 

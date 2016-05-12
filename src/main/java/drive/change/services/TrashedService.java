@@ -4,16 +4,12 @@ import drive.change.ChangeStruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
 /**
  * Delete a file or folder locally when receiving a delete change from api
  *
  * David Maignan <davidmaignan@gmail.com>
  */
-public class TrashedService implements DriveChangeInterface {
+public class TrashedService implements ChangeServiceInterface {
     private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
     private ChangeStruct structure;
 

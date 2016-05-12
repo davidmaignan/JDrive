@@ -7,7 +7,7 @@ import com.google.inject.Injector;
 import database.repository.ChangeRepository;
 import database.repository.FileRepository;
 import drive.change.*;
-import drive.change.services.DriveChangeInterface;
+import drive.change.services.ChangeServiceInterface;
 import io.*;
 import org.api.change.ChangeService;
 import org.api.UpdateService;
@@ -20,7 +20,6 @@ import org.neo4j.graphdb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.Path;
@@ -144,7 +143,7 @@ public class JDriveMain {
 
             try {
                 ChangeStruct changeStruct = changeInterpreted.execute(changeNode);
-                DriveChangeInterface service = ChangeFactory.getWriter(changeStruct);
+                ChangeServiceInterface service = ChangeFactory.getWriter(changeStruct);
 
                 boolean result = service.execute();
 
@@ -181,7 +180,6 @@ public class JDriveMain {
             delete.execute(queue.remove());
         }
     }
-
 
     private static void initRootFolder(){
         Node rootNode = fileRepository.getRootNode();

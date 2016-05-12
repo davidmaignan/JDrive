@@ -3,7 +3,6 @@ package drive.change.services;
 import com.google.inject.Inject;
 import database.repository.FileRepository;
 import drive.change.ChangeStruct;
-import drive.change.services.DriveChangeInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +17,7 @@ import java.nio.file.StandardCopyOption;
  *
  * David Maignan <davidmaignan@gmail.com>
  */
-public class MoveService implements DriveChangeInterface {
+public class MoveService implements ChangeServiceInterface {
     private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
     private ChangeStruct structure;
     private FileRepository fileRepository;

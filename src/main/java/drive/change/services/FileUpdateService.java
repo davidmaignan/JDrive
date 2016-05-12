@@ -6,14 +6,13 @@ import database.DatabaseModule;
 import database.repository.FileRepository;
 import drive.change.ChangeStruct;
 import io.File;
-import org.neo4j.graphdb.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Created by david on 2016-05-05.
  */
-public class FileUpdateService implements DriveChangeInterface {
+public class FileUpdateService implements ChangeServiceInterface {
     private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
     private ChangeStruct structure;
     private FileRepository fileRepository;

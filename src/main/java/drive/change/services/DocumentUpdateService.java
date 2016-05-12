@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
  *
  * David Maignan <davidmaignan@gmail.com>
  */
-public class DocumentUpdateService implements DriveChangeInterface {
+public class DocumentUpdateService implements ChangeServiceInterface {
     private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
     private ChangeStruct structure;
 

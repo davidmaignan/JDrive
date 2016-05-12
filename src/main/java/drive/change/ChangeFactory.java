@@ -5,8 +5,8 @@ import database.DatabaseModule;
 import drive.change.services.*;
 
 public class ChangeFactory {
-    public static DriveChangeInterface getWriter(ChangeStruct structure){
-        DriveChangeInterface service;
+    public static ChangeServiceInterface getWriter(ChangeStruct structure){
+        ChangeServiceInterface service;
         switch (structure.getType()){
             case DELETE:
                 service = Guice.createInjector(new DatabaseModule()).getInstance(DeleteService.class);

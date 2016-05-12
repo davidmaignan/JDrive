@@ -16,7 +16,7 @@ import java.nio.file.Path;
  *
  * David Maignan <davidmaignan@gmail.com>
  */
-public class FolderUpdateService implements DriveChangeInterface {
+public class FolderUpdateService implements ChangeServiceInterface {
     private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
     private ChangeStruct structure;
     private FileRepository fileRepository;
