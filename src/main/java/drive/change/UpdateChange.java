@@ -1,10 +1,8 @@
 package drive.change;
 
-import com.google.inject.Guice;
-import database.DatabaseModule;
 import database.repository.ChangeRepository;
 import database.repository.FileRepository;
-import io.*;
+import drive.change.model.ChangeStruct;
 
 /**
  * Created by david on 2016-05-11.
@@ -36,7 +34,6 @@ public class UpdateChange {
                 result = fileRepository.markAsTrashed(structure.getFileNode());
                 break;
             default:
-                result = changeRepository.markAsProcessed(structure.getChangeNode());
                 result = fileRepository.update(structure.getFileNode(), structure.getChange().getFile());
                 break;
         }

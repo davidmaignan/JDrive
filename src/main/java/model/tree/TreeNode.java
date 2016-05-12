@@ -9,7 +9,7 @@ import com.google.api.services.drive.model.User;
 import model.types.MimeType;
 
 /**
- *  Tree structure to represent the Drive file structure
+ *  Tree structure to represent the DriveMimeTypes file structure
  *
  * Created by David Maignan <davidmaignan@gmail.com> on 15-07-15.
  */

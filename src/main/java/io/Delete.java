@@ -23,7 +23,7 @@ public class Delete {
 
     @Inject
     public Delete(FileRepository fileRepository){
-
+        this.fileRepository = fileRepository;
     }
 
     public boolean execute(Node node){

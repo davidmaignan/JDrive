@@ -1,7 +1,6 @@
 package database.repository;
 
 import com.google.api.client.util.DateTime;
-import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.ParentReference;
 import com.google.api.services.drive.model.User;
@@ -9,7 +8,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import database.Fields;
 import database.RelTypes;
-import org.configuration.Configuration;
+import configuration.Configuration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;

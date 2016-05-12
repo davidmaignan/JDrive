@@ -2,10 +2,7 @@ package io;
 
 import com.google.inject.Inject;
 import database.repository.FileRepository;
-import model.tree.TreeNode;
-import org.api.DriveService;
-import org.api.FileService;
-import org.neo4j.graphdb.Node;
+import drive.api.DriveService;
 
 
 import java.io.FileOutputStream;

@@ -23,7 +23,7 @@ public class Trashed {
 
     @Inject
     public Trashed(FileRepository fileRepository){
-
+        this.fileRepository = fileRepository;
     }
 
     public boolean execute(Node node){

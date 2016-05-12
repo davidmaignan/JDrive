@@ -8,7 +8,7 @@ import com.google.api.services.drive.model.User;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import database.RelTypes;
-import org.configuration.Configuration;
+import configuration.Configuration;
 import database.Fields;
 import org.junit.*;
 import model.tree.TreeBuilder;

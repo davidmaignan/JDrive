@@ -6,13 +6,16 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import database.repository.ChangeRepository;
 import database.repository.FileRepository;
-import drive.change.*;
-import drive.change.services.DriveChangeInterface;
+import drive.change.model.ChangeInterpreted;
+import drive.change.model.ChangeStruct;
+import drive.change.model.ChangeTree;
+import drive.change.model.ValidChange;
+import drive.change.services.ChangeFactoryService;
+import drive.change.services.ChangeInterface;
 import io.*;
-import org.api.change.ChangeService;
-import org.api.UpdateService;
-import org.configuration.Configuration;
-import org.api.FileService;
+import drive.api.change.ChangeService;
+import configuration.Configuration;
+import drive.api.FileService;
 import database.DatabaseModule;
 import database.repository.DatabaseService;
 import model.tree.TreeBuilder;
@@ -20,7 +23,6 @@ import org.neo4j.graphdb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.Path;
@@ -37,7 +39,6 @@ public class JDriveMain {
     private static TreeBuilder treeBuilder;
     private static FileService fileService;
     private static ChangeService changeService;
-    private static UpdateService updateService;
     private static DatabaseService dbService;
     private static ChangeRepository changeRepository;
     private static FileRepository fileRepository;
@@ -137,21 +138,15 @@ public class JDriveMain {
         }
 
         Queue<Node> changeQueue = changeRepository.getUnprocessed();
-
         logger.debug("Change queue: " + changeQueue.size());
 
         for (Node changeNode : changeQueue) {
 
             try {
                 ChangeStruct changeStruct = changeInterpreted.execute(changeNode);
-                DriveChangeInterface service = ChangeFactory.getWriter(changeStruct);
+                ChangeInterface service = ChangeFactoryService.get(changeStruct);
 
                 boolean result = service.execute();
-
-                if(result){
-                    UpdateChange updateChange = new UpdateChange(fileRepository, changeRepository);
-                    updateChange.execute(changeStruct);
-                }
 
                 if(result == false)
                     logger.error(changeStruct.toString());
@@ -181,7 +176,6 @@ public class JDriveMain {
             delete.execute(queue.remove());
         }
     }
-
 
     private static void initRootFolder(){
         Node rootNode = fileRepository.getRootNode();
@@ -257,7 +251,6 @@ public class JDriveMain {
         treeBuilder = injector.getInstance(TreeBuilder.class);
         fileService = injector.getInstance(FileService.class);
         changeService = injector.getInstance(ChangeService.class);
-        updateService = injector.getInstance(UpdateService.class);
         dbService = injector.getInstance(DatabaseService.class);
         changeRepository = injector.getInstance(ChangeRepository.class);
         fileRepository = injector.getInstance(FileRepository.class);

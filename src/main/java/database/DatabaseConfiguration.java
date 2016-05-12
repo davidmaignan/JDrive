@@ -1,7 +1,7 @@
 package database;
 
 import com.google.inject.Inject;
-import org.configuration.Configuration;
+import configuration.Configuration;
 
 /**
  * DatabaseConfiguration
