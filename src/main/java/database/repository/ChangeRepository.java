@@ -37,32 +37,188 @@ public class ChangeRepository extends DatabaseService {
         super(dbConfig, configuration);
     }
 
-    public boolean markAsProcessed(Node change) {
-        String query = "match (change {%s:%d})-[r:CHANGE*]->(m) set change.%s=%b, m.processed=true return change.%s";
+    public boolean delete(Node changeNode){
 
-        try (
-                Transaction tx = graphDB.beginTx();
-        ) {
-            query = String.format(query, Fields.ID, change.getProperty(Fields.ID),
-                    Fields.PROCESSED, true, Fields.PROCESSED);
+        logger.error("Implement delete method");
 
-            Result queryResult = graphDB.execute(query);
+        return true;
+    }
 
-            boolean result = false;
+    public String getId(Node node){
+        try(Transaction tx = graphDB.beginTx()) {
+            return node.getProperty(Fields.ID).toString();
 
-            if(queryResult.hasNext()) {
-                result = (boolean)queryResult.next().get(String.format("change.%s", Fields.PROCESSED));
+        } catch (Exception exception){
+            return null;
+        }
+    }
+
+    public Boolean getDeleted(Node node){
+        try(Transaction tx = graphDB.beginTx()) {
+            return Boolean.valueOf(node.getProperty(Fields.DELETED).toString());
+        } catch (Exception exception){
+            return false;
+        }
+    }
+
+    public Boolean getProcessed(Node node){
+        try(Transaction tx = graphDB.beginTx()) {
+            return Boolean.valueOf(node.getProperty(Fields.PROCESSED).toString());
+        } catch (Exception exception){
+            return false;
+        }
+    }
+
+    public String getFileId(Node node){
+        try(Transaction tx = graphDB.beginTx()) {
+            return node.getProperty(Fields.FILE_ID).toString();
+
+        } catch (Exception exception){
+            return null;
+        }
+    }
+
+    public Long getVersion(Node node){
+        try(Transaction tx = graphDB.beginTx()) {
+            return new Long((long)node.getProperty(Fields.VERSION));
+
+        } catch (Exception exception){
+            return null;
+        }
+    }
+
+
+    /**
+     * Get all the unprocessed changes
+     *
+     * @return queue of changes order by id asc.
+     */
+    public Queue<Node> getUnprocessed() {
+        Queue<Node> queueResult = new ArrayDeque<>();
+
+        String query = "match (n)<-[r:CHANGE]-(m {%s: %b}) with r, m order by m.identifier asc return m";
+
+        try(Transaction tx = graphDB.beginTx()) {
+            Result result = graphDB.execute(String.format(query, Fields.PROCESSED, false));
+
+            while(result.hasNext()){
+                Node node = (Node)result.next().get("m");
+                queueResult.add(node);
             }
 
             tx.success();
+        }
 
-            return result;
+        return queueResult;
+    }
+
+    /**
+     * Set processed as true
+     * @param node
+     * @return processed value updated
+     */
+    public boolean markAsProcessed(Node node) {
+        try (Transaction tx = graphDB.beginTx()) {
+
+            node.setProperty(Fields.PROCESSED, true);
+
+            tx.success();
+
+            return true;
 
         } catch (Exception exception) {
             logger.error(exception.getMessage());
         }
 
         return false;
+    }
+
+    /**
+     * Set processed as true
+     * @param node
+     * @return processed value updated
+     */
+    public boolean markAsDeleted(Node node) {
+        try (Transaction tx = graphDB.beginTx()) {
+
+            node.setProperty(Fields.DELETED, true);
+
+            tx.success();
+
+            return true;
+
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        return false;
+    }
+
+    /**
+     * Set processed as true
+     * @param node
+     * @return processed value updated
+     */
+    public boolean markAsTrashed(Node node) {
+        try (Transaction tx = graphDB.beginTx()) {
+
+            node.setProperty(Fields.TRASHED, true);
+
+            tx.success();
+
+            return true;
+
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        return false;
+    }
+
+    /**
+     * Update change node once applied
+     *
+     * @param change Change
+     * @return true on success
+     */
+    public boolean update(Change change) {
+
+        String query = "match (change:Change {%s: '%s'}) set change.processed=true, change.deleted=%b return change";
+
+        try(Transaction tx = graphDB.beginTx()){
+            boolean deleted = getTrashed(change);
+            query = String.format(query, Fields.ID, change.getId(), deleted);
+
+            Result result = graphDB.execute(query);
+
+            tx.success();
+
+            return true;
+        }catch (QueryExecutionException exception){
+            exception.printStackTrace();
+            logger.error("Failed to update change: %d", change.getId());
+        }catch (Exception exception){
+            logger.error(exception.getMessage());
+        }
+
+        return false;
+    }
+
+    /**
+     * Get trashed label value if available
+     *
+     * @param change Change
+     *
+     * @return boolean
+     */
+    public boolean getTrashed(Change change) {
+        return  change.getDeleted()
+                && (change.getFile() != null
+                                && change.getFile().getExplicitlyTrashed() != null
+                                && change.getFile().getExplicitlyTrashed())
+                && (change.getFile() != null
+                                    && change.getFile().getLabels() != null
+                                    && change.getFile().getLabels().getTrashed());
     }
 
     public long getLastChangeId() {
@@ -113,7 +269,8 @@ public class ChangeRepository extends DatabaseService {
     }
 
     /**
-     * Add change node to a queue/linkedList of changes starting from a file node
+     * Add change node to the linked list
+     *
      * @param change
      * @return true on success
      */
@@ -143,28 +300,7 @@ public class ChangeRepository extends DatabaseService {
                     + " - " +exception.getMessage()
             );
 
-            exception.printStackTrace();
-        }
-
-        return false;
-    }
-
-    public boolean createLonelyChange(Change change){
-        try (Transaction tx = graphDB.beginTx()) {
-
-            createChangeNode(change);
-
-            tx.success();
-
-            return true;
-
-        } catch (Exception exception) {
-            logger.error("Change: " + change.getId()
-                            + " - " + change.getFileId()
-                            + " - " +exception.getMessage()
-            );
-
-            exception.printStackTrace();
+//            exception.printStackTrace();
         }
 
         return false;
@@ -185,7 +321,9 @@ public class ChangeRepository extends DatabaseService {
         changeNode.setProperty(Fields.SELF_LINK, change.getSelfLink());
         changeNode.setProperty(Fields.DELETED, change.getDeleted());
         changeNode.setProperty(Fields.PROCESSED, false);
-        changeNode.setProperty(Fields.VERSION, change.getFile().getVersion());
+        changeNode.setProperty(Fields.TRASHED, false);
+        if(change.getFile() != null)
+            changeNode.setProperty(Fields.VERSION, change.getFile().getVersion());
 
         return changeNode;
     }
@@ -196,11 +334,11 @@ public class ChangeRepository extends DatabaseService {
      * @return null | change node
      */
     private Node getInsertPoint(String nodeId) {
-        String query = "match (file {%s:'%s'}) optional match (file)<-[r:%s*]-(m) " +
-                "with file, m, count(r) AS length order by length desc limit 1 return  file, m";
+        String query = "match (file {identifier: '%s'}) optional match (file)<-[r:CHANGE*]-(m) " +
+                "with m order by m.identifier DESC limit 1 return m";
 
         try (Transaction tx = graphDB.beginTx()) {
-            Result result = graphDB.execute(String.format(query, Fields.ID, nodeId, RelTypes.CHANGE, nodeId));
+            Result result = graphDB.execute(String.format(query, nodeId));
 
             tx.success();
 
@@ -211,28 +349,5 @@ public class ChangeRepository extends DatabaseService {
         }
 
         return null;
-    }
-
-    /**
-     * Get unprocessed changes queue
-     * @return queue of changes to be apply from the oldest to newest
-     */
-    public Queue<Node> getUnprocessed() {
-        Queue<Node> queueResult = new ArrayDeque<>();
-
-        String query = "match (n)<-[r:CHANGE]-(m {%s: %b}) with r, m order by m.identifier asc return m";
-
-        try(Transaction tx = graphDB.beginTx()) {
-            Result result = graphDB.execute(String.format(query, Fields.PROCESSED, false));
-
-            while(result.hasNext()){
-                Node node = (Node)result.next().get("m");
-                queueResult.add(node);
-            }
-
-            tx.success();
-        }
-
-        return queueResult;
     }
 }

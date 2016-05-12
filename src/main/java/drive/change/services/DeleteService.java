@@ -1,45 +1,44 @@
-package io;
+package drive.change.services;
 
-import com.google.api.services.drive.model.Change;
+import drive.change.ChangeStruct;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * Delete a file or folder locally when receiving a deletion change from api
+ * Delete a file or folder locally when receiving a delete change from api
  *
  * David Maignan <davidmaignan@gmail.com>
  */
-public class DeleteService {
+public class DeleteService implements DriveChangeInterface {
+    private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
+    private ChangeStruct structure;
 
-    private static Logger logger;
-    private String absolutePath;
-
-    public DeleteService(String absolutePath){
-        this.absolutePath = absolutePath;
+    @Override
+    public void setStructure(ChangeStruct structure) {
+        this.structure = structure;
     }
 
     public final boolean execute(){
-        Path path = FileSystems.getDefault().getPath(absolutePath);
-
-        try{
-            if (Files.isDirectory(path)) {
-                deleteDirectory(path);
-            }
-
-            Files.deleteIfExists(path);
-        } catch (FileNotFoundException exception) {
-            return true;
-        } catch (IOException exception) {
-            logger.error("Error when deleting %s", path);
-            return false;
-        }
-
         return true;
+//        Path path = null;
+//
+//        try{
+//            path = FileSystems.getDefault().getPath(structure.getNewPath());
+//
+//            Files.deleteIfExists(path);
+//
+//            return true;
+//        } catch (FileNotFoundException exception) {
+//            return false;
+//        } catch (IOException exception) {
+////            exception.printStackTrace();
+//            logger.error(exception.getMessage());
+//            return false;
+//        }
     }
 
     /**

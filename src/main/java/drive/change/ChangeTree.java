@@ -1,17 +1,17 @@
-package drive;
+package drive.change;
 
 import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.File;
 import com.google.inject.Inject;
+import database.DatabaseException;
 import database.repository.ChangeRepository;
 import database.repository.FileRepository;
 import org.api.FileService;
 import org.neo4j.graphdb.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 
 public class ChangeTree {
     private static Logger logger = LoggerFactory.getLogger(ChangeTree.class);
@@ -27,24 +27,28 @@ public class ChangeTree {
         this.fileService = fileService;
     }
 
-    public boolean execute(List<Change> changeList) throws Exception{
-        while( ! changeList.isEmpty()) {
-            Change change = changeList.remove(0);
-            Node node = fileRepository.getNodeById(change.getFileId());
+    public boolean execute(List<ValidChange> list) throws Exception{
+
+        List<Node> trashedNode = fileRepository.getTrashedList();
+
+        logger.debug("Trash size: " + trashedNode.size());
+
+        while( ! list.isEmpty()){
+            ValidChange validChange = list.remove(0);
+
             boolean result = true;
 
-            if (node == null) {
-                result = createNode(change);
+            if(validChange.isNewFile()){
+                result = createNode(validChange.getChange());
             }
 
-            if (result) {
-                result = changeRepository.addChange(change);
-            } else {
-                result = changeRepository.createLonelyChange(change);
-            }
+            if(result){
+                //If trashed files get untrashed and moved at the same time
+                if(trashedNode.contains(validChange.getFileNode())){
+                    fileRepository.markAsUnTrashed(validChange.getFileNode());
+                }
 
-            if (!result) {
-                logger.error("Change: %d is not admissible\n", change.getId());
+                changeRepository.addChange(validChange.getChange());
             }
         }
 
@@ -52,19 +56,32 @@ public class ChangeTree {
     }
 
     private boolean createNode(Change change) throws Exception{
-        String parentId = change.getFile().getParents().get(0).getId();
+        try {
+            String parentId = change.getFile().getParents().get(0).getId();
 
-        Node newNode = fileRepository.createNode(change.getFile());
+            Node parentNode = fileRepository.getNodeById(parentId);
 
-        Node parentNode = fileRepository.getNodeById(parentId);
+            if (parentNode == null) {
+                logger.debug("This code should never be executed.");
+                parentNode = createParentNode(parentId);
+            }
 
-        if (parentNode == null) {
-            parentNode = createParentNode(parentId);
+            Node newNode = fileRepository.createNode(change.getFile());
+
+            return fileRepository.createParentRelation(newNode, parentNode);
+        }catch (Exception exception){
+            logger.error(exception.getMessage(), exception);
+            return true;
         }
-
-        return fileRepository.createParentRelation(newNode, parentNode);
     }
 
+    /**
+     * Create recursively the parent Node in case Google returns the changes unordered.
+     *
+     * @param fileId
+     * @return
+     * @throws Exception
+     */
     private Node createParentNode(String fileId) throws Exception{
         File file = fileService.getFile(fileId);
 
@@ -85,7 +102,7 @@ public class ChangeTree {
         boolean result = fileRepository.createParentRelation(node, parentNode);
 
         if ( ! result) {
-            throw new Exception("Cannot create relation between " + node + " : " + parentNode);
+            throw new DatabaseException("Cannot create relation between " + node + " : " + parentNode);
         }
 
         return node;

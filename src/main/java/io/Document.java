@@ -46,6 +46,11 @@ public class Document implements WriterInterface {
         return true;
     }
 
+    @Override
+    public void setFileId(String fileId) {
+        this.id = fileId;
+    }
+
     private String setContent() {
         return String.format("" +
                 "{\"url\": \"https://docs.google.com/open?id=%s\", " +
@@ -58,12 +63,7 @@ public class Document implements WriterInterface {
         );
     }
 
-    @Override
-    public void setNode(Node node) {
-        this.node = node;
 
-        this.id = fileRepository.getFileId(node);
-    }
 
     @Override
     public boolean delete(String path) {

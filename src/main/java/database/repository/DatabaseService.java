@@ -151,6 +151,34 @@ public class DatabaseService implements DatabaseServiceInterface {
         return false;
     }
 
+
+    /**
+     * Delete a node by id
+     *
+     * @param node Node
+     * @return boolean
+     */
+    public boolean delete(Node node) {
+        String query = "match (file {identifier: '%s'}) match (file)<-[r*]-(m) " +
+                "foreach (rel in r | delete rel) delete m with file match (file)-[r]->(m) delete r, file";
+        try (Transaction tx = graphDB.beginTx()) {
+
+            query = String.format(query, node.getProperty(Fields.ID));
+
+            logger.debug("Query: " + query);
+
+            Result result = graphDB.execute(query);
+
+            tx.success();
+
+            return true;
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        return false;
+    }
+
     /**
      * Get parent for a file
      *
@@ -287,6 +315,50 @@ public class DatabaseService implements DatabaseServiceInterface {
 
             pathBuilder.append("/");
             pathBuilder.append(node.getProperty(Fields.TITLE).toString());
+
+            tx.success();
+
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        return String.format("%s%s",
+                configuration.getRootFolder(),
+                pathBuilder.substring(1).toString()
+        );
+    }
+
+    /**
+     * Get absolutePath for a node by Id
+     *
+     * @param  nodeId
+     * @return
+     * @throws Exception
+     */
+    public String getNodeAbsolutePath(String nodeId) {
+        StringBuilder pathBuilder = new StringBuilder();
+
+        String query = "match (file {identifier:'%s'}) match (file)-[r*]->(m {IsRoot:true}) return r";
+
+        try (Transaction tx = graphDB.beginTx())
+        {
+            Result result = graphDB.execute(String.format(query, nodeId));
+
+            if ( ! result.hasNext()) {
+                return configuration.getRootFolder();
+            }
+
+            Map<String, Object> row = result.next();
+
+            List<Relationship> relationshipList = (List<Relationship>) row.get("r");
+
+            for (Relationship rel : relationshipList) {
+                pathBuilder.insert(0, rel.getEndNode().getProperty(Fields.TITLE).toString());
+                pathBuilder.insert(0, "/");
+            }
+
+            pathBuilder.append("/");
+            pathBuilder.append(nodeId);
 
             tx.success();
 

@@ -1,14 +1,14 @@
 <configuration>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%-4relative [%thread] %-5level %logger{35} - %msg %n</pattern>
+            <pattern>%-4relative %class{36}:%L %M - %msg%n</pattern>
         </encoder>
     </appender>
     <appender name="InfoFile" class="ch.qos.logback.core.FileAppender">
         <file>logs/Info.log</file>
         <append>true</append>
         <encoder>
-            <pattern>%-4r %-5level %logger{35}: %msg%n</pattern>
+            <pattern>%-4r %-5level %class{36}:%L %M - %msg%n</pattern>
         </encoder>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>INFO</level>
@@ -20,7 +20,7 @@
         <file>logs/Debug.log</file>
         <append>true</append>
         <encoder>
-            <pattern>%-4r %-5level [%thread]  %logger{35}: %msg%n</pattern>
+            <pattern>%-4r %-5level %class{36}:%L %M - %msg%n</pattern>
         </encoder>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>DEBUG</level>
@@ -32,7 +32,7 @@
         <file>logs/Error.log</file>
         <append>true</append>
         <encoder>
-            <pattern>%-4r %-5level [%thread]  %logger{35}: %msg%n</pattern>
+            <pattern>%-4r %-5level %class{36}:%L %M - %msg%n</pattern>
         </encoder>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>ERROR</level>
@@ -40,14 +40,14 @@
             <onMismatch>DENY</onMismatch>
         </filter>
     </appender>
-    <root level="INFO">
+    <root level="INFO" additivity="true">
         <appender-ref ref="InfoFile" />
         <appender-ref ref="STDOUT" />
     </root>
-    <root level="ERROR">
+    <root level="ERROR" additivity="true">
         <appender-ref ref="ErrorFile" />
     </root>
-    <root level="DEBUG">
+    <root level="DEBUG" additivity="true">
         <appender-ref ref="DebugFile" />
     </root>
 </configuration>

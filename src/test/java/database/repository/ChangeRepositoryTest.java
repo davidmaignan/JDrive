@@ -56,12 +56,47 @@ public class ChangeRepositoryTest {
         graphDb.shutdown();
     }
 
-    @Test(timeout = 10000)
-    public void testMarkAsProcessed() {
+    @Test(timeout = 1000)
+    public void testUpdate(){
         repository.save(this.getRootNode());
-        repository.addChange(this.generateChange(1l, "folder1"));
 
-//        assertTrue(repository.markAsProcessed(1l));
+        Change change = this.generateChange(1l, "folder1");
+
+        repository.addChange(change);
+
+        try{
+            change.setDeleted(true);
+            assertTrue(repository.update(change));
+
+            Node node = repository.getChangeById(1l);
+
+            assertTrue((Boolean) node.getProperty(Fields.PROCESSED));
+            assertTrue((Boolean) node.getProperty(Fields.DELETED));
+
+        }catch (Exception exception){
+
+        }
+    }
+
+    @Test(timeout = 10000)
+    public void testGetProperties(){
+        repository.save(this.getRootNode());
+
+        Change change = this.generateChange(1l, "folder1");
+
+        repository.addChange(change);
+
+        try{
+            Node node = repository.getChangeById(1l);
+
+            assertFalse(repository.getProcessed(node));
+            assertFalse(repository.getDeleted(node));
+            assertEquals("folder1", repository.getFileId(node));
+            assertEquals(new Long(0l), repository.getVersion(node));
+
+        }catch (Exception exception){
+
+        }
     }
 
     @Test(timeout = 10000)
