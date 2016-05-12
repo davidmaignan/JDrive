@@ -15,11 +15,11 @@ import java.nio.file.Path;
  */
 public class DeleteService implements DriveChangeInterface {
     private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
-    private ChangeStruct changeStruct;
+    private ChangeStruct structure;
 
     @Override
     public void setStructure(ChangeStruct structure) {
-
+        this.structure = structure;
     }
 
     public final boolean execute(){
