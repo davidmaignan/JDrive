@@ -9,7 +9,7 @@ import java.nio.file.*;
 import static java.nio.file.StandardWatchEventKinds.*;
 
 /**
- * Monitor service - Listen to JDrive directory files updates
+ * Monitor apply - Listen to JDrive directory files updates
  *
  * David Maignan <davidmaignan@gmail.com> on 15-07-21.
  */

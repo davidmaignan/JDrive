@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Tree File structure of the Google Drive
+ * Tree File structure of the Google DriveMimeTypes
  *
  * David Maignan <davidmaignan@gmail.com>
  */

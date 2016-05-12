@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Change executor: execute recursively a list of change service
+ * Change executor: execute recursively a list of change apply
  * <p>
  * David Maignan <davidmaignan@gmail.com>
  */
@@ -36,7 +36,7 @@ public class ChangeExecutor {
 
     public void debug() {
         for (ChangeInterface service : changeList) {
-            System.out.println("service: " + service);
+            System.out.println("apply: " + service);
         }
     }
 

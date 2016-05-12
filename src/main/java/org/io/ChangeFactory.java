@@ -20,6 +20,6 @@ public class ChangeFactory {
             return service;
         }
 
-        throw new UnsupportedOperationException("No change service provided");
+        throw new UnsupportedOperationException("No change apply provided");
     }
 }

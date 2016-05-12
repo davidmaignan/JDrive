@@ -1,4 +1,4 @@
-package drive.change.services;
+package drive.change.services.apply;
 
 import com.google.inject.Inject;
 import database.repository.FileRepository;
@@ -16,13 +16,13 @@ import java.nio.file.Path;
  *
  * David Maignan <davidmaignan@gmail.com>
  */
-public class FolderUpdateService implements ChangeServiceInterface {
+public class FolderService implements ChangeServiceInterface {
     private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
     private ChangeStruct structure;
     private FileRepository fileRepository;
 
     @Inject
-    public FolderUpdateService(FileRepository fileRepository){
+    public FolderService(FileRepository fileRepository){
         this.fileRepository = fileRepository;
     }
 

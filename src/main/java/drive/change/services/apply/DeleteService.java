@@ -1,4 +1,4 @@
-package drive.change.services;
+package drive.change.services.apply;
 
 import drive.change.model.ChangeStruct;
 import org.slf4j.Logger;
@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
  *
  * David Maignan <davidmaignan@gmail.com>
  */
-public class TrashedService implements ChangeServiceInterface {
+public class DeleteService implements ChangeServiceInterface {
     private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
     private ChangeStruct structure;
 
@@ -20,6 +20,5 @@ public class TrashedService implements ChangeServiceInterface {
 
     public final boolean execute(){
         return true;
-
     }
 }

@@ -14,7 +14,7 @@ import org.neo4j.graphdb.Node;
 import java.util.List;
 
 /**
- * Update service: apply changes received from Drive API
+ * Update apply: apply changes received from DriveMimeTypes API
  *
  *  Change can be different types:
  *    - hard deletion or Trashed label

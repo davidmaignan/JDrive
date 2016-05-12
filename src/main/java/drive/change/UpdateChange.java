@@ -34,7 +34,6 @@ public class UpdateChange {
                 result = fileRepository.markAsTrashed(structure.getFileNode());
                 break;
             default:
-                result = changeRepository.markAsProcessed(structure.getChangeNode());
                 result = fileRepository.update(structure.getFileNode(), structure.getChange().getFile());
                 break;
         }

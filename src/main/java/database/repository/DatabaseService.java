@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 /**
- * Graph database service - Implementation for Neo4j
+ * Graph database apply - Implementation for Neo4j
  *
  * David Maignan <davidmaignan@gmail.com>
  */

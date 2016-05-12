@@ -1,4 +1,4 @@
-package drive.change.services;
+package drive.change.services.apply;
 
 import com.google.inject.Guice;
 import com.google.inject.Inject;
@@ -12,13 +12,13 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by david on 2016-05-05.
  */
-public class FileUpdateService implements ChangeServiceInterface {
+public class FileService implements ChangeServiceInterface {
     private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
     private ChangeStruct structure;
     private FileRepository fileRepository;
 
     @Inject
-    public FileUpdateService(FileRepository fileRepository){
+    public FileService(FileRepository fileRepository){
         this.fileRepository = fileRepository;
     }
 

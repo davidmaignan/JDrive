@@ -5,14 +5,13 @@ import database.repository.ChangeRepository;
 import database.repository.FileRepository;
 import drive.change.model.ChangeStruct;
 
-
-public class DeleteChangeUpdate implements ChangeUpdateInterface{
+public class DocumentChangeUpdate implements ChangeUpdateInterface{
     private ChangeStruct structure;
     private FileRepository fileRepository;
     private ChangeRepository changeRepository;
 
     @Inject
-    public DeleteChangeUpdate(FileRepository fileRepository, ChangeRepository changeRepository){
+    public DocumentChangeUpdate(FileRepository fileRepository, ChangeRepository changeRepository){
         this.fileRepository = fileRepository;
         this.changeRepository = changeRepository;
     }
@@ -20,8 +19,8 @@ public class DeleteChangeUpdate implements ChangeUpdateInterface{
     @Override
     public boolean execute() {
         return changeRepository.markAsProcessed(structure.getChangeNode())
-                && changeRepository.markAsDeleted(structure.getChangeNode())
-                && fileRepository.markAsDeleted(structure.getFileNode());
+                && fileRepository.update(structure.getFileNode(), structure.getChange().getFile());
+
     }
 
     @Override

@@ -1,9 +1,9 @@
-package drive.change;
+package drive.change.services;
 
 import com.google.inject.Guice;
 import database.DatabaseModule;
 import drive.change.model.ChangeStruct;
-import drive.change.services.*;
+import drive.change.services.apply.*;
 
 public class ChangeFactory {
     public static ChangeServiceInterface getWriter(ChangeStruct structure){
@@ -16,12 +16,12 @@ public class ChangeFactory {
                 service = Guice.createInjector(new DatabaseModule()).getInstance(MoveService.class);
                 break;
             case FILE_UPDATE:
-                service = Guice.createInjector(new DatabaseModule()).getInstance(FileUpdateService.class);
+                service = Guice.createInjector(new DatabaseModule()).getInstance(FileService.class);
                 break;
             case FOLDER_UPDATE:
-                service = Guice.createInjector(new DatabaseModule()).getInstance(FolderUpdateService.class);
+                service = Guice.createInjector(new DatabaseModule()).getInstance(FolderService.class);
                 break;
-            case GOOGLE_TYPE_UPDATE:
+            case DOCUMENT:
                 service = Guice.createInjector(new DatabaseModule()).getInstance(DocumentUpdateService.class);
                 break;
             case TRASHED:

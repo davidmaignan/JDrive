@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * JDrive API service client
+ * JDrive API apply client
  *
  * Created by David Maignan <davidmaignan@gmail.com> on 15-07-15.
  */
@@ -97,7 +97,7 @@ public class DriveService {
     /**
      * Get api
      *
-     * @return Drive
+     * @return DriveMimeTypes
      */
     public Drive getDrive() {
         return new Drive.Builder(

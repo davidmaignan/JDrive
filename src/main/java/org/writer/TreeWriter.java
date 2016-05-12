@@ -5,7 +5,7 @@ import model.tree.TreeNode;
 import java.util.List;
 
 /**
- * Tree writer service
+ * Tree writer apply
  *
  * David Maignan <davidmaignan@gmail.com>
  */

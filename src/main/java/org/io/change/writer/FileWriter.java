@@ -76,7 +76,7 @@ public class FileWriter implements WriterChangeInterface {
                 return null;
             }
         } else {
-            // The file doesn't have any content stored on Drive.
+            // The file doesn't have any content stored on DriveMimeTypes.
             return null;
         }
     }

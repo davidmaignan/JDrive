@@ -1,13 +1,15 @@
-package drive.change.services;
+package drive.change.services.apply;
 
 import drive.change.model.ChangeStruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Created by david on 2016-01-12.
+ * Delete a file or folder locally when receiving a delete change from api
+ *
+ * David Maignan <davidmaignan@gmail.com>
  */
-public class NullWriter implements ChangeServiceInterface {
+public class TrashedService implements ChangeServiceInterface {
     private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
     private ChangeStruct structure;
 
@@ -16,8 +18,8 @@ public class NullWriter implements ChangeServiceInterface {
         this.structure = structure;
     }
 
-    @Override
-    public boolean execute() {
+    public final boolean execute(){
         return true;
+
     }
 }

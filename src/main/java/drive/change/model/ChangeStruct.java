@@ -38,7 +38,7 @@ public class ChangeStruct {
         } else if(change.getFile().getMimeType().equals(MimeType.FOLDER)){
             return ChangeTypes.FOLDER_UPDATE;
         } else if (MimeType.all().contains(change.getFile().getMimeType())) {
-            return ChangeTypes.GOOGLE_TYPE_UPDATE;
+            return ChangeTypes.DOCUMENT;
         } else {
             return ChangeTypes.FILE_UPDATE;
         }

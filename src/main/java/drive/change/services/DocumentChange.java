@@ -1,22 +1,23 @@
 package drive.change.services;
 
 import com.google.inject.Inject;
+import drive.change.annotations.Document;
+import drive.change.annotations.File;
 import drive.change.model.ChangeStruct;
-import drive.change.annotations.Delete;
 import drive.change.services.apply.ChangeServiceInterface;
 import drive.change.services.update.ChangeUpdateInterface;
 
 
 /**
- * Service to apply all the steps for a delete change
+ * Service to apply all the steps for a document change
  */
-public class DeleteChange implements ChangeInterface {
+public class DocumentChange implements ChangeInterface {
     private ChangeStruct structure;
     private ChangeServiceInterface service;
     private ChangeUpdateInterface update;
 
     @Inject
-    public DeleteChange(@Delete ChangeServiceInterface service, @Delete ChangeUpdateInterface update){
+    public DocumentChange(@Document ChangeServiceInterface service, @Document ChangeUpdateInterface update){
         this.service = service;
         this.update = update;
     }

@@ -7,7 +7,14 @@ import com.google.inject.Injector;
 import database.repository.ChangeRepository;
 import database.repository.FileRepository;
 import drive.change.*;
-import drive.change.services.ChangeServiceInterface;
+import drive.change.model.ChangeInterpreted;
+import drive.change.model.ChangeStruct;
+import drive.change.model.ChangeTree;
+import drive.change.model.ValidChange;
+import drive.change.services.ChangeFactory;
+import drive.change.services.ChangeFactoryService;
+import drive.change.services.ChangeInterface;
+import drive.change.services.apply.ChangeServiceInterface;
 import io.*;
 import org.api.change.ChangeService;
 import org.api.UpdateService;
@@ -60,29 +67,35 @@ public class JDriveMain {
         initServices();
         setUp();
 
-        try{
-            getLastChanges();
-        } catch (Exception exception) {
-            exception.printStackTrace();
-        }
+        ChangeStruct structure = new ChangeStruct();
 
-        try {
-            applyLastChanges();
-        } catch (Exception exception) {
-            exception.printStackTrace();
-        }
+        ChangeInterface changeService = ChangeFactoryService.get(structure);
 
-        try{
-            applyTrashed();
-        } catch (Exception exception){
-            exception.printStackTrace();
-        }
+        changeService.execute();
 
-        try{
-            applyDeleted();
-        } catch (Exception exception){
-            exception.printStackTrace();
-        }
+//        try{
+//            getLastChanges();
+//        } catch (Exception exception) {
+//            exception.printStackTrace();
+//        }
+//
+//        try {
+//            applyLastChanges();
+//        } catch (Exception exception) {
+//            exception.printStackTrace();
+//        }
+//
+//        try{
+//            applyTrashed();
+//        } catch (Exception exception){
+//            exception.printStackTrace();
+//        }
+//
+//        try{
+//            applyDeleted();
+//        } catch (Exception exception){
+//            exception.printStackTrace();
+//        }
 
         registerShutdownHook(dbService.getGraphDB());
     }
