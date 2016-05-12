@@ -1,4 +1,4 @@
-package drive.change;
+package drive.change.model;
 
 /**
  * JDrive

@@ -1,10 +1,8 @@
 package drive.change;
 
-import com.google.inject.Guice;
-import database.DatabaseModule;
 import database.repository.ChangeRepository;
 import database.repository.FileRepository;
-import io.*;
+import drive.change.model.ChangeStruct;
 
 /**
  * Created by david on 2016-05-11.

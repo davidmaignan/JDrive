@@ -11,7 +11,7 @@ import database.Fields;
 import database.RelTypes;
 import database.repository.ChangeRepository;
 import database.repository.FileRepository;
-import drive.change.ChangeTree;
+import drive.change.model.ChangeTree;
 import model.tree.TreeBuilder;
 import model.tree.TreeNode;
 import org.api.FileService;

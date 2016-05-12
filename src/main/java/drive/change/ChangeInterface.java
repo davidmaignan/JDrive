@@ -1,5 +1,7 @@
 package drive.change;
 
+import drive.change.model.ChangeStruct;
+
 /**
  *
  *

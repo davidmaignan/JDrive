@@ -1,6 +1,6 @@
 package drive.change.services;
 
-import drive.change.ChangeStruct;
+import drive.change.model.ChangeStruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

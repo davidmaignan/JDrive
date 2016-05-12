@@ -2,17 +2,15 @@ package drive.change.services;
 
 import com.google.inject.Inject;
 import drive.change.ChangeInterface;
-import drive.change.ChangeStruct;
+import drive.change.model.ChangeStruct;
 import drive.change.annotations.Delete;
 import drive.change.services.update.ChangeUpdateInterface;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 /**
- * Created by david on 2016-05-12.
+ * Service to apply all the steps for a deletion of a file/folder
  */
 public class DeleteChange implements ChangeInterface {
-    private static Logger logger = LoggerFactory.getLogger(DeleteChange.class);
     private ChangeStruct structure;
     private ChangeServiceInterface service;
     private ChangeUpdateInterface update;

@@ -1,4 +1,4 @@
-package drive.change;
+package drive.change.model;
 
 import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.File;
@@ -11,7 +11,6 @@ import org.neo4j.graphdb.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.List;
-import java.util.Queue;
 
 public class ChangeTree {
     private static Logger logger = LoggerFactory.getLogger(ChangeTree.class);

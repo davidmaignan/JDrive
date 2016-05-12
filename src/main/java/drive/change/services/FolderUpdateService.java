@@ -2,7 +2,7 @@ package drive.change.services;
 
 import com.google.inject.Inject;
 import database.repository.FileRepository;
-import drive.change.ChangeStruct;
+import drive.change.model.ChangeStruct;
 import io.Folder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,10 +1,8 @@
-package drive.change;
+package drive.change.model;
 
 import com.google.api.services.drive.model.Change;
 import model.types.MimeType;
 import org.neo4j.graphdb.Node;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Structure containing the data from a change

@@ -2,6 +2,7 @@ package drive.change;
 
 import com.google.inject.Guice;
 import database.DatabaseModule;
+import drive.change.model.ChangeStruct;
 import drive.change.services.*;
 
 public class ChangeFactory {

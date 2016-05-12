@@ -1,6 +1,7 @@
 package drive.change;
 
 import com.google.inject.Guice;
+import drive.change.model.ChangeStruct;
 import drive.change.modules.ChangeModule;
 import drive.change.services.DeleteChange;
 

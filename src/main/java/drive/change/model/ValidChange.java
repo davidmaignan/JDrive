@@ -1,4 +1,4 @@
-package drive.change;
+package drive.change.model;
 
 import com.google.api.services.drive.model.Change;
 import database.repository.FileRepository;

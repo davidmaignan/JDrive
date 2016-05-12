@@ -1,6 +1,6 @@
 package drive.change.services.update;
 
-import drive.change.ChangeStruct;
+import drive.change.model.ChangeStruct;
 
 /**
  * Created by david on 2016-05-12.
