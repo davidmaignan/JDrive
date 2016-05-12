@@ -90,7 +90,6 @@ public class FileRepository extends DatabaseService {
      * @return
      */
     public boolean updateParentRelation(Node child, Node parent) {
-
         try(Transaction tx = graphDB.beginTx()) {
             String queryCreateRelation = "match (child {%s:'%s'}), (parent {%s:'%s'})" +
                     " CREATE (child)-[r:%s]->(parent) return child, parent, r";
@@ -163,7 +162,6 @@ public class FileRepository extends DatabaseService {
             tx.success();
 
             return true;
-
         } catch (Exception exception) {
             logger.error(exception.getMessage());
         }
@@ -185,7 +183,6 @@ public class FileRepository extends DatabaseService {
             tx.success();
 
             return true;
-
         } catch (Exception exception) {
             logger.error(exception.getMessage());
         }
@@ -198,7 +195,7 @@ public class FileRepository extends DatabaseService {
      * @param id
      * @return
      */
-    public boolean markasDeleted(String id) {
+    public boolean markAsDeleted(String id) {
         String query = "match (file {%s:'%s'})<-[:%s*]-(m) " +
                 "set file.deleted=true, m.deleted=true return file, m";
 
@@ -211,7 +208,6 @@ public class FileRepository extends DatabaseService {
             tx.success();
 
             return true;
-
         } catch (Exception exception) {
             logger.error(exception.getMessage());
         }
@@ -256,8 +252,6 @@ public class FileRepository extends DatabaseService {
      * @return processed value updated
      */
     public boolean markAsProcessed(Node node) {
-        String query = "match (file:File {%s: '%s'}) set file.%s = %s return file.%s";
-
         try (Transaction tx = graphDB.beginTx()){
 
             node.setProperty(Fields.PROCESSED, true);
@@ -540,6 +534,8 @@ public class FileRepository extends DatabaseService {
         dbNode.setProperty(Fields.MIME_TYPE, tNode.getMimeType());
         dbNode.setProperty(Fields.IS_ROOT, tNode.isSuperRoot());
         dbNode.setProperty(Fields.PROCESSED, false);
+        dbNode.setProperty(Fields.TRASHED, false);
+        dbNode.setProperty(Fields.DELETED, false);
         dbNode.setProperty(Fields.VERSION, tNode.getVersion());
 
         if (tNode.getCreatedDate() != null) {
