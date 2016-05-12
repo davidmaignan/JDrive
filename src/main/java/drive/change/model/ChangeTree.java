@@ -6,7 +6,7 @@ import com.google.inject.Inject;
 import database.DatabaseException;
 import database.repository.ChangeRepository;
 import database.repository.FileRepository;
-import org.api.FileService;
+import drive.api.FileService;
 import org.neo4j.graphdb.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,10 +27,7 @@ public class ChangeTree {
     }
 
     public boolean execute(List<ValidChange> list) throws Exception{
-
         List<Node> trashedNode = fileRepository.getTrashedList();
-
-        logger.debug("Trash size: " + trashedNode.size());
 
         while( ! list.isEmpty()){
             ValidChange validChange = list.remove(0);

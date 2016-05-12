@@ -3,6 +3,7 @@ package drive.change.services;
 import com.google.inject.Guice;
 import database.DatabaseModule;
 import drive.change.model.ChangeStruct;
+import drive.change.modules.ChangeModule;
 
 /**
  * Created by david on 2016-05-12.
@@ -14,25 +15,25 @@ public class ChangeFactoryService {
 
         switch (structure.getType()){
             case DELETE:
-                service = Guice.createInjector(new DatabaseModule()).getInstance(DeleteChange.class);
+                service = Guice.createInjector(new ChangeModule()).getInstance(DeleteChange.class);
                 break;
             case MOVE:
-                service = Guice.createInjector(new DatabaseModule()).getInstance(MoveChange.class);
+                service = Guice.createInjector(new ChangeModule()).getInstance(MoveChange.class);
                 break;
             case FILE_UPDATE:
-                service = Guice.createInjector(new DatabaseModule()).getInstance(FileChange.class);
+                service = Guice.createInjector(new ChangeModule()).getInstance(FileChange.class);
                 break;
             case FOLDER_UPDATE:
-                service = Guice.createInjector(new DatabaseModule()).getInstance(FolderChange.class);
+                service = Guice.createInjector(new ChangeModule()).getInstance(FolderChange.class);
                 break;
             case DOCUMENT:
-                service = Guice.createInjector(new DatabaseModule()).getInstance(DocumentChange.class);
+                service = Guice.createInjector(new ChangeModule()).getInstance(DocumentChange.class);
                 break;
             case TRASHED:
-                service = Guice.createInjector(new DatabaseModule()).getInstance(TrashChange.class);
+                service = Guice.createInjector(new ChangeModule()).getInstance(TrashChange.class);
                 break;
             default:
-                service = Guice.createInjector(new DatabaseModule()).getInstance(NullChange.class);
+                service = Guice.createInjector(new ChangeModule()).getInstance(NullChange.class);
                 break;
         }
 

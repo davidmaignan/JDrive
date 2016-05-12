@@ -1,7 +1,7 @@
-package org.monitor;
+package monitor;
 
 import com.google.inject.Inject;
-import org.configuration.Configuration;
+import configuration.Configuration;
 
 import java.io.IOException;
 import java.nio.file.*;

@@ -1,13 +1,11 @@
 package database.repository;
 
-import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.File;
 import com.google.inject.Inject;
-import database.Connection;
 import database.DatabaseConfiguration;
 import database.Fields;
 import database.RelTypes;
-import org.configuration.Configuration;
+import configuration.Configuration;
 import model.tree.TreeNode;
 import org.neo4j.graphdb.*;
 import org.slf4j.Logger;
@@ -70,8 +68,6 @@ public class FileRepository extends DatabaseService {
             String query = "match (file:File {IsRoot: true}) return file";
 
             Result queryResult = graphDB.execute(query);
-
-//            logger.debug(queryResult.resultAsString());
 
             if(queryResult.hasNext()){
                 result = (Node)queryResult.next().get("file");
@@ -305,12 +301,12 @@ public class FileRepository extends DatabaseService {
     public Queue<Node> getUnprocessedQueue() {
         Queue<Node> queueResult = new ArrayDeque<>();
 
-        String query = "match (file:File {%s: %b}) optional match (file)<-[r:PARENT]-(m) " +
+        String query = "match (file:File {%s: %b, %s: %b}) optional match (file)<-[r:PARENT]-(m) " +
                 "with file, r order by r.id asc return distinct file";
 
         try(Transaction tx = graphDB.beginTx()) {
             Result result = graphDB.execute(
-                    String.format(query, Fields.PROCESSED, false)
+                    String.format(query, Fields.PROCESSED, false, Fields.TRASHED, false)
             );
 
             while (result.hasNext()) {

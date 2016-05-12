@@ -10,7 +10,7 @@ import database.repository.FileRepository;
 import drive.change.model.ChangeInterpreted;
 import drive.change.model.ChangeStruct;
 import drive.change.model.ChangeTypes;
-import org.api.change.ChangeService;
+import drive.api.change.ChangeService;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;

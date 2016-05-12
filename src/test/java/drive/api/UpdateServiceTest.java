@@ -1,4 +1,4 @@
-package org.api;
+package drive.api;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.model.Change;

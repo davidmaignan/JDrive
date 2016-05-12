@@ -9,7 +9,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import database.Fields;
 import database.RelTypes;
-import org.configuration.Configuration;
+import configuration.Configuration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;

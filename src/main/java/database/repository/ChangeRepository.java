@@ -5,7 +5,7 @@ import com.google.inject.Inject;
 import database.DatabaseConfiguration;
 import database.Fields;
 import database.RelTypes;
-import org.configuration.Configuration;
+import configuration.Configuration;
 import org.neo4j.graphdb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,4 +1,4 @@
-package org.configuration;
+package configuration;
 
 import java.io.*;
 import java.net.URL;
