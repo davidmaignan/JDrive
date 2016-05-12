@@ -21,5 +21,4 @@ public class DeleteService implements ChangeServiceInterface {
     public final boolean execute(){
         return true;
     }
-
 }
