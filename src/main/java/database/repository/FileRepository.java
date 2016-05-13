@@ -295,12 +295,12 @@ public class FileRepository extends DatabaseService {
     public Queue<Node> getUnprocessedQueue() {
         Queue<Node> queueResult = new ArrayDeque<>();
 
-        String query = "match (file:File {%s: %b, %s: %b}) optional match (file)<-[r:PARENT]-(m) " +
+        String query = "match (file:File {%s: %b}) optional match (file)<-[r:PARENT]-(m) " +
                 "with file, r order by r.id asc return distinct file";
 
         try(Transaction tx = graphDB.beginTx()) {
             Result result = graphDB.execute(
-                    String.format(query, Fields.PROCESSED, false, Fields.TRASHED, false)
+                    String.format(query, Fields.PROCESSED, false)
             );
 
             while (result.hasNext()) {
