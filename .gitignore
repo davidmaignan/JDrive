@@ -3,7 +3,6 @@ build/
 target/
 
 #Ignore libs
-libs/
 neo4j/
 
 #db

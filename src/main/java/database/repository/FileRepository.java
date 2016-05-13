@@ -4,6 +4,7 @@ import com.google.api.services.drive.model.File;
 import com.google.inject.Inject;
 import database.DatabaseConfiguration;
 import database.Fields;
+import database.labels.FileLabel;
 import database.RelTypes;
 import configuration.Configuration;
 import model.tree.TreeNode;
@@ -196,7 +197,7 @@ public class FileRepository extends DatabaseService {
      * @return
      */
     public boolean markAsDeleted(String id) {
-        String query = "match (file {%s:'%s'})<-[:%s*]-(m) " +
+        String query = "match (file:File {%s:'%s'})<-[:%s*]-(m) " +
                 "set file.deleted=true, m.deleted=true return file, m";
 
         query = String.format(query, Fields.ID, id, RelTypes.PARENT);
@@ -295,12 +296,12 @@ public class FileRepository extends DatabaseService {
     public Queue<Node> getUnprocessedQueue() {
         Queue<Node> queueResult = new ArrayDeque<>();
 
-        String query = "match (file:File {%s: %b, %s: %b}) optional match (file)<-[r:PARENT]-(m) " +
+        String query = "match (file:File {%s: %b}) optional match (file)<-[r:PARENT]-(m) " +
                 "with file, r order by r.id asc return distinct file";
 
         try(Transaction tx = graphDB.beginTx()) {
             Result result = graphDB.execute(
-                    String.format(query, Fields.PROCESSED, false, Fields.TRASHED, false)
+                    String.format(query, Fields.PROCESSED, false)
             );
 
             while (result.hasNext()) {
@@ -405,9 +406,9 @@ public class FileRepository extends DatabaseService {
                 return false;
             }
 
-            Node dbNode = graphDB.createNode(DynamicLabel.label("File"));
+            Node dbNode = graphDB.createNode(new FileLabel());
 
-            dbNode.addLabel(DynamicLabel.label("File"));
+            dbNode.addLabel(new FileLabel());
             dbNode.setProperty(Fields.ID, file.getId());
             dbNode.setProperty(Fields.TITLE, file.getTitle());
             dbNode.setProperty(Fields.MIME_TYPE, file.getMimeType());
@@ -441,9 +442,9 @@ public class FileRepository extends DatabaseService {
     public Node createNode(File file) throws Exception{
         try(Transaction tx = graphDB.beginTx()) {
 
-            Node dbNode = graphDB.createNode(DynamicLabel.label("File"));
+            Node dbNode = graphDB.createNode(new FileLabel());
 
-            dbNode.addLabel(DynamicLabel.label("File"));
+            dbNode.addLabel(new FileLabel());
             dbNode.setProperty(Fields.ID, file.getId());
             dbNode.setProperty(Fields.TITLE, file.getTitle());
             dbNode.setProperty(Fields.MIME_TYPE, file.getMimeType());
@@ -528,7 +529,7 @@ public class FileRepository extends DatabaseService {
      * @param tNode  TreeNode
      */
     private void setNode(Node dbNode, TreeNode tNode) {
-        dbNode.addLabel(DynamicLabel.label("File"));
+        dbNode.addLabel(new FileLabel());
         dbNode.setProperty(Fields.ID, tNode.getId());
         dbNode.setProperty(Fields.TITLE, tNode.getTitle());
         dbNode.setProperty(Fields.MIME_TYPE, tNode.getMimeType());

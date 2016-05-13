@@ -6,6 +6,7 @@ import database.DatabaseConfiguration;
 import database.Fields;
 import database.RelTypes;
 import configuration.Configuration;
+import database.labels.ChangeLabel;
 import org.neo4j.graphdb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -313,7 +314,7 @@ public class ChangeRepository extends DatabaseService {
      */
     private Node createChangeNode(Change change) {
         Node changeNode = graphDB.createNode();
-        changeNode.addLabel(DynamicLabel.label("Change"));
+        changeNode.addLabel(new ChangeLabel());
 
         changeNode.setProperty(Fields.ID, change.getId());
         changeNode.setProperty(Fields.FILE_ID, change.getFileId());

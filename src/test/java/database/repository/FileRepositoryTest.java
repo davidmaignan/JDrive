@@ -10,6 +10,7 @@ import database.DatabaseModule;
 import database.Fields;
 import database.RelTypes;
 import configuration.Configuration;
+import database.labels.FileLabel;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -18,7 +19,6 @@ import model.tree.TreeBuilder;
 import model.tree.TreeNode;
 import org.neo4j.graphdb.*;
 import org.neo4j.test.TestGraphDatabaseFactory;
-import org.neo4j.tooling.GlobalGraphOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
@@ -76,15 +76,15 @@ public class FileRepositoryTest {
 
         try(Transaction tx = graphDb.beginTx()) {
 
-            Node file2 = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "file2");
-            Node folder3 = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "folder3");
+            Node file2 = graphDb.findNode(new FileLabel(), Fields.ID, "file2");
+            Node folder3 = graphDb.findNode(new FileLabel(), Fields.ID, "folder3");
 
             assertEquals("folder3",
                     file2.getSingleRelationship(RelTypes.PARENT, Direction.OUTGOING)
                             .getEndNode()
                             .getProperty(Fields.ID));
 
-            Node folder2 = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "folder2");
+            Node folder2 = graphDb.findNode(new FileLabel(), Fields.ID, "folder2");
 
             List<Relationship> relationshipList = getResultAsList(folder2.getRelationships(RelTypes.PARENT, Direction.INCOMING));
 
@@ -103,10 +103,10 @@ public class FileRepositoryTest {
         assertTrue(repository.markAsDeleted("folder2"));
 
         try(Transaction tx = graphDb.beginTx()) {
-            Node folder2 = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "folder2");
-            Node file2 = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "file2");
-            Node folder3 = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "folder3");
-            Node file3 = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "file3");
+            Node folder2 = graphDb.findNode(new FileLabel(), Fields.ID, "folder2");
+            Node file2 = graphDb.findNode(new FileLabel(), Fields.ID, "file2");
+            Node folder3 = graphDb.findNode(new FileLabel(), Fields.ID, "folder3");
+            Node file3 = graphDb.findNode(new FileLabel(), Fields.ID, "file3");
 
             assertTrue((boolean)folder2.getProperty(Fields.DELETED));
             assertTrue((boolean)file2.getProperty(Fields.DELETED));
@@ -121,10 +121,10 @@ public class FileRepositoryTest {
     @Test(timeout = 10000)
     public void testMarkAsDeletedNodeArgument(){
         try(Transaction tx = graphDb.beginTx()) {
-            Node folder2 = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "folder2");
-            Node file2 = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "file2");
-            Node folder3 = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "folder3");
-            Node file3 = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "file3");
+            Node folder2 = graphDb.findNode(new FileLabel(), Fields.ID, "folder2");
+            Node file2 = graphDb.findNode(new FileLabel(), Fields.ID, "file2");
+            Node folder3 = graphDb.findNode(new FileLabel(), Fields.ID, "folder3");
+            Node file3 = graphDb.findNode(new FileLabel(), Fields.ID, "file3");
 
             assertTrue(repository.markAsDeleted(folder2));
 
@@ -163,9 +163,7 @@ public class FileRepositoryTest {
     @Test(timeout = 10000)
     public void testSave() {
         try (Transaction tx = graphDb.beginTx()) {
-            GlobalGraphOperations globalGraphOp = GlobalGraphOperations.at(graphDb);
-
-            assertEquals(7, getResultAsList(globalGraphOp.getAllNodes()).size());
+            assertEquals(7, getResultAsList(graphDb.getAllNodes()).size());
 
             tx.success();
 
@@ -177,7 +175,7 @@ public class FileRepositoryTest {
     @Test(timeout = 10000)
     public void testRelationShipRoot() {
         try (Transaction tx = graphDb.beginTx()) {
-            Node rootNode = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "root");
+            Node rootNode = graphDb.findNode(new FileLabel(), Fields.ID, "root");
 
             assertEquals(2, getResultAsList(rootNode.getRelationships()).size());
             assertEquals(0, getResultAsList(rootNode.getRelationships(RelTypes.PARENT, Direction.OUTGOING)).size());
@@ -204,7 +202,7 @@ public class FileRepositoryTest {
     @Test(timeout = 10000)
     public void testRelationShipFolder() {
         try (Transaction tx = graphDb.beginTx()) {
-            Node rootNode = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "folder3");
+            Node rootNode = graphDb.findNode(new FileLabel(), Fields.ID, "folder3");
 
             assertEquals(2, getResultAsList(rootNode.getRelationships()).size());
 
@@ -230,7 +228,7 @@ public class FileRepositoryTest {
     @Test(timeout = 10000)
     public void testLeaf() {
         try (Transaction tx = graphDb.beginTx()) {
-            Node file1 = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "file1");
+            Node file1 = graphDb.findNode(new FileLabel(), Fields.ID, "file1");
 
             List<Relationship> list = getResultAsList(file1.getRelationships(RelTypes.PARENT));
 
@@ -242,7 +240,7 @@ public class FileRepositoryTest {
     @Test(timeout = 10000)
     public void testSetNodeProperties() {
         try (Transaction tx = graphDb.beginTx()) {
-            Node node = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "folder1");
+            Node node = graphDb.findNode(new FileLabel(), Fields.ID, "folder1");
 
             assertNotNull(node);
             assertEquals("folder1", node.getProperty(Fields.ID));
@@ -306,7 +304,7 @@ public class FileRepositoryTest {
         assertTrue(repository.createIfNotExists(file));
 
         try (Transaction tx = graphDb.beginTx()) {
-            Node node = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "newFile");
+            Node node = graphDb.findNode(new FileLabel(), Fields.ID, "newFile");
 
             Relationship relationship = node.getSingleRelationship(RelTypes.PARENT, Direction.OUTGOING);
 
@@ -463,15 +461,14 @@ public class FileRepositoryTest {
     }
 
     private void debugDb(){
-        GlobalGraphOperations globalGraphOp = GlobalGraphOperations.at(graphDb);
 
-        List<Node> nodeList = getResultAsList(globalGraphOp.getAllNodes());
+        List<Node> nodeList = getResultAsList(graphDb.getAllNodes());
 
         for(Node node : nodeList) {
             System.out.printf("%s\n", node.getProperty(Fields.ID));
         }
 
-        List<Relationship> relationshipList = getResultAsList(globalGraphOp.getAllRelationships());
+        List<Relationship> relationshipList = getResultAsList(graphDb.getAllRelationships());
 
         for (Relationship rel : relationshipList) {
             System.out.printf("Type: %s - Start: %s - End :%s\n", rel.getType(), rel.getStartNode(), rel.getEndNode());

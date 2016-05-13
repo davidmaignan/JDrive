@@ -11,13 +11,13 @@ import database.DatabaseModule;
 import database.RelTypes;
 import configuration.Configuration;
 import database.Fields;
+import database.labels.FileLabel;
 import org.junit.*;
 import model.tree.TreeBuilder;
 import model.tree.TreeNode;
 import model.types.MimeType;
 import org.neo4j.graphdb.*;
 import org.neo4j.test.TestGraphDatabaseFactory;
-import org.neo4j.tooling.GlobalGraphOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
@@ -53,9 +53,7 @@ public class DatabaseServiceTest {
         dbService.save(this.getRootNode());
 
         try (Transaction tx = graphDb.beginTx()) {
-            GlobalGraphOperations globalGraphOp = GlobalGraphOperations.at(graphDb);
-
-            assertEquals(7, getResultAsList(globalGraphOp.getAllNodes()).size());
+            assertEquals(7, getResultAsList(graphDb.getAllNodes()).size());
 
         } catch (Exception exception) {
 
@@ -67,7 +65,7 @@ public class DatabaseServiceTest {
         dbService.save(this.getRootNode());
 
         try (Transaction tx = graphDb.beginTx()) {
-            Node rootNode = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "root");
+            Node rootNode = graphDb.findNode(new FileLabel(), Fields.ID, "root");
 
             assertEquals(2, getResultAsList(rootNode.getRelationships()).size());
             assertEquals(0, getResultAsList(rootNode.getRelationships(RelTypes.PARENT, Direction.OUTGOING)).size());
@@ -96,7 +94,7 @@ public class DatabaseServiceTest {
         dbService.save(this.getRootNode());
 
         try (Transaction tx = graphDb.beginTx()) {
-            Node rootNode = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "folder3");
+            Node rootNode = graphDb.findNode(new FileLabel(), Fields.ID, "folder3");
 
             assertEquals(2, getResultAsList(rootNode.getRelationships()).size());
 
@@ -124,7 +122,7 @@ public class DatabaseServiceTest {
         dbService.save(this.getRootNode());
 
         try (Transaction tx = graphDb.beginTx()) {
-            Node file1 = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "file1");
+            Node file1 = graphDb.findNode(new FileLabel(), Fields.ID, "file1");
 
             List<Relationship> list = getResultAsList(file1.getRelationships(RelTypes.PARENT));
 
@@ -165,7 +163,7 @@ public class DatabaseServiceTest {
         dbService.save(this.getRootNode());
 
         try (Transaction tx = graphDb.beginTx()) {
-            Node node = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "folder1");
+            Node node = graphDb.findNode(new FileLabel(), Fields.ID, "folder1");
 
             assertNotNull(node);
             assertEquals("folder1", node.getProperty(Fields.ID));
@@ -186,23 +184,22 @@ public class DatabaseServiceTest {
         dbService.delete("folder2");
 
         try (Transaction tx = graphDb.beginTx()) {
-            GlobalGraphOperations globalGraphOp = GlobalGraphOperations.at(graphDb);
 
-            assertEquals(3, getResultAsList(globalGraphOp.getAllNodes()).size());
-            assertEquals(2, getResultAsList(globalGraphOp.getAllRelationships()).size());
+            assertEquals(3, getResultAsList(graphDb.getAllNodes()).size());
+            assertEquals(2, getResultAsList(graphDb.getAllRelationships()).size());
 
             //relationship between root and folder 1 is deleted (child and parent)
-            Node rootNode = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "root");
+            Node rootNode = graphDb.findNode(new FileLabel(), Fields.ID, "root");
             assertEquals(1, getResultAsList(rootNode.getRelationships()).size());
 
-            assertNotNull(graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "folder1"));
-            assertNotNull(graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "file1"));
+            assertNotNull(graphDb.findNode(new FileLabel(), Fields.ID, "folder1"));
+            assertNotNull(graphDb.findNode(new FileLabel(), Fields.ID, "file1"));
 
-            assertNull(graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "folder2"));
-            assertNull(graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "file2"));
+            assertNull(graphDb.findNode(new FileLabel(), Fields.ID, "folder2"));
+            assertNull(graphDb.findNode(new FileLabel(), Fields.ID, "file2"));
 
-            assertNull(graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "folder3"));
-            assertNull(graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "file3"));
+            assertNull(graphDb.findNode(new FileLabel(), Fields.ID, "folder3"));
+            assertNull(graphDb.findNode(new FileLabel(), Fields.ID, "file3"));
 
             tx.success();
         } catch (Exception exception) {
@@ -276,7 +273,7 @@ public class DatabaseServiceTest {
         dbService.update(change);
 
         try (Transaction tx = graphDb.beginTx()) {
-            Node node = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "file1");
+            Node node = graphDb.findNode(new FileLabel(), Fields.ID, "file1");
 
             List<Relationship> result = getResultAsList(node.getRelationships());
 
@@ -307,7 +304,7 @@ public class DatabaseServiceTest {
         dbService.update(change);
 
         try (Transaction tx = graphDb.beginTx()) {
-            Node node = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "folder1");
+            Node node = graphDb.findNode(new FileLabel(), Fields.ID, "folder1");
 
             List<Relationship> result = getResultAsList(node.getRelationships(RelTypes.PARENT, Direction.OUTGOING));
 
@@ -315,7 +312,7 @@ public class DatabaseServiceTest {
             assertEquals("folder2", result.get(0).getEndNode().getProperty(Fields.ID));
             assertEquals("folder1", result.get(0).getStartNode().getProperty(Fields.ID));
 
-            Node parentNode = graphDb.findNode(DynamicLabel.label("File"), Fields.ID, "folder2");
+            Node parentNode = graphDb.findNode(new FileLabel(), Fields.ID, "folder2");
 
             List<Relationship> resultParent = getResultAsList(parentNode.getRelationships());
 
@@ -324,15 +321,13 @@ public class DatabaseServiceTest {
     }
 
     private void debugDb(){
-        GlobalGraphOperations globalGraphOp = GlobalGraphOperations.at(graphDb);
-
-        List<Node> nodeList = getResultAsList(globalGraphOp.getAllNodes());
+        List<Node> nodeList = getResultAsList(graphDb.getAllNodes());
 
         for(Node node : nodeList) {
             System.out.printf("%s\n", node.getProperty(Fields.ID));
         }
 
-        List<Relationship> relationshipList = getResultAsList(globalGraphOp.getAllRelationships());
+        List<Relationship> relationshipList = getResultAsList(graphDb.getAllRelationships());
 
         for (Relationship rel : relationshipList) {
             System.out.printf("Type: %s - Start: %s - End :%s\n", rel.getType(), rel.getStartNode(), rel.getEndNode());
