@@ -6,6 +6,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import database.*;
 import configuration.Configuration;
+import database.labels.ChangeLabel;
+import database.labels.FileLabel;
 import model.tree.TreeNode;
 import org.neo4j.graphdb.*;
 import org.slf4j.Logger;
@@ -38,7 +40,7 @@ public class DatabaseService implements DatabaseServiceInterface {
 
         try (Transaction tx = graphDB.beginTx()) {
             graphDB.schema()
-                    .constraintFor(DynamicLabel.label("File"))
+                    .constraintFor(new FileLabel())
                     .assertPropertyIsUnique(Fields.ID)
                     .create();
             tx.success();
@@ -48,7 +50,7 @@ public class DatabaseService implements DatabaseServiceInterface {
 
         try (Transaction tx = graphDB.beginTx()) {
             graphDB.schema()
-                    .constraintFor(DynamicLabel.label("Change"))
+                    .constraintFor(new ChangeLabel())
                     .assertPropertyIsUnique(Fields.ID)
                     .create();
             tx.success();
@@ -70,7 +72,7 @@ public class DatabaseService implements DatabaseServiceInterface {
         if( ! init) {
             try (Transaction tx = graphDB.beginTx()) {
                 graphDB.schema()
-                        .constraintFor(DynamicLabel.label("File"))
+                        .constraintFor(new FileLabel())
                         .assertPropertyIsUnique(Fields.ID)
                         .create();
                 tx.success();
@@ -80,7 +82,7 @@ public class DatabaseService implements DatabaseServiceInterface {
 
             try (Transaction tx = graphDB.beginTx()) {
                 graphDB.schema()
-                        .constraintFor(DynamicLabel.label("Change"))
+                        .constraintFor(new ChangeLabel())
                         .assertPropertyIsUnique(Fields.ID)
                         .create();
                 tx.success();
@@ -535,7 +537,7 @@ public class DatabaseService implements DatabaseServiceInterface {
     private void setNode(Node dbNode, Change change) {
         File file = change.getFile();
 
-        dbNode.addLabel(DynamicLabel.label("File"));
+        dbNode.addLabel(new FileLabel());
         dbNode.setProperty(Fields.ID, file.getId());
         dbNode.setProperty(Fields.TITLE, file.getTitle());
         dbNode.setProperty(Fields.MIME_TYPE, file.getMimeType());
@@ -556,7 +558,7 @@ public class DatabaseService implements DatabaseServiceInterface {
      * @param tNode  TreeNode
      */
     private void setNode(Node dbNode, TreeNode tNode) {
-        dbNode.addLabel(DynamicLabel.label("File"));
+        dbNode.addLabel(new FileLabel());
         dbNode.setProperty(Fields.ID, tNode.getId());
         dbNode.setProperty(Fields.TITLE, tNode.getTitle());
         dbNode.setProperty(Fields.MIME_TYPE, tNode.getMimeType());
