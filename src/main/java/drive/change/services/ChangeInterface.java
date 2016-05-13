@@ -1,6 +1,6 @@
 package drive.change.services;
 
-import drive.change.model.ChangeStruct;
+import drive.change.model.CustomChange;
 
 /**
  *
@@ -9,5 +9,5 @@ import drive.change.model.ChangeStruct;
  */
 public interface ChangeInterface {
     boolean execute();
-    void setStructure(ChangeStruct structure);
+    void setStructure(CustomChange structure);
 }

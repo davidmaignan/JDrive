@@ -3,10 +3,10 @@ package drive.change.services.update;
 import com.google.inject.Inject;
 import database.repository.ChangeRepository;
 import database.repository.FileRepository;
-import drive.change.model.ChangeStruct;
+import drive.change.model.CustomChange;
 
 public class DocumentChangeUpdate implements ChangeUpdateInterface{
-    private ChangeStruct structure;
+    private CustomChange structure;
     private FileRepository fileRepository;
     private ChangeRepository changeRepository;
 
@@ -24,7 +24,7 @@ public class DocumentChangeUpdate implements ChangeUpdateInterface{
     }
 
     @Override
-    public void setStructure(ChangeStruct structure) {
+    public void setStructure(CustomChange structure) {
         this.structure = structure;
     }
 }

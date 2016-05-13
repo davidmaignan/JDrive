@@ -6,8 +6,8 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import database.repository.ChangeRepository;
 import database.repository.FileRepository;
-import drive.change.model.ChangeInterpreted;
-import drive.change.model.ChangeStruct;
+import drive.change.model.CustomChange;
+import drive.change.services.ConverterService;
 import drive.change.model.ChangeTree;
 import drive.change.model.ValidChange;
 import drive.change.services.ChangeFactoryService;
@@ -43,7 +43,7 @@ public class JDriveMain {
     private static ChangeRepository changeRepository;
     private static FileRepository fileRepository;
     private static ChangeTree changeTree;
-    private static ChangeInterpreted changeInterpreted;
+    private static ConverterService converterService;
     private static Configuration configReader;
     private static Delete delete;
     private static Trashed trashed;
@@ -143,13 +143,13 @@ public class JDriveMain {
         for (Node changeNode : changeQueue) {
 
             try {
-                ChangeStruct changeStruct = changeInterpreted.execute(changeNode);
-                ChangeInterface service = ChangeFactoryService.get(changeStruct);
+                CustomChange customChange = converterService.execute(changeNode);
+                ChangeInterface service = ChangeFactoryService.get(customChange);
 
                 boolean result = service.execute();
 
                 if(result == false)
-                    logger.error(changeStruct.toString());
+                    logger.error(customChange.toString());
 
             }catch(Exception exception) {
                 exception.printStackTrace();
@@ -255,7 +255,7 @@ public class JDriveMain {
         changeRepository = injector.getInstance(ChangeRepository.class);
         fileRepository = injector.getInstance(FileRepository.class);
         changeTree = injector.getInstance(ChangeTree.class);
-        changeInterpreted = injector.getInstance(ChangeInterpreted.class);
+        converterService = injector.getInstance(ConverterService.class);
         delete = injector.getInstance(Delete.class);
         trashed = injector.getInstance(Trashed.class);
 

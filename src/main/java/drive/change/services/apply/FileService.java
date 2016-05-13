@@ -4,7 +4,7 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import database.DatabaseModule;
 import database.repository.FileRepository;
-import drive.change.model.ChangeStruct;
+import drive.change.model.CustomChange;
 import io.File;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
  */
 public class FileService implements ChangeServiceInterface {
     private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
-    private ChangeStruct structure;
+    private CustomChange structure;
     private FileRepository fileRepository;
 
     @Inject
@@ -23,7 +23,7 @@ public class FileService implements ChangeServiceInterface {
     }
 
     @Override
-    public void setStructure(ChangeStruct structure) {
+    public void setStructure(CustomChange structure) {
         this.structure = structure;
     }
 

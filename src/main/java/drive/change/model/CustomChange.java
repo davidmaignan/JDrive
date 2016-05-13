@@ -9,7 +9,7 @@ import org.neo4j.graphdb.Node;
  *
  * Created by david on 2016-05-04.
  */
-public class ChangeStruct {
+public class CustomChange {
     private Node changeNode;
     private Node fileNode;
     private Node newParentNode;
@@ -19,8 +19,6 @@ public class ChangeStruct {
     private String newName;
     private Boolean deleted;
     private Boolean trashed;
-    private Long changeVersion;
-    private Long fileVersion;
 
     public ChangeTypes getType(){
         if(change == null){
@@ -68,14 +66,6 @@ public class ChangeStruct {
         this.deleted = deleted;
     }
 
-    public void setChangeVersion(Long changeVersion) {
-        this.changeVersion = changeVersion;
-    }
-
-    public void setFileVersion(Long fileVersion) {
-        this.fileVersion = fileVersion;
-    }
-
     public Node getNewParentNode() {
         return newParentNode;
     }
@@ -116,14 +106,6 @@ public class ChangeStruct {
         return deleted;
     }
 
-    public Long getChangeVersion() {
-        return changeVersion;
-    }
-
-    public Long getFileVersion() {
-        return fileVersion;
-    }
-
     public Node getFileNode() {
         return fileNode;
     }
@@ -134,7 +116,7 @@ public class ChangeStruct {
 
     @Override
     public String toString() {
-        return "ChangeStruct{" +
+        return "CustomChange{" +
                 "oldParentNode=" + oldParentNode +
                 ", newParentNode=" + newParentNode +
                 ", oldName='" + oldName + '\'' +

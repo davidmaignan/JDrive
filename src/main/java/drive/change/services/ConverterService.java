@@ -1,10 +1,11 @@
-package drive.change.model;
+package drive.change.services;
 
 import com.google.api.services.drive.model.Change;
 import com.google.inject.Inject;
 import database.repository.ChangeRepository;
 import database.repository.FileRepository;
 import drive.api.change.ChangeService;
+import drive.change.model.CustomChange;
 import org.neo4j.graphdb.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +13,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by david on 2016-05-04.
  */
-public class ChangeInterpreted {
+public class ConverterService {
 
     private FileRepository fileRepository;
     private ChangeRepository changeRepository;
@@ -20,64 +21,63 @@ public class ChangeInterpreted {
     private Node fileNode;
     private Change change;
 
-    private ChangeStruct changeStruct;
+    private CustomChange customChange;
 
-    private static Logger logger = LoggerFactory.getLogger(ChangeInterpreted.class);
+    private static Logger logger = LoggerFactory.getLogger(ConverterService.class);
 
     @Inject
-    public ChangeInterpreted(FileRepository fileRepository, ChangeRepository changeRepository, ChangeService changeService){
+    public ConverterService(FileRepository fileRepository, ChangeRepository changeRepository, ChangeService changeService){
         this.fileRepository = fileRepository;
         this.changeRepository = changeRepository;
         this.changeService = changeService;
 
-        changeStruct = new ChangeStruct();
+        customChange = new CustomChange();
     }
 
-    public ChangeStruct execute(Node changeNode){
-        changeStruct.setChangeNode(changeNode);
+    public CustomChange execute(Node changeNode){
+        customChange.setChangeNode(changeNode);
 
         String changeId = changeRepository.getId(changeNode);
 
         change = changeService.get(changeId);
-        changeStruct.setChange(change);
+        customChange.setChange(change);
 
         if(change == null){
-            return changeStruct;
+            return customChange;
         }
 
         fileNode = fileRepository.getFileNodeFromChange(changeNode);
-        changeStruct.setFileNode(fileNode);
+        customChange.setFileNode(fileNode);
 
-//        Long changeVersion = changeRepository.getVersion(changeNode);
-//        Long fileVersion = fileRepository.getVersion(fileNode);
-//        changeStruct.setFileVersion(fileVersion);
-//        changeStruct.setChangeVersion(changeVersion);
+        if(fileNode == null){
+            return customChange;
+        }
 
         //Check if deleted
-        changeStruct.setDeleted(change.getDeleted());
+        customChange.setDeleted(change.getDeleted());
 
         if(change.getDeleted()) {
             Node parentNode = fileRepository.getParent(change.getFileId());
-            changeStruct.setNewParentNode(parentNode);
-            changeStruct.setOldParentNode(parentNode);
+            customChange.setNewParentNode(parentNode);
+            customChange.setOldParentNode(parentNode);
             String title = fileRepository.getTitle(fileNode);
-            changeStruct.setOldName(title);
-            changeStruct.setNewName(title);
-            return changeStruct;
+            customChange.setOldName(title);
+            customChange.setNewName(title);
+            return customChange;
         }
 
-        changeStruct.setTrashed(getTrashed(change));
+        customChange.setTrashed(getTrashed(change));
 
         Node newParentNode = fileRepository.getNodeById(change.getFile().getParents().get(0).getId());
         Node oldParentNode = fileRepository.getParent(change.getFileId());
 
-        changeStruct.setNewParentNode(newParentNode);
-        changeStruct.setOldParentNode(oldParentNode);
+        customChange.setNewParentNode(newParentNode);
+        customChange.setOldParentNode(oldParentNode);
 
-        changeStruct.setOldName(fileRepository.getTitle(fileNode));
-        changeStruct.setNewName(change.getFile().getTitle());
+        customChange.setOldName(fileRepository.getTitle(fileNode));
+        customChange.setNewName(change.getFile().getTitle());
 
-        return changeStruct;
+        return customChange;
     }
 
     /**

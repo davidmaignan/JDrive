@@ -7,6 +7,7 @@ import com.google.api.services.drive.model.ParentReference;
 import com.google.api.services.drive.model.User;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import database.DatabaseModule;
 import database.RelTypes;
 import configuration.Configuration;
 import database.Fields;
@@ -19,8 +20,6 @@ import org.neo4j.test.TestGraphDatabaseFactory;
 import org.neo4j.tooling.GlobalGraphOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.writer.FileModule;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -461,7 +460,7 @@ public class DatabaseServiceTest {
 
         listFile.add(file3);
 
-        Injector injector = Guice.createInjector(new FileModule());
+        Injector injector = Guice.createInjector(new DatabaseModule());
         TreeBuilder treeBuilder = injector.getInstance(TreeBuilder.class);
 
         treeBuilder.build(listFile);

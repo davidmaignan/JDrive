@@ -2,7 +2,7 @@ package drive.change.services.apply;
 
 import com.google.inject.Inject;
 import database.repository.FileRepository;
-import drive.change.model.ChangeStruct;
+import drive.change.model.CustomChange;
 import io.Folder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +18,7 @@ import java.nio.file.Path;
  */
 public class FolderService implements ChangeServiceInterface {
     private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
-    private ChangeStruct structure;
+    private CustomChange structure;
     private FileRepository fileRepository;
 
     @Inject
@@ -27,7 +27,7 @@ public class FolderService implements ChangeServiceInterface {
     }
 
     @Override
-    public void setStructure(ChangeStruct structure) {
+    public void setStructure(CustomChange structure) {
         this.structure = structure;
     }
 

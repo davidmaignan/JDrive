@@ -7,12 +7,13 @@ import com.google.api.services.drive.model.ParentReference;
 import com.google.api.services.drive.model.User;
 import database.repository.ChangeRepository;
 import database.repository.FileRepository;
-import drive.change.model.ChangeInterpreted;
-import drive.change.model.ChangeStruct;
+import drive.change.model.CustomChange;
+import drive.change.services.ConverterService;
 import drive.change.model.ChangeTypes;
 import drive.api.change.ChangeService;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.neo4j.graphdb.Node;
 import org.slf4j.Logger;
@@ -21,18 +22,19 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
  * Created by david on 2016-05-04.
  */
-public class ChangeInterpretedTest {
+public class ConverterServiceTest {
     private ChangeRepository spyChangeRepository;
     private FileRepository spyFileRepository;
     private ChangeService spyChangeService;
 
-    private ChangeInterpreted service;
+    private ConverterService service;
 
     private static Logger logger;
 
@@ -47,7 +49,7 @@ public class ChangeInterpretedTest {
         spyFileRepository = mock(FileRepository.class);
         spyChangeService = mock(ChangeService.class);
 
-        service = new ChangeInterpreted(spyFileRepository, spyChangeRepository, spyChangeService);
+        service = new ConverterService(spyFileRepository, spyChangeRepository, spyChangeService);
     }
 
     @Test(timeout = 10000)
@@ -58,7 +60,7 @@ public class ChangeInterpretedTest {
         when(spyChangeService.get("mockNodeId")).thenReturn(null);
         when(spyChangeRepository.delete(spyNode)).thenReturn(true);
 
-        ChangeStruct result = service.execute(spyNode);
+        CustomChange result = service.execute(spyNode);
         assertEquals(ChangeTypes.NULL, result.getType());
     }
 
@@ -72,72 +74,47 @@ public class ChangeInterpretedTest {
         when(spyFileRepository.getFileNodeFromChange(spyNode)).thenReturn(null);
         when(spyChangeRepository.update(change)).thenReturn(true);
 
-        ChangeStruct result = service.execute(spyNode);
+        CustomChange result = service.execute(spyNode);
         assertEquals(ChangeTypes.NULL, result.getType());
-    }
-
-    @Test(timeout = 10000)
-    public void testSameVersionBetweenChangeAndFile() throws Exception {
-        Node changeNode = mock(Node.class);
-        Node fileNode = mock(Node.class);
-        Change change = new Change();
-
-        Long changeVersion = new Long(100l);
-        Long fileVersion = new Long(100l);
-
-
-        when(spyChangeRepository.getId(changeNode)).thenReturn("mockNodeId");
-        when(spyChangeService.get("mockNodeId")).thenReturn(change);
-        when(spyFileRepository.getFileNodeFromChange(changeNode)).thenReturn(fileNode);
-
-        when(spyChangeRepository.getVersion(changeNode)).thenReturn(changeVersion);
-        when(spyFileRepository.getVersion(fileNode)).thenReturn(fileVersion);
-
-        when(spyChangeRepository.update(change)).thenReturn(true);
-
-        ChangeStruct result = service.execute(changeNode);
-        assertEquals(ChangeTypes.VERSION, result.getType());
     }
 
     @Test(timeout = 10000)
     public void testDeleteChange() throws Exception {
         Node changeNode = mock(Node.class);
+        Node parentNode = mock(Node.class);
         Node fileNode = mock(Node.class);
         Change change = new Change();
+        change.setFileId("fileId");
         change.setDeleted(true);
 
-        Long changeVersion = new Long(100l);
-        Long fileVersion = new Long(101l);
 
         when(spyChangeRepository.getId(changeNode)).thenReturn("mockNodeId");
         when(spyChangeService.get("mockNodeId")).thenReturn(change);
         when(spyFileRepository.getFileNodeFromChange(changeNode)).thenReturn(fileNode);
+        when(spyFileRepository.getParent("fileId")).thenReturn(parentNode);
+        when(spyFileRepository.getTitle(fileNode)).thenReturn("fileTitle");
 
-        when(spyChangeRepository.getVersion(changeNode)).thenReturn(changeVersion);
-        when(spyFileRepository.getVersion(fileNode)).thenReturn(fileVersion);
-
-        ChangeStruct result = service.execute(changeNode);
+        CustomChange result = service.execute(changeNode);
 
         assertEquals(ChangeTypes.DELETE, result.getType());
+        assertEquals("fileTitle", result.getNewName());
+        assertEquals("fileTitle", result.getOldName());
+        assertEquals(parentNode, result.getNewParentNode());
+        assertEquals(parentNode, result.getOldParentNode());
     }
 
     @Test(timeout = 10000)
     public void testFileRenamed(){
         Node changeNode = mock(Node.class);
         Node fileNode = mock(Node.class);
-        Node parentNode = mock(Node.class);
+        Node oldParentNode = mock(Node.class);
         Change change = new Change();
         change.setDeleted(false);
-
-        Long changeVersion = new Long(100l);
-        Long fileVersion = new Long(101l);
 
         when(spyChangeRepository.getId(changeNode)).thenReturn("mockNodeId");
         when(spyChangeService.get("mockNodeId")).thenReturn(change);
         when(spyFileRepository.getFileNodeFromChange(changeNode)).thenReturn(fileNode);
 
-        when(spyChangeRepository.getVersion(changeNode)).thenReturn(changeVersion);
-        when(spyFileRepository.getVersion(fileNode)).thenReturn(fileVersion);
 
         String oldParent = "oldParent";
         String oldName = "oldName";
@@ -147,79 +124,104 @@ public class ChangeInterpretedTest {
         change.setFile(file);
         change.setFileId(file.getId());
 
-        when(spyFileRepository.getParent(change.getFileId())).thenReturn(parentNode);
-        when(parentNode.toString()).thenReturn(oldParent);
-
-        String oldParentPath = "/mock/oldparent";
-        when(spyFileRepository.getNodeAbsolutePath(oldParent)).thenReturn(oldParentPath);
-
+        when(spyFileRepository.getParent(change.getFileId())).thenReturn(oldParentNode);
         when(spyFileRepository.getTitle(fileNode)).thenReturn(oldName);
+        when(spyFileRepository.getNodeById(oldParent)).thenReturn(oldParentNode);
 
 
-        ChangeStruct result = service.execute(changeNode);
+        CustomChange result = service.execute(changeNode);
 
-        assertEquals(oldParentPath, result.getOldParentPath());
-        assertEquals(oldParentPath, result.getNewParentPath());
-        assertEquals(oldParent, result.getOldParent());
-        assertEquals(oldParent, result.getNewParent());
-        assertEquals(newName, result.getNewName());
         assertEquals(oldName, result.getOldName());
-        assertEquals(oldParentPath+ "/" + newName, result.getNewPath());
-        assertEquals(oldParentPath+ "/" + oldName, result.getOldPath());
+        assertEquals(newName, result.getNewName());
+        assertEquals(oldParentNode, result.getOldParentNode());
+        assertEquals(oldParentNode, result.getNewParentNode());
+
+
         assertEquals(ChangeTypes.MOVE, result.getType());
     }
 
     @Test(timeout = 10000)
-    public void testFileMoved() {
+    public void testFileMoved(){
         Node changeNode = mock(Node.class);
         Node fileNode = mock(Node.class);
-        Node parentNode = mock(Node.class);
+        Node oldParentNode = mock(Node.class);
+        Node newParentNode = mock(Node.class);
         Change change = new Change();
         change.setDeleted(false);
-
-        Long changeVersion = new Long(100l);
-        Long fileVersion = new Long(101l);
 
         when(spyChangeRepository.getId(changeNode)).thenReturn("mockNodeId");
         when(spyChangeService.get("mockNodeId")).thenReturn(change);
         when(spyFileRepository.getFileNodeFromChange(changeNode)).thenReturn(fileNode);
 
-        when(spyChangeRepository.getVersion(changeNode)).thenReturn(changeVersion);
-        when(spyFileRepository.getVersion(fileNode)).thenReturn(fileVersion);
 
         String newParent = "newParent";
-        String oldParent = "oldParent";
-        String fileName = "mockFile";
+        String oldName = "oldName";
+        String newName = "newName";
 
-        File file = createFile(fileName, newParent);
+        File file = createFile(newName, newParent);
         change.setFile(file);
         change.setFileId(file.getId());
 
-        when(spyFileRepository.getParent(change.getFileId())).thenReturn(parentNode);
-        when(parentNode.toString()).thenReturn(oldParent);
+        when(spyFileRepository.getParent(change.getFileId())).thenReturn(oldParentNode);
+        when(spyFileRepository.getTitle(fileNode)).thenReturn(oldName);
+        when(spyFileRepository.getNodeById(newParent)).thenReturn(newParentNode);
 
-        String oldParentPath = "/mock/oldparent";
-        when(spyFileRepository.getNodeAbsolutePath(oldParent)).thenReturn(oldParentPath);
 
-        String newParentPath = "/mock/newparent";
-        when(spyFileRepository.getNodeAbsolutePath(newParent)).thenReturn(newParentPath);
+        CustomChange result = service.execute(changeNode);
 
-        when(spyFileRepository.getTitle(fileNode)).thenReturn(fileName);
+        assertEquals(oldName, result.getOldName());
+        assertEquals(newName, result.getNewName());
+        assertEquals(oldParentNode, result.getOldParentNode());
+        assertEquals(newParentNode, result.getNewParentNode());
 
-        ChangeStruct result = service.execute(changeNode);
 
-        assertEquals(oldParentPath, result.getOldParentPath());
-        assertEquals(newParentPath, result.getNewParentPath());
-        assertEquals(oldParent, result.getOldParent());
-        assertEquals(newParent, result.getNewParent());
-        assertEquals(fileName, result.getOldName());
-        assertEquals(fileName, result.getNewName());
-        assertEquals(newParentPath+ "/" + fileName, result.getNewPath());
-        assertEquals(oldParentPath+ "/" + fileName, result.getOldPath());
         assertEquals(ChangeTypes.MOVE, result.getType());
     }
 
     @Test(timeout = 10000)
+    public void testFileTrashed(){
+        Node changeNode = mock(Node.class);
+        Node fileNode = mock(Node.class);
+        Node oldParentNode = mock(Node.class);
+        Change change = new Change();
+        change.setDeleted(false);
+
+        when(spyChangeRepository.getId(changeNode)).thenReturn("mockNodeId");
+        when(spyChangeService.get("mockNodeId")).thenReturn(change);
+        when(spyFileRepository.getFileNodeFromChange(changeNode)).thenReturn(fileNode);
+
+
+        String oldParent = "oldParent";
+        String oldName = "oldName";
+        String newName = "newName";
+
+        File file = createFile(newName, oldParent);
+
+        File.Labels labels = new File.Labels();
+        labels.setTrashed(true);
+        file.setLabels(labels);
+        change.setFile(file);
+        change.setFileId(file.getId());
+
+        when(spyFileRepository.getParent(change.getFileId())).thenReturn(oldParentNode);
+        when(spyFileRepository.getTitle(fileNode)).thenReturn(oldName);
+        when(spyFileRepository.getNodeById(oldParent)).thenReturn(oldParentNode);
+
+
+        CustomChange result = service.execute(changeNode);
+
+        assertEquals(oldName, result.getOldName());
+        assertEquals(newName, result.getNewName());
+        assertEquals(oldParentNode, result.getOldParentNode());
+        assertEquals(oldParentNode, result.getNewParentNode());
+        assertTrue(result.getTrashed());
+
+
+        assertEquals(ChangeTypes.TRASHED, result.getType());
+    }
+
+    @Test(timeout = 10000)
+    @Ignore
     public void testUpdateContent(){
         Node changeNode = mock(Node.class);
         Node fileNode = mock(Node.class);
@@ -233,9 +235,6 @@ public class ChangeInterpretedTest {
         when(spyChangeRepository.getId(changeNode)).thenReturn("mockNodeId");
         when(spyChangeService.get("mockNodeId")).thenReturn(change);
         when(spyFileRepository.getFileNodeFromChange(changeNode)).thenReturn(fileNode);
-
-        when(spyChangeRepository.getVersion(changeNode)).thenReturn(changeVersion);
-        when(spyFileRepository.getVersion(fileNode)).thenReturn(fileVersion);
 
         String newParent = "oldParent";
         String oldParent = "oldParent";
@@ -254,16 +253,16 @@ public class ChangeInterpretedTest {
 
         when(spyFileRepository.getTitle(fileNode)).thenReturn(fileName);
 
-        ChangeStruct result = service.execute(changeNode);
+        CustomChange result = service.execute(changeNode);
 
-        assertEquals(oldParentPath, result.getOldParentPath());
-        assertEquals(oldParentPath, result.getNewParentPath());
-        assertEquals(oldParent, result.getOldParent());
-        assertEquals(newParent, result.getNewParent());
-        assertEquals(fileName, result.getOldName());
-        assertEquals(fileName, result.getNewName());
-        assertEquals(oldParentPath+ "/" + fileName, result.getNewPath());
-        assertEquals(oldParentPath+ "/" + fileName, result.getOldPath());
+//        assertEquals(oldParentPath, result.getOldParentPath());
+//        assertEquals(oldParentPath, result.getNewParentPath());
+//        assertEquals(oldParent, result.getOldParent());
+//        assertEquals(newParent, result.getNewParent());
+//        assertEquals(fileName, result.getOldName());
+//        assertEquals(fileName, result.getNewName());
+//        assertEquals(oldParentPath+ "/" + fileName, result.getNewPath());
+//        assertEquals(oldParentPath+ "/" + fileName, result.getOldPath());
         assertEquals(ChangeTypes.FILE_UPDATE, result.getType());
     }
 

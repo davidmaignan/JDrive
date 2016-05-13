@@ -1,8 +1,7 @@
 package drive.change.services;
 
 import com.google.inject.Guice;
-import database.DatabaseModule;
-import drive.change.model.ChangeStruct;
+import drive.change.model.CustomChange;
 import drive.change.modules.ChangeModule;
 
 /**
@@ -10,7 +9,7 @@ import drive.change.modules.ChangeModule;
  */
 public class ChangeFactoryService {
 
-    public static ChangeInterface get(ChangeStruct structure){
+    public static ChangeInterface get(CustomChange structure){
         ChangeInterface service;
 
         switch (structure.getType()){
