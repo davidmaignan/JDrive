@@ -43,11 +43,7 @@ public class ValidChange {
             return fileNode != null;
         }
 
-        if (isNewFile()) {
-            return true;
-        }
-
-        return fileNode != null && change.getFile() != null;
+        return change.getFile() != null;
     }
 
     public Node getFileNode(){
@@ -62,11 +58,7 @@ public class ValidChange {
      * @return
      */
     public boolean isNewFile(){
-        return change.getFile() != null && fileNode == null && ! isTrashed();
-    }
-
-    public String getParentId(){
-        return change.getFile().getParents().get(0).getId();
+        return change.getFile() != null && fileNode == null;
     }
 
     /**
@@ -75,14 +67,11 @@ public class ValidChange {
      * @return boolean
      */
     public boolean isTrashed() {
-        boolean result = false;
-        result =  (change.getFile() != null
+        return (change.getFile() != null
                 && change.getFile().getExplicitlyTrashed() != null
                 && change.getFile().getExplicitlyTrashed())
                 || (change.getFile() != null
                 && change.getFile().getLabels() != null
                 && change.getFile().getLabels().getTrashed());
-
-        return result;
     }
 }
