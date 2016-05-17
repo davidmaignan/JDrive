@@ -96,21 +96,6 @@ public class ValidChangeTest {
         assertFalse(validChange.isValid());
     }
 
-    @Test
-    @Ignore
-    public void testIsNotValidFileNodeIsMissing(){
-        Change change = this.getChange(false);
-        File file = change.getFile();
-        file.setExplicitlyTrashed(true);
-        change.setFile(file);
-
-        when(fileRepository.getNodeById("file1")).thenReturn(null);
-
-        validChange.execute(change);
-
-        assertTrue(validChange.isValid());
-    }
-
     private Change getChange(boolean deleted){
         Change change = new Change();
         change.setId(1l);
