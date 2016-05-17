@@ -33,6 +33,7 @@ import java.util.Queue;
 public class FileRepository extends DatabaseService {
     private Logger logger = LoggerFactory.getLogger(FileRepository.class);
 
+
     public FileRepository(){}
 
     public FileRepository(GraphDatabaseService graphDb, Configuration configuration) {
@@ -451,6 +452,8 @@ public class FileRepository extends DatabaseService {
             dbNode.setProperty(Fields.IS_ROOT, false);
             dbNode.setProperty(Fields.PROCESSED, false);
             dbNode.setProperty(Fields.VERSION, file.getVersion());
+            dbNode.setProperty(Fields.DELETED, false);
+            dbNode.setProperty(Fields.TRASHED, isTrash(file));
 
             if (file.getCreatedDate() != null) {
                 dbNode.setProperty(Fields.CREATED_DATE, file.getCreatedDate().getValue());
@@ -471,7 +474,8 @@ public class FileRepository extends DatabaseService {
             child.createRelationshipTo(parent, RelTypes.PARENT);
             tx.success();
         } catch (Exception exception) {
-            logger.error(exception.getMessage());
+            String message = String.format("Failed to create relation parent between: %s and %s. ", child, parent);
+            logger.error(message + exception.getMessage());
             return false;
         }
 
@@ -546,5 +550,19 @@ public class FileRepository extends DatabaseService {
         if (tNode.getModifiedDate() != null) {
             dbNode.setProperty(Fields.MODIFIED_DATE, tNode.getModifiedDate().getValue());
         }
+    }
+
+    /**
+     * Get trashed label value if available
+     *
+     * @return boolean
+     */
+    private boolean isTrash(File file){
+         return (file != null
+                && file.getExplicitlyTrashed() != null
+                && file.getExplicitlyTrashed())
+                || (file != null
+                && file.getLabels() != null
+                && file.getLabels().getTrashed());
     }
 }

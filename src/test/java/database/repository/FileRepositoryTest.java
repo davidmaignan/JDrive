@@ -6,6 +6,9 @@ import com.google.api.services.drive.model.ParentReference;
 import com.google.api.services.drive.model.User;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+import com.tngtech.java.junit.dataprovider.UseDataProvider;
 import database.DatabaseModule;
 import database.Fields;
 import database.RelTypes;
@@ -17,6 +20,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import model.tree.TreeBuilder;
 import model.tree.TreeNode;
+import org.junit.runner.RunWith;
 import org.neo4j.graphdb.*;
 import org.neo4j.test.TestGraphDatabaseFactory;
 import org.slf4j.Logger;
@@ -31,6 +35,7 @@ import static org.junit.Assert.*;
 /**
  * Created by david on 2015-12-31.
  */
+@RunWith(DataProviderRunner.class)
 public class FileRepositoryTest {
     protected GraphDatabaseService graphDb;
     private FileRepository repository;
@@ -693,8 +698,33 @@ public class FileRepositoryTest {
         }
     }
 
+    @DataProvider
+    public static Object[][] dataProviderCreateNode(){
+        return new Object[][]{
+                {false, false, false},
+                {true, false, true},
+                {false, true, true},
+                {true, true, true}
+        };
+    }
+
+//    /**
+//     * Get trashed label value if available
+//     *
+//     * @return boolean
+//     */
+//    private boolean isTrash(File file){
+//        return (file != null
+//                && file.getExplicitlyTrashed() != null
+//                && file.getExplicitlyTrashed())
+//                || (file != null
+//                && file.getLabels() != null
+//                && file.getLabels().getTrashed());
+//    }
+
     @Test
-    public void testCreateNode() throws Exception {
+    @UseDataProvider("dataProviderCreateNode")
+    public void testCreateNode(boolean explicitly, boolean trashed, boolean expected) throws Exception {
         try(Transaction tx = graphDb.beginTx()) {
             File file = new File();
 
@@ -704,6 +734,9 @@ public class FileRepositoryTest {
             file.setCreatedDate(new DateTime("2016-01-07T15:14:10.751Z"));
             file.setModifiedDate(new DateTime("2016-01-07T15:14:10.751Z"));
             file.setVersion(1l);
+
+            file.setExplicitlyTrashed(explicitly);
+            file.getLabels().setTrashed(trashed);
 
             file.setParents(this.getParentReferenceList(
                     "root", true
@@ -715,6 +748,8 @@ public class FileRepositoryTest {
 
             assertEquals("newTitle", result.getProperty(Fields.TITLE));
             assertEquals("newId", result.getProperty(Fields.ID));
+            assertEquals(expected, (boolean) result.getProperty(Fields.TRASHED));
+            assertFalse((boolean)result.getProperty(Fields.DELETED));
         }catch (Exception exception) {
 
         }
