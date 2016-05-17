@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 /**
@@ -221,12 +222,12 @@ public class ConverterServiceTest {
     }
 
     @Test(timeout = 10000)
-    @Ignore
     public void testUpdateContent(){
         Node changeNode = mock(Node.class);
         Node fileNode = mock(Node.class);
         Node parentNode = mock(Node.class);
         Change change = new Change();
+        change.setFileId("file");
         change.setDeleted(false);
 
         Long changeVersion = new Long(100l);
@@ -236,33 +237,21 @@ public class ConverterServiceTest {
         when(spyChangeService.get("mockNodeId")).thenReturn(change);
         when(spyFileRepository.getFileNodeFromChange(changeNode)).thenReturn(fileNode);
 
-        String newParent = "oldParent";
-        String oldParent = "oldParent";
-        String fileName = "mockFile";
+        String parent = "parent";
+        String fileName = "file";
 
-        File file = createFile(fileName, newParent);
+        File file = createFile(fileName, parent);
         file.setMimeType("image/png");
         change.setFile(file);
         change.setFileId(file.getId());
 
-        when(spyFileRepository.getParent(change.getFileId())).thenReturn(parentNode);
-        when(parentNode.toString()).thenReturn(oldParent);
-
-        String oldParentPath = "/mock/oldparent";
-        when(spyFileRepository.getNodeAbsolutePath(oldParent)).thenReturn(oldParentPath);
+        when(spyFileRepository.getNodeById(parent)).thenReturn(parentNode);
+        when(spyFileRepository.getParent("file")).thenReturn(parentNode);
 
         when(spyFileRepository.getTitle(fileNode)).thenReturn(fileName);
 
         CustomChange result = service.execute(changeNode);
 
-//        assertEquals(oldParentPath, result.getOldParentPath());
-//        assertEquals(oldParentPath, result.getNewParentPath());
-//        assertEquals(oldParent, result.getOldParent());
-//        assertEquals(newParent, result.getNewParent());
-//        assertEquals(fileName, result.getOldName());
-//        assertEquals(fileName, result.getNewName());
-//        assertEquals(oldParentPath+ "/" + fileName, result.getNewPath());
-//        assertEquals(oldParentPath+ "/" + fileName, result.getOldPath());
         assertEquals(ChangeTypes.FILE_UPDATE, result.getType());
     }
 
