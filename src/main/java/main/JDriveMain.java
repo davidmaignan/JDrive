@@ -212,7 +212,7 @@ public class JDriveMain {
 
         logger.debug("New valid changes total: " + validChangeList.size());
 
-        boolean result = changeTree.execute(validChangeList);
+        changeTree.execute(validChangeList);
     }
 
     private static void initWrite() throws Exception {
