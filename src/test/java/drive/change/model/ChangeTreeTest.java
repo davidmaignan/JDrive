@@ -1,4 +1,4 @@
-package drive;
+package drive.change.model;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.model.Change;
@@ -12,7 +12,6 @@ import database.Fields;
 import database.RelTypes;
 import database.repository.ChangeRepository;
 import database.repository.FileRepository;
-import drive.change.model.ChangeTree;
 import model.tree.TreeBuilder;
 import model.tree.TreeNode;
 import drive.api.FileService;
@@ -62,7 +61,6 @@ public class ChangeTreeTest {
     }
 
     @Test
-    @Ignore
     public void testExecuteOneChangeMoveFolder() throws Exception {
 
         List<Change> changeList = this.getListOneChangeMoveFolder();
