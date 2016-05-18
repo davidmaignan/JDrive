@@ -1,7 +1,7 @@
 package database;
 
 /**
- * Created by david on 2016-05-11.
+ * Created by David Maignan <davidmaignan@gmail.com> on 2016-05-11.
  */
 public class DatabaseException extends Exception{
     public DatabaseException(String message){

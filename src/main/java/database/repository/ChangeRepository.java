@@ -38,33 +38,65 @@ public class ChangeRepository extends DatabaseService {
         super(dbConfig, configuration);
     }
 
-    public boolean delete(Node changeNode){
+    /**
+     * Delete a node by id
+     *
+     * @param node Node
+     * @return boolean
+     */
+    public boolean delete(Node node) {
+        String query = "match (file {identifier: '%s'}) match (file)<-[r*]-(m) " +
+                "foreach (rel in r | delete rel) delete m with file match (file)-[r]->(m) delete r, file";
+        try (Transaction tx = graphDB.beginTx()) {
 
-        logger.error("Implement delete method");
+            query = String.format(query, node.getProperty(Fields.ID));
 
-        return true;
+            graphDB.execute(query);
+
+            tx.success();
+
+            return true;
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
+        }
+
+        return false;
     }
 
+    //@todo refactor - do not return null
     public String getId(Node node){
         try(Transaction tx = graphDB.beginTx()) {
-            return node.getProperty(Fields.ID).toString();
+            String result = node.getProperty(Fields.ID).toString();
 
+            tx.success();
+
+            return result;
         } catch (Exception exception){
             return null;
         }
     }
 
+    //@todo - what to return if failure ?
     public Boolean getDeleted(Node node){
         try(Transaction tx = graphDB.beginTx()) {
-            return Boolean.valueOf(node.getProperty(Fields.DELETED).toString());
+            Boolean result = Boolean.valueOf(node.getProperty(Fields.DELETED).toString());
+
+            tx.success();
+
+            return result;
         } catch (Exception exception){
             return false;
         }
     }
 
+    //@todo - what to return if failure ?
     public Boolean getProcessed(Node node){
         try(Transaction tx = graphDB.beginTx()) {
-            return Boolean.valueOf(node.getProperty(Fields.PROCESSED).toString());
+            Boolean result = Boolean.valueOf(node.getProperty(Fields.PROCESSED).toString());
+
+            tx.success();
+
+            return result;
         } catch (Exception exception){
             return false;
         }
@@ -72,8 +104,11 @@ public class ChangeRepository extends DatabaseService {
 
     public String getFileId(Node node){
         try(Transaction tx = graphDB.beginTx()) {
-            return node.getProperty(Fields.FILE_ID).toString();
+            String result = node.getProperty(Fields.FILE_ID).toString();
 
+            tx.success();
+
+            return result;
         } catch (Exception exception){
             return null;
         }
@@ -81,8 +116,11 @@ public class ChangeRepository extends DatabaseService {
 
     public Long getVersion(Node node){
         try(Transaction tx = graphDB.beginTx()) {
-            return new Long((long)node.getProperty(Fields.VERSION));
+            Long result = new Long((long)node.getProperty(Fields.VERSION));
 
+            tx.success();
+
+            return result;
         } catch (Exception exception){
             return null;
         }
@@ -108,6 +146,8 @@ public class ChangeRepository extends DatabaseService {
             }
 
             tx.success();
+        } catch (Exception exception) {
+            logger.error(exception.getMessage());
         }
 
         return queueResult;
@@ -120,13 +160,11 @@ public class ChangeRepository extends DatabaseService {
      */
     public boolean markAsProcessed(Node node) {
         try (Transaction tx = graphDB.beginTx()) {
-
             node.setProperty(Fields.PROCESSED, true);
-
+            boolean result = (boolean)node.getProperty(Fields.PROCESSED);
             tx.success();
 
-            return true;
-
+            return result;
         } catch (Exception exception) {
             logger.error(exception.getMessage());
         }
@@ -141,13 +179,12 @@ public class ChangeRepository extends DatabaseService {
      */
     public boolean markAsDeleted(Node node) {
         try (Transaction tx = graphDB.beginTx()) {
-
             node.setProperty(Fields.DELETED, true);
+            boolean result = (boolean)node.getProperty(Fields.DELETED);
 
             tx.success();
 
-            return true;
-
+            return result;
         } catch (Exception exception) {
             logger.error(exception.getMessage());
         }
@@ -162,13 +199,12 @@ public class ChangeRepository extends DatabaseService {
      */
     public boolean markAsTrashed(Node node) {
         try (Transaction tx = graphDB.beginTx()) {
-
             node.setProperty(Fields.TRASHED, true);
+            boolean result = (boolean)node.getProperty(Fields.TRASHED);
 
             tx.success();
 
-            return true;
-
+            return result;
         } catch (Exception exception) {
             logger.error(exception.getMessage());
         }
@@ -184,20 +220,22 @@ public class ChangeRepository extends DatabaseService {
      */
     public boolean update(Change change) {
 
-        String query = "match (change:Change {%s: '%s'}) set change.processed=true, change.deleted=%b return change";
+        String query = "match (change:Change {%s: %s}) " +
+                "set change.%s=%b, change.%s=%b, change.%s=%b " +
+                "return change";
 
         try(Transaction tx = graphDB.beginTx()){
-            boolean deleted = getTrashed(change);
-            query = String.format(query, Fields.ID, change.getId(), deleted);
+            boolean trashed = getTrashed(change);
+            query = String.format(query,
+                    Fields.ID, change.getId(),
+                    Fields.PROCESSED, true,
+                    Fields.TRASHED, trashed,
+                    Fields.DELETED, change.getDeleted());
 
             Result result = graphDB.execute(query);
-
             tx.success();
 
-            return true;
-        }catch (QueryExecutionException exception){
-            exception.printStackTrace();
-            logger.error("Failed to update change: %d", change.getId());
+            return result.hasNext();
         }catch (Exception exception){
             logger.error(exception.getMessage());
         }
@@ -300,8 +338,6 @@ public class ChangeRepository extends DatabaseService {
                     + " - " + change.getFileId()
                     + " - " +exception.getMessage()
             );
-
-//            exception.printStackTrace();
         }
 
         return false;
@@ -323,8 +359,7 @@ public class ChangeRepository extends DatabaseService {
         changeNode.setProperty(Fields.DELETED, change.getDeleted());
         changeNode.setProperty(Fields.PROCESSED, false);
         changeNode.setProperty(Fields.TRASHED, false);
-        if(change.getFile() != null)
-            changeNode.setProperty(Fields.VERSION, change.getFile().getVersion());
+        changeNode.setProperty(Fields.VERSION, change.getFile().getVersion());
 
         return changeNode;
     }

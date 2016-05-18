@@ -131,21 +131,7 @@ public class DatabaseServiceTest {
         }
     }
 
-    @Test(timeout = 10000)
-    public void testGetPropertyById() {
-        dbService.save(this.getRootNode());
-
-        try (Transaction tx = graphDb.beginTx()) {
-            assertEquals("folder1", dbService.getNodePropertyById("folder1", Fields.ID));
-            assertEquals("folder1", dbService.getNodePropertyById("folder1", Fields.TITLE));
-
-            tx.success();
-        } catch (Exception exception) {
-
-        }
-    }
-
-    @Test(timeout = 10000)
+    @Test(timeout = 100000)
     public void testGetNodeById() {
         dbService.save(this.getRootNode());
 
@@ -175,35 +161,6 @@ public class DatabaseServiceTest {
             tx.success();
         } catch (Exception exception) {
 
-        }
-    }
-
-    @Test(timeout = 100000)
-    public void testDeleteFolderNode() {
-        dbService.save(this.getRootNode());
-        dbService.delete("folder2");
-
-        try (Transaction tx = graphDb.beginTx()) {
-
-            assertEquals(3, getResultAsList(graphDb.getAllNodes()).size());
-            assertEquals(2, getResultAsList(graphDb.getAllRelationships()).size());
-
-            //relationship between root and folder 1 is deleted (child and parent)
-            Node rootNode = graphDb.findNode(new FileLabel(), Fields.ID, "root");
-            assertEquals(1, getResultAsList(rootNode.getRelationships()).size());
-
-            assertNotNull(graphDb.findNode(new FileLabel(), Fields.ID, "folder1"));
-            assertNotNull(graphDb.findNode(new FileLabel(), Fields.ID, "file1"));
-
-            assertNull(graphDb.findNode(new FileLabel(), Fields.ID, "folder2"));
-            assertNull(graphDb.findNode(new FileLabel(), Fields.ID, "file2"));
-
-            assertNull(graphDb.findNode(new FileLabel(), Fields.ID, "folder3"));
-            assertNull(graphDb.findNode(new FileLabel(), Fields.ID, "file3"));
-
-            tx.success();
-        } catch (Exception exception) {
-            exception.printStackTrace();
         }
     }
 
@@ -237,6 +194,18 @@ public class DatabaseServiceTest {
         }
     }
 
+    @Test()
+    public void testNodeAbsolutePathRoot(){
+        dbService.save(this.getRootNode());
+
+        try (Transaction tx = graphDb.beginTx()) {
+            Node node = dbService.getNodeById("root");
+            assertEquals("/Test/Path", dbService.getNodeAbsolutePath(node));
+        } catch (Exception exception) {
+
+        }
+    }
+
     @Test(timeout = 100000)
     public void testUpdateProperty() {
         dbService.save(this.getRootNode());
@@ -251,73 +220,38 @@ public class DatabaseServiceTest {
         }
     }
 
-    @Test(timeout = 10000)
-    public void testUpdateChangeFile() throws Exception {
+    @Test(timeout = 100000)
+    public void testGetMimeType() {
         dbService.save(this.getRootNode());
-
-        Change change = new Change();
-        change.setFileId("file1");
-        File file1 = new File();
-        file1.setTitle("file1");
-        file1.setId("file1");
-        file1.setMimeType("application/vnd.google-apps.document");
-
-        file1.setParents(this.getParentReferenceList(
-                "folder2",
-                false
-        ));
-
-        file1.setOwners(this.getOwnerList("David Maignan", true));
-        change.setFile(file1);
-
-        dbService.update(change);
-
-        try (Transaction tx = graphDb.beginTx()) {
-            Node node = graphDb.findNode(new FileLabel(), Fields.ID, "file1");
-
-            List<Relationship> result = getResultAsList(node.getRelationships());
-
-            assertEquals("file1", result.get(0).getStartNode().getProperty(Fields.ID).toString());
-            assertEquals("folder2", result.get(0).getEndNode().getProperty(Fields.ID).toString());
-        }
+        Node folder1 = dbService.getNodeById("folder1");
+        assertEquals(MimeType.FOLDER, dbService.getMimeType(folder1));
     }
 
-    @Test(timeout = 10000)
-    public void testUpdateChangeFolder() {
+    @Test(timeout = 100000)
+    public void testGetMimeTypeFails() {
         dbService.save(this.getRootNode());
+        Node folder1 = dbService.getNodeById("not exits");
+        assertNull(dbService.getMimeType(folder1));
+    }
 
-        Change change = new Change();
-        change.setFileId("folder1");
-        File file1 = new File();
-        file1.setTitle("folder1");
-        file1.setId("folder1");
-        file1.setMimeType(MimeType.FOLDER);
+    @Test(timeout = 100000)
+    public void testGetFileId() {
+        dbService.save(this.getRootNode());
+        Node folder1 = dbService.getNodeById("folder1");
+        assertEquals("folder1", dbService.getFileId(folder1));
+    }
 
-        file1.setParents(this.getParentReferenceList(
-                "folder2",
-                false
-        ));
+    @Test(timeout = 100000)
+    public void testGetFileIdFails() {
+        dbService.save(this.getRootNode());
+        Node folder1 = dbService.getNodeById("not exists");
+        assertNull(dbService.getFileId(folder1));
+    }
 
-        file1.setOwners(this.getOwnerList("David Maignan", true));
-        change.setFile(file1);
-
-        dbService.update(change);
-
-        try (Transaction tx = graphDb.beginTx()) {
-            Node node = graphDb.findNode(new FileLabel(), Fields.ID, "folder1");
-
-            List<Relationship> result = getResultAsList(node.getRelationships(RelTypes.PARENT, Direction.OUTGOING));
-
-            assertEquals(1, result.size());
-            assertEquals("folder2", result.get(0).getEndNode().getProperty(Fields.ID));
-            assertEquals("folder1", result.get(0).getStartNode().getProperty(Fields.ID));
-
-            Node parentNode = graphDb.findNode(new FileLabel(), Fields.ID, "folder2");
-
-            List<Relationship> resultParent = getResultAsList(parentNode.getRelationships());
-
-            assertEquals(4, resultParent.size());
-        }
+    @Test(timeout = 100000)
+    public void testUpdatePropertyFails() {
+        dbService.save(this.getRootNode());
+        assertNull(dbService.update("folder1", "not exists", "999"));
     }
 
     private void debugDb(){

@@ -33,7 +33,6 @@ import java.util.Queue;
 public class FileRepository extends DatabaseService {
     private Logger logger = LoggerFactory.getLogger(FileRepository.class);
 
-
     public FileRepository(){}
 
     public FileRepository(GraphDatabaseService graphDb, Configuration configuration) {
@@ -201,46 +200,13 @@ public class FileRepository extends DatabaseService {
         String query = "match (file:File {%s:'%s'})<-[:%s*]-(m) " +
                 "set file.deleted=true, m.deleted=true return file, m";
 
-        query = String.format(query, Fields.ID, id, RelTypes.PARENT);
-
-        try(Transaction tx = graphDB.beginTx())
-        {
+        try(Transaction tx = graphDB.beginTx()) {
+            query = String.format(query, Fields.ID, id, RelTypes.PARENT);
             Result result = graphDB.execute(query);
 
             tx.success();
 
-            return true;
-        } catch (Exception exception) {
-            logger.error(exception.getMessage());
-        }
-
-        return false;
-    }
-
-    /**
-     * Set processed field as true
-     * @param id
-     * @return processed value updated
-     */
-    public boolean markAsProcessed(String id) {
-        String query = "match (file:File {%s: '%s'}) with file set file.%s = %s return file.%s";
-
-        try (
-                Transaction tx = graphDB.beginTx();
-                Result queryResult = graphDB.execute(String.format(query, Fields.ID, id,
-                        Fields.PROCESSED, true, Fields.PROCESSED));
-        ) {
-
-            boolean result = false;
-
-            if(queryResult.hasNext()) {
-                result = (boolean)queryResult.next().get(String.format("file.%s", Fields.PROCESSED));
-            }
-
-            tx.success();
-
-            return result;
-
+            return result.hasNext();
         } catch (Exception exception) {
             logger.error(exception.getMessage());
         }
@@ -471,15 +437,21 @@ public class FileRepository extends DatabaseService {
 
     public boolean createParentRelation(Node child, Node parent){
         try(Transaction tx = graphDB.beginTx()) {
-            child.createRelationshipTo(parent, RelTypes.PARENT);
+            Relationship relationship = child.createRelationshipTo(parent, RelTypes.PARENT);
+
             tx.success();
+
+            return relationship != null;
         } catch (Exception exception) {
-            String message = String.format("Failed to create relation parent between: %s and %s. ", child, parent);
-            logger.error(message + exception.getMessage());
-            return false;
+            String message = String.format("Failed to create relation parent between: %s and %s. %s",
+                    child,
+                    parent,
+                    exception.getMessage()
+            );
+            logger.error(message);
         }
 
-        return true;
+        return false;
     }
 
     /**

@@ -11,6 +11,7 @@ import database.DatabaseModule;
 import database.Fields;
 import database.RelTypes;
 import configuration.Configuration;
+import database.labels.FileLabel;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -29,7 +30,7 @@ import java.util.Queue;
 import static org.junit.Assert.*;
 
 /**
- * Created by david on 2015-12-30.
+ * Created by David Maignan <davidmaignan@gmail.com> on 2015-12-30.
  */
 public class ChangeRepositoryTest {
 
@@ -55,6 +56,107 @@ public class ChangeRepositoryTest {
     }
 
     @Test(timeout = 1000)
+    public void testGetId(){
+        repository.save(this.getRootNode());
+
+        Change change = this.generateChange(1l, "folder1");
+        repository.addChange(change);
+
+        try{
+            Node node = repository.getChangeById(1l);
+            assertEquals("1", repository.getId(node));
+        }catch (Exception exception){
+
+        }
+    }
+
+    @Test(timeout = 1000)
+    public void testGetIdFails(){
+        repository.save(this.getRootNode());
+
+        Change change = this.generateChange(1l, "folder1");
+        repository.addChange(change);
+
+        try{
+            assertNull("1", repository.getId(null));
+        }catch (Exception exception){
+
+        }
+    }
+
+    @Test(timeout = 1000)
+    public void testMarkAsTrashed(){
+        repository.save(this.getRootNode());
+
+        Change change = this.generateChange(1l, "folder1");
+        repository.addChange(change);
+
+        try{
+            Node node = repository.getChangeById(1l);
+            assertTrue(repository.markAsTrashed(node));
+        }catch (Exception exception){
+
+        }
+    }
+
+    @Test(timeout = 1000)
+    public void testMarkAsProcessed(){
+        repository.save(this.getRootNode());
+
+        Change change = this.generateChange(1l, "folder1");
+        repository.addChange(change);
+
+        try{
+            Node node = repository.getChangeById(1l);
+            assertTrue(repository.markAsProcessed(node));
+        }catch (Exception exception){
+
+        }
+    }
+
+    @Test(timeout = 1000)
+    public void testMarkAsDeleted(){
+        repository.save(this.getRootNode());
+
+        Change change = this.generateChange(1l, "folder1");
+        repository.addChange(change);
+
+        try{
+            Node node = repository.getChangeById(1l);
+            assertTrue(repository.markAsDeleted(node));
+        }catch (Exception exception){
+
+        }
+    }
+
+    @Test(timeout = 1000)
+    public void testMarkAsTrashedFails(){
+        try{
+            assertFalse(repository.markAsTrashed(null));
+        }catch (Exception exception){
+
+        }
+    }
+
+    @Test(timeout = 1000)
+    public void testMarkAsProcessedFails(){
+        try{
+            assertFalse(repository.markAsProcessed(null));
+        }catch (Exception exception){
+
+        }
+    }
+
+    @Test(timeout = 1000)
+    public void testMarkAsDeletedFails(){
+        try{
+            assertFalse(repository.markAsDeleted(null));
+        }catch (Exception exception){
+
+        }
+    }
+
+    @Test(timeout = 1000)
     public void testUpdate(){
         repository.save(this.getRootNode());
 
@@ -71,6 +173,20 @@ public class ChangeRepositoryTest {
             assertTrue((Boolean) node.getProperty(Fields.PROCESSED));
             assertTrue((Boolean) node.getProperty(Fields.DELETED));
 
+        }catch (Exception exception){
+
+        }
+    }
+
+    @Test(timeout = 1000)
+    public void testUpdateFails(){
+        repository.save(this.getRootNode());
+
+        Change change = this.generateChange(1l, "folder1");
+        repository.addChange(change);
+
+        try{
+            assertFalse(repository.update(null));
         }catch (Exception exception){
 
         }
@@ -98,6 +214,27 @@ public class ChangeRepositoryTest {
     }
 
     @Test(timeout = 10000)
+    public void testGetPropertiesFails(){
+        repository.save(this.getRootNode());
+
+        Change change = this.generateChange(1l, "folder1");
+
+        repository.addChange(change);
+
+        try{
+            Node node = null;
+
+            assertFalse(repository.getProcessed(node));
+            assertFalse(repository.getDeleted(node));
+            assertNull(repository.getFileId(node));
+            assertNull(repository.getVersion(node));
+
+        }catch (Exception exception){
+
+        }
+    }
+
+    @Test(timeout = 100000)
     public void testUnprocessed(){
         repository.save(this.getRootNode());
 
@@ -139,7 +276,68 @@ public class ChangeRepositoryTest {
         }
     }
 
-    @Test(timeout = 1000)
+    @Test(timeout = 100000)
+    public void testDeleteNode(){
+        repository.save(this.getRootNode());
+
+        repository.addChange(this.generateChange(1l, "folder1"));
+        repository.addChange(this.generateChange(2l, "folder1"));
+        repository.addChange(this.generateChange(3l, "folder1"));
+        repository.addChange(this.generateChange(4l, "file1"));
+        repository.addChange(this.generateChange(5l, "folder2"));
+        repository.addChange(this.generateChange(6l, "file3"));
+
+        Node folder2 = repository.getNodeById("folder2");
+
+        assertTrue(repository.delete(folder2));
+
+        try(Transaction tx = graphDb.beginTx()) {
+
+            // 3 nodes File (root, folder1, file1) + 4 nodes Changes
+            assertEquals(7, getResultAsList(graphDb.getAllNodes()).size());
+            assertEquals(6, getResultAsList(graphDb.getAllRelationships()).size());
+
+            //relationship between root and folder 1 is deleted (child and parent)
+            Node rootNode = graphDb.findNode(new FileLabel(), Fields.ID, "root");
+            assertEquals(1, getResultAsList(rootNode.getRelationships()).size());
+
+            Node folder1 = graphDb.findNode(new FileLabel(), Fields.ID, "folder1");
+            assertNotNull(folder1);
+
+            //3 relations: root, file1 and change 1l
+            assertEquals(3, getResultAsList(folder1.getRelationships()).size());
+            assertNotNull(graphDb.findNode(new FileLabel(), Fields.ID, "file1"));
+
+            //All the nodes are deleted and their changes
+            assertNull(graphDb.findNode(new FileLabel(), Fields.ID, "folder2"));
+            assertNull(graphDb.findNode(new FileLabel(), Fields.ID, "file2"));
+            assertNull(graphDb.findNode(new FileLabel(), Fields.ID, "folder3"));
+            assertNull(graphDb.findNode(new FileLabel(), Fields.ID, "file3"));
+            assertNull(repository.getChangeById(5l));
+            assertNull(repository.getChangeById(6l));
+
+        } catch (Exception exception){
+
+        }
+    }
+
+    @Test(timeout = 100000)
+    public void testDeleteNodeFails(){
+        repository.save(this.getRootNode());
+
+        assertFalse(repository.delete(null));
+
+        try(Transaction tx = graphDb.beginTx()) {
+            assertEquals(7, getResultAsList(graphDb.getAllNodes()).size());
+            assertEquals(6, getResultAsList(graphDb.getAllRelationships()).size());
+
+            tx.success();
+        } catch (Exception exception){
+
+        }
+    }
+
+    @Test(timeout = 10000)
     public void testGetLastChangeId(){
         repository.save(this.getRootNode());
 
@@ -179,6 +377,15 @@ public class ChangeRepositoryTest {
         return change;
     }
 
+    @Test
+    public void testAddChangeWithNullPropertyFails(){
+        repository.save(this.getRootNode());
+
+        Change change = this.generateChange(1l, null);
+
+        assertFalse(repository.addChange(change));
+    }
+
     @Test(timeout = 10000)
     public void testAddFirstChangeFile() {
         repository.save(this.getRootNode());
@@ -203,7 +410,7 @@ public class ChangeRepositoryTest {
 
         change.setFile(file1);
 
-        repository.addChange(change);
+        assertTrue(repository.addChange(change));
 
         try (Transaction tx = graphDb.beginTx()) {
             Node node = repository.getNodeById(change.getFileId());
@@ -241,7 +448,7 @@ public class ChangeRepositoryTest {
 
         change.setFile(file1);
 
-        repository.addChange(change);
+        assertTrue(repository.addChange(change));
 
         Change change2 = new Change();
         change2.setId(999999999L);
@@ -252,7 +459,7 @@ public class ChangeRepositoryTest {
 
         change2.setFile(file1);
 
-        repository.addChange(change2);
+        assertTrue(repository.addChange(change2));
 
         try (Transaction tx = graphDb.beginTx()) {
 
@@ -277,7 +484,7 @@ public class ChangeRepositoryTest {
     }
 
     @Test(timeout = 10000)
-    public void testAddChangeDuplication() {
+    public void testAddChangeASecondTimeFails() {
         repository.save(this.getRootNode());
 
         Change change = new Change();
@@ -301,7 +508,6 @@ public class ChangeRepositoryTest {
         change.setFile(file1);
 
         assertTrue(repository.addChange(change));
-
         assertFalse(repository.addChange(change));
 
         try (Transaction tx = graphDb.beginTx()) {

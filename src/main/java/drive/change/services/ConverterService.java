@@ -46,7 +46,7 @@ public class ConverterService {
             return customChange;
         }
 
-        fileNode = fileRepository.getFileNodeFromChange(changeNode);
+        fileNode = fileRepository.getNodeById(change.getFileId());
         customChange.setFileNode(fileNode);
 
         if(fileNode == null){
@@ -55,6 +55,8 @@ public class ConverterService {
 
         //Check if deleted
         customChange.setDeleted(change.getDeleted());
+
+
 
         if(change.getDeleted()) {
             Node parentNode = fileRepository.getParent(change.getFileId());
