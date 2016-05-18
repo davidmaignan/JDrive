@@ -5,6 +5,8 @@ import drive.change.annotations.Move;
 import drive.change.model.CustomChange;
 import drive.change.services.apply.ChangeServiceInterface;
 import drive.change.services.update.ChangeUpdateInterface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -23,6 +25,16 @@ public class MoveChange implements ChangeInterface {
 
     public void setStructure(CustomChange structure){
         this.structure = structure;
+    }
+
+    @Override
+    public ChangeServiceInterface getService() {
+        return service;
+    }
+
+    @Override
+    public ChangeUpdateInterface getUpdate() {
+        return update;
     }
 
     @Override

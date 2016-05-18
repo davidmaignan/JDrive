@@ -21,6 +21,16 @@ public class NullChange implements ChangeInterface {
         this.update = update;
     }
 
+    @Override
+    public ChangeServiceInterface getService() {
+        return service;
+    }
+
+    @Override
+    public ChangeUpdateInterface getUpdate() {
+        return update;
+    }
+
     public void setStructure(CustomChange structure){
         this.structure = structure;
     }

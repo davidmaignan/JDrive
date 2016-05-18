@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by David Maignan <davidmaignan@gmail.com> on 2016-01-12.
  */
-public class NullWriter implements ChangeServiceInterface {
+public class NullService implements ChangeServiceInterface {
     private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
     private CustomChange structure;
 

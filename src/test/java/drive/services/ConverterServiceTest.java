@@ -5,6 +5,9 @@ import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.ParentReference;
 import com.google.api.services.drive.model.User;
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+import com.tngtech.java.junit.dataprovider.UseDataProvider;
 import database.repository.ChangeRepository;
 import database.repository.FileRepository;
 import drive.change.model.CustomChange;
@@ -13,23 +16,21 @@ import drive.change.model.ChangeTypes;
 import drive.api.change.ChangeService;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.neo4j.graphdb.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 /**
  * Created by David Maignan <davidmaignan@gmail.com> on 2016-05-04.
  */
+@RunWith(DataProviderRunner.class)
 public class ConverterServiceTest {
     private ChangeRepository spyChangeRepository;
     private FileRepository spyFileRepository;
@@ -258,6 +259,39 @@ public class ConverterServiceTest {
         assertEquals(ChangeTypes.FILE_UPDATE, result.getType());
     }
 
+    @DataProvider
+    public static Object[][] dataProviderGetTrashed(){
+        return new Object[][]{
+                {null, null, null, null, false},
+                {new File(), null, null, null, false},
+                {new File(), false, null, null, false},
+                {new File(), false, new File.Labels(), false, false},
+                {new File(), true, null, false, true},
+                {new File(), false, new File.Labels(), true, true},
+                {new File(), true, new File.Labels(), true, true}
+        };
+    }
+
+    @Test
+    @UseDataProvider("dataProviderGetTrashed")
+    public void testGetTrashed(File file, Boolean explicitely,
+                               File.Labels labels, Boolean trashed,
+                               boolean expected){
+        Change change = new Change();
+
+        if(file != null) {
+            file.setExplicitlyTrashed(explicitely);
+            if(labels != null){
+                labels.setTrashed(trashed);
+            }
+            file.setLabels(labels);
+        }
+
+        change.setFile(file);
+
+        assertEquals(expected, service.getTrashed(change));
+    }
+
     private File createFile(String title, String parent){
         File file = new File();
         file.setTitle(title);
@@ -304,15 +338,5 @@ public class ConverterServiceTest {
         owner.setIsAuthenticatedUser(isAuthenticatedUser);
 
         return owner;
-    }
-
-    @Test(timeout = 10000)
-    public void testFileNewContent(){
-
-    }
-
-    @Test(timeout = 10000)
-    public void testFileDriveMimeType(){
-
     }
 }

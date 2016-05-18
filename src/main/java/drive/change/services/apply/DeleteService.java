@@ -14,11 +14,13 @@ public class DeleteService implements ChangeServiceInterface {
     private CustomChange structure;
 
     @Override
+    public boolean execute() {
+        return true;
+    }
+
+    @Override
     public void setStructure(CustomChange structure) {
         this.structure = structure;
     }
 
-    public final boolean execute(){
-        return true;
-    }
 }
