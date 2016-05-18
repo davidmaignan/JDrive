@@ -3,6 +3,7 @@ def neo4jVersion = "3.0.1"
 apply plugin: 'java'
 apply plugin: 'application'
 apply plugin: 'idea'
+apply plugin: "jacoco"
 
 mainClassName = 'main.JDriveMain'
 sourceCompatibility = 1.8
@@ -74,6 +75,20 @@ test {
 
 run {
     systemProperty 'logback.configurationFile', 'logback.xml'
+}
+
+
+jacoco {
+    applyTo run
+}
+
+jacocoTestReport {
+    group = "Reporting"
+    reports {
+        xml.enabled true
+        csv.enabled false
+        html.destination "${buildDir}/reports/coverage"
+    }
 }
 
 task('clean') <<
