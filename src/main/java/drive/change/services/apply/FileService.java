@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Created by david on 2016-05-05.
+ * Created by David Maignan <davidmaignan@gmail.com> on 2016-05-05.
  */
 public class FileService implements ChangeServiceInterface {
     private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());

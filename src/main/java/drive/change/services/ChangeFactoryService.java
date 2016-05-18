@@ -5,7 +5,7 @@ import drive.change.model.CustomChange;
 import drive.change.modules.ChangeModule;
 
 /**
- * Created by david on 2016-05-12.
+ * Created by David Maignan <davidmaignan@gmail.com> on 2016-05-12.
  */
 public class ChangeFactoryService {
 

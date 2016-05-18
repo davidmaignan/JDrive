@@ -7,7 +7,7 @@ import org.neo4j.graphdb.Node;
 /**
  * Structure containing the data from a change
  *
- * Created by david on 2016-05-04.
+ * Created by David Maignan <davidmaignan@gmail.com> on 2016-05-04.
  */
 public class CustomChange {
     private Node changeNode;
@@ -113,6 +113,8 @@ public class CustomChange {
     public Node getChangeNode() {
         return changeNode;
     }
+
+//    @todo implements equals & hascode
 
     @Override
     public String toString() {

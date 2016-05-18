@@ -14,7 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Created by david on 2016-05-12.
+ * Created by David Maignan <davidmaignan@gmail.com> on 2016-05-12.
  */
 public class Trashed {
     private static Logger logger = LoggerFactory.getLogger(Trashed.class);

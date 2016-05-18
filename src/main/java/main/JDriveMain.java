@@ -271,7 +271,7 @@ public class JDriveMain {
         List<File> result = fileService.getAll();
 
         treeBuilder.build(result);
-        dbService.save(treeBuilder.getRoot());
+        fileRepository.save(treeBuilder.getRoot());
 
         return true;
     }

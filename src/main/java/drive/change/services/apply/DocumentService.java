@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Created by david on 2016-01-12.
+ * Created by David Maignan <davidmaignan@gmail.com> on 2016-01-12.
  */
 public class DocumentService implements ChangeServiceInterface {
     private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());

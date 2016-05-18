@@ -21,7 +21,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * Created by david on 2016-05-17.
+ * Created by David Maignan <davidmaignan@gmail.com> on 2016-05-17.
  */
 public class ValidChangeTest {
 
