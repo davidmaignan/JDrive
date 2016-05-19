@@ -212,7 +212,7 @@ public class JDriveMain {
 
         logger.debug("New valid changes total: " + validChangeList.size());
 
-        boolean result = changeTree.execute(validChangeList);
+        changeTree.execute(validChangeList);
     }
 
     private static void initWrite() throws Exception {
@@ -232,13 +232,6 @@ public class JDriveMain {
 
             if (result) {
                 result = fileRepository.markAsProcessed(node);
-            }
-
-            if(result){
-                logger.error("Success to write: " + path);
-            } else {
-                logger.error("Failed to write: " + path);
-                writer.delete(path);
             }
         }
     }
@@ -271,7 +264,7 @@ public class JDriveMain {
         List<File> result = fileService.getAll();
 
         treeBuilder.build(result);
-        dbService.save(treeBuilder.getRoot());
+        fileRepository.save(treeBuilder.getRoot());
 
         return true;
     }

@@ -200,46 +200,13 @@ public class FileRepository extends DatabaseService {
         String query = "match (file:File {%s:'%s'})<-[:%s*]-(m) " +
                 "set file.deleted=true, m.deleted=true return file, m";
 
-        query = String.format(query, Fields.ID, id, RelTypes.PARENT);
-
-        try(Transaction tx = graphDB.beginTx())
-        {
+        try(Transaction tx = graphDB.beginTx()) {
+            query = String.format(query, Fields.ID, id, RelTypes.PARENT);
             Result result = graphDB.execute(query);
 
             tx.success();
 
-            return true;
-        } catch (Exception exception) {
-            logger.error(exception.getMessage());
-        }
-
-        return false;
-    }
-
-    /**
-     * Set processed field as true
-     * @param id
-     * @return processed value updated
-     */
-    public boolean markAsProcessed(String id) {
-        String query = "match (file:File {%s: '%s'}) with file set file.%s = %s return file.%s";
-
-        try (
-                Transaction tx = graphDB.beginTx();
-                Result queryResult = graphDB.execute(String.format(query, Fields.ID, id,
-                        Fields.PROCESSED, true, Fields.PROCESSED));
-        ) {
-
-            boolean result = false;
-
-            if(queryResult.hasNext()) {
-                result = (boolean)queryResult.next().get(String.format("file.%s", Fields.PROCESSED));
-            }
-
-            tx.success();
-
-            return result;
-
+            return result.hasNext();
         } catch (Exception exception) {
             logger.error(exception.getMessage());
         }
@@ -451,6 +418,8 @@ public class FileRepository extends DatabaseService {
             dbNode.setProperty(Fields.IS_ROOT, false);
             dbNode.setProperty(Fields.PROCESSED, false);
             dbNode.setProperty(Fields.VERSION, file.getVersion());
+            dbNode.setProperty(Fields.DELETED, false);
+            dbNode.setProperty(Fields.TRASHED, isTrash(file));
 
             if (file.getCreatedDate() != null) {
                 dbNode.setProperty(Fields.CREATED_DATE, file.getCreatedDate().getValue());
@@ -468,14 +437,21 @@ public class FileRepository extends DatabaseService {
 
     public boolean createParentRelation(Node child, Node parent){
         try(Transaction tx = graphDB.beginTx()) {
-            child.createRelationshipTo(parent, RelTypes.PARENT);
+            Relationship relationship = child.createRelationshipTo(parent, RelTypes.PARENT);
+
             tx.success();
+
+            return relationship != null;
         } catch (Exception exception) {
-            logger.error(exception.getMessage());
-            return false;
+            String message = String.format("Failed to create relation parent between: %s and %s. %s",
+                    child,
+                    parent,
+                    exception.getMessage()
+            );
+            logger.error(message);
         }
 
-        return true;
+        return false;
     }
 
     /**
@@ -546,5 +522,19 @@ public class FileRepository extends DatabaseService {
         if (tNode.getModifiedDate() != null) {
             dbNode.setProperty(Fields.MODIFIED_DATE, tNode.getModifiedDate().getValue());
         }
+    }
+
+    /**
+     * Get trashed label value if available
+     *
+     * @return boolean
+     */
+    private boolean isTrash(File file){
+         return (file != null
+                && file.getExplicitlyTrashed() != null
+                && file.getExplicitlyTrashed())
+                || (file != null
+                && file.getLabels() != null
+                && file.getLabels().getTrashed());
     }
 }

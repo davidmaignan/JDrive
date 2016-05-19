@@ -16,17 +16,15 @@ public class ChangeTree {
     private static Logger logger = LoggerFactory.getLogger(ChangeTree.class);
 
     private final ChangeRepository changeRepository;
-    private final FileService fileService;
     private final FileRepository fileRepository;
 
     @Inject
-    public ChangeTree(FileRepository fileRepository, FileService fileService, ChangeRepository changeRepository) {
+    public ChangeTree(FileRepository fileRepository, ChangeRepository changeRepository) {
         this.changeRepository = changeRepository;
         this.fileRepository = fileRepository;
-        this.fileService = fileService;
     }
 
-    public boolean execute(List<ValidChange> list) throws Exception{
+    public void execute(List<ValidChange> list) throws Exception{
         List<Node> trashedNode = fileRepository.getTrashedList();
 
         while( ! list.isEmpty()){
@@ -38,8 +36,14 @@ public class ChangeTree {
                 result = createNode(validChange.getChange());
             }
 
+            // @todo investiqge if this condition is necessary
+//            if(validChange.isTrashed()) {
+//                trashedNode = fileRepository.getTrashedList();
+//            }
+
             if(result){
-                //If trashed files get untrashed and moved at the same time
+                //If trashed files get untrashed and is also moved
+                //It must be recreated in its previous location to be moved after
                 if(trashedNode.contains(validChange.getFileNode())){
                     fileRepository.markAsUnTrashed(validChange.getFileNode());
                 }
@@ -47,8 +51,6 @@ public class ChangeTree {
                 changeRepository.addChange(validChange.getChange());
             }
         }
-
-        return true;
     }
 
     private boolean createNode(Change change) throws Exception{
@@ -58,49 +60,17 @@ public class ChangeTree {
             Node parentNode = fileRepository.getNodeById(parentId);
 
             if (parentNode == null) {
-                logger.debug("This code should never be executed.");
-                parentNode = createParentNode(parentId);
+                logger.error(change.toPrettyString());
+                throw new Exception("Cannot create a node if parent does not exists");
             }
 
             Node newNode = fileRepository.createNode(change.getFile());
 
             return fileRepository.createParentRelation(newNode, parentNode);
         }catch (Exception exception){
+            logger.error(change.toPrettyString());
             logger.error(exception.getMessage(), exception);
-            return true;
+            return false;
         }
-    }
-
-    /**
-     * Create recursively the parent Node in case Google returns the changes unordered.
-     *
-     * @param fileId
-     * @return
-     * @throws Exception
-     */
-    private Node createParentNode(String fileId) throws Exception{
-        File file = fileService.getFile(fileId);
-
-        if (file == null) {
-            throw new Exception("Error google api. No file found for id: " + fileId);
-        }
-
-        Node node = fileRepository.createNode(file);
-
-        String parentId = file.getParents().get(0).getId();
-
-        Node parentNode = fileRepository.getNodeById(parentId);
-
-        if (parentNode == null) {
-            parentNode = createParentNode(parentId);
-        }
-
-        boolean result = fileRepository.createParentRelation(node, parentNode);
-
-        if ( ! result) {
-            throw new DatabaseException("Cannot create relation between " + node + " : " + parentNode);
-        }
-
-        return node;
     }
 }

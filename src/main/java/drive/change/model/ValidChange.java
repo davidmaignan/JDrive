@@ -3,13 +3,23 @@ package drive.change.model;
 import com.google.api.services.drive.model.Change;
 import database.repository.FileRepository;
 import org.neo4j.graphdb.Node;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * A valid change is a change that:
- *  1 - if not a new file it must exist in the database.
- *  2 - if new file newly created. (change.getFile() != null)
+ * Drive api return different format of response for change.
+ *
+ * ValidChange checks that the change response is valid for:
+ *
+ *  - case 1: most cases (update, new file, trashed file ...) => change.getFile() must provide a File object
+ *  - case 2: change.getFile() return null => it's a deletion so change.getDeleted() == true
+ *
+ *  NB: If a case is not asset, it is not valid and then disregarded.
+ *
  */
 public class ValidChange {
+    private static Logger logger = LoggerFactory.getLogger(ValidChange.class);
+
     private Change change;
     private FileRepository fileRepository;
     private Node fileNode;
@@ -29,15 +39,11 @@ public class ValidChange {
     }
 
     public boolean isValid(){
-        if(change.getDeleted() && fileNode != null){
-            return true;
+        if(change.getDeleted()){
+            return fileNode != null;
         }
 
-        if(isNewFile()) {
-            return true;
-        }
-
-        return fileNode != null;
+        return change.getFile() != null;
     }
 
     public Node getFileNode(){
@@ -52,27 +58,6 @@ public class ValidChange {
      * @return
      */
     public boolean isNewFile(){
-        return change.getFile() != null && fileNode == null && ! isTrashed();
-    }
-
-    public String getParentId(){
-        return change.getFile().getParents().get(0).getId();
-    }
-
-    /**
-     * Get trashed label value if available
-     *
-     * @return boolean
-     */
-    public boolean isTrashed() {
-        boolean result = false;
-        result =  (change.getFile() != null
-                && change.getFile().getExplicitlyTrashed() != null
-                && change.getFile().getExplicitlyTrashed())
-                || (change.getFile() != null
-                && change.getFile().getLabels() != null
-                && change.getFile().getLabels().getTrashed());
-
-        return result;
+        return change.getFile() != null && fileNode == null;
     }
 }

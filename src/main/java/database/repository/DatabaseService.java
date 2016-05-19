@@ -28,7 +28,7 @@ public class DatabaseService implements DatabaseServiceInterface {
     private DatabaseConfiguration dbConfig;
     private Configuration configuration;
     protected GraphDatabaseService graphDB;
-    private Logger logger;
+    private static Logger logger = LoggerFactory.getLogger(DatabaseService.class.getSimpleName());
 
     public DatabaseService() {
     }
@@ -36,7 +36,6 @@ public class DatabaseService implements DatabaseServiceInterface {
     public DatabaseService(GraphDatabaseService graphDB, Configuration configuration) {
         this.graphDB = graphDB;
         this.configuration = configuration;
-        logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
 
         try (Transaction tx = graphDB.beginTx()) {
             graphDB.schema()
@@ -63,7 +62,6 @@ public class DatabaseService implements DatabaseServiceInterface {
     public DatabaseService(DatabaseConfiguration dbConfig, Configuration configuration) {
         this.dbConfig = dbConfig;
         this.configuration = configuration;
-        logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
 
         Connection object = Connection.getInstance();
 
@@ -130,58 +128,6 @@ public class DatabaseService implements DatabaseServiceInterface {
     }
 
     /**
-     * Delete a node by id
-     *
-     * @param id String
-     * @return boolean
-     */
-    public boolean delete(String id) {
-        String query = "match (file {identifier: '%s'}) match (file)<-[r*]-(m) " +
-                "foreach (rel in r | delete rel) delete m with file match (file)-[r]->(m) delete r, file";
-        try (
-                Transaction tx = graphDB.beginTx();
-                Result result = graphDB.execute(String.format(query, id))
-        ) {
-            tx.success();
-
-            return true;
-        } catch (Exception exception) {
-            logger.error("Fail to delete: " + id);
-            logger.error(exception.getMessage());
-        }
-
-        return false;
-    }
-
-
-    /**
-     * Delete a node by id
-     *
-     * @param node Node
-     * @return boolean
-     */
-    public boolean delete(Node node) {
-        String query = "match (file {identifier: '%s'}) match (file)<-[r*]-(m) " +
-                "foreach (rel in r | delete rel) delete m with file match (file)-[r]->(m) delete r, file";
-        try (Transaction tx = graphDB.beginTx()) {
-
-            query = String.format(query, node.getProperty(Fields.ID));
-
-            logger.debug("Query: " + query);
-
-            Result result = graphDB.execute(query);
-
-            tx.success();
-
-            return true;
-        } catch (Exception exception) {
-            logger.error(exception.getMessage());
-        }
-
-        return false;
-    }
-
-    /**
      * Get parent for a file
      *
      * @param id String
@@ -236,56 +182,6 @@ public class DatabaseService implements DatabaseServiceInterface {
         return node;
     }
 
-    public Node getFileNodeFromChange(Node change) {
-        Node result = null;
-
-        String query = "match (file {identifier:'%s'}) return file";
-
-        try (Transaction tx = graphDB.beginTx()) {
-            Result resultQuery = graphDB.execute(String.format(query, change.getProperty(Fields.FILE_ID)));
-
-            tx.success();
-
-            if(resultQuery.hasNext()) {
-                return (Node) resultQuery.next().get("file");
-            }
-
-        } catch (Exception exception) {
-            logger.error(exception.getMessage());
-        }
-
-        return result;
-    }
-
-
-    /**
-     * Get property for a node by it's identifier
-     *
-     * @param id       String
-     * @param property String
-     * @return String
-     */
-    public String getNodePropertyById(String id, String property) {
-        String resultProperty = null;
-
-        String query = "match (file {identifier: '%s'}) return file.%s as %s";
-
-        try (Transaction tx = graphDB.beginTx();
-             Result result = graphDB.execute(String.format(query, id, property, property))) {
-
-            if (result.hasNext()) {
-                resultProperty = String.valueOf(result.next().get(property));
-            }
-
-            tx.success();
-        } catch (Exception exception) {
-            logger.error("Fail to getNodePropertyById: " + id);
-            logger.error(exception.getMessage());
-        }
-
-        return resultProperty;
-    }
-
     /**
      * Get absolutePath for a node by Id
      *
@@ -330,50 +226,7 @@ public class DatabaseService implements DatabaseServiceInterface {
         );
     }
 
-    /**
-     * Get absolutePath for a node by Id
-     *
-     * @param  nodeId
-     * @return
-     * @throws Exception
-     */
-    public String getNodeAbsolutePath(String nodeId) {
-        StringBuilder pathBuilder = new StringBuilder();
-
-        String query = "match (file {identifier:'%s'}) match (file)-[r*]->(m {IsRoot:true}) return r";
-
-        try (Transaction tx = graphDB.beginTx())
-        {
-            Result result = graphDB.execute(String.format(query, nodeId));
-
-            if ( ! result.hasNext()) {
-                return configuration.getRootFolder();
-            }
-
-            Map<String, Object> row = result.next();
-
-            List<Relationship> relationshipList = (List<Relationship>) row.get("r");
-
-            for (Relationship rel : relationshipList) {
-                pathBuilder.insert(0, rel.getEndNode().getProperty(Fields.TITLE).toString());
-                pathBuilder.insert(0, "/");
-            }
-
-            pathBuilder.append("/");
-            pathBuilder.append(nodeId);
-
-            tx.success();
-
-        } catch (Exception exception) {
-            logger.error(exception.getMessage());
-        }
-
-        return String.format("%s%s",
-                configuration.getRootFolder(),
-                pathBuilder.substring(1).toString()
-        );
-    }
-
+    //@todo do not return null - throw an exception instead
     public String getMimeType(Node node) {
         try(Transaction tx = graphDB.beginTx()) {
 
@@ -389,6 +242,7 @@ public class DatabaseService implements DatabaseServiceInterface {
         return null;
     }
 
+    //@todo do not return null - throw an exception instead
     public String getFileId(Node node) {
         try(Transaction tx = graphDB.beginTx()) {
 
@@ -433,122 +287,6 @@ public class DatabaseService implements DatabaseServiceInterface {
         }
 
         return resultNode;
-    }
-
-    /**
-     * Update node from a change api request
-     *
-     * @param change Change
-     * @return boolean
-     */
-    public boolean update(Change change) {
-        String id = change.getFileId();
-        File file = change.getFile();
-
-        String query = "match (file {identifier: '%s'}) " +
-                "set file.title = '%s' " +
-                "set file.modifiedDate = '%s' return file";
-
-        try (Transaction tx = graphDB.beginTx()) {
-            Result resultUpdate = graphDB.execute(
-                    String.format(
-                            query,
-                            id,
-                            file.getTitle(),
-                            file.getModifiedDate()
-                    )
-            );
-
-            Map<String, Object> row = resultUpdate.next();
-            Node node = (Node) row.get("file");
-
-            //Check if parent was changed
-            String newParentId = change.getFile().getParents().get(0).getId();
-
-            Node parentNode = this.getParent(id);
-
-            if (parentNode == null) {
-                throw new Exception("Error updating db with changeId: " + change.getFileId()
-                        + ". No parent found! Every node other than root should have a parent.");
-            }
-
-            if (!parentNode.getProperty(Fields.ID).equals(newParentId)) {
-                String queryDeleteRelations = String.format(
-                        "match (file {identifier:'%s'}) match (file)-[r:PARENT]->() " +
-                                "delete r with file match (file)<-[r2:CHILD]-() delete r2",
-                        id
-                );
-
-                graphDB.execute(queryDeleteRelations);
-
-                Node newParentNode = this.getNodeById(newParentId);
-
-                node.createRelationshipTo(newParentNode, RelTypes.PARENT);
-            }
-
-            tx.success();
-
-        } catch (Exception exception) {
-            logger.error(exception.getMessage());
-            return false;
-        }
-
-        return true;
-    }
-
-//    match (n)<-[r:CHANGE*]-(m) where n.n = 'a' with m, count(r) AS length order by length desc limit 1  return  m;
-
-    /**
-     * -     * Save a change
-     * -     * @param change Change
-     * -     * @return boolean
-     * -
-     */
-    public boolean save(Change change) {
-        try (Transaction tx = graphDB.beginTx()) {
-            Node node = graphDB.createNode();
-            this.setNode(node, change);
-            Node parentNode = this.getNodeById(change.getFile().getParents().get(0).getId());
-            node.setProperty(Fields.PATH,
-                    String.format(
-                            "%s/%s",
-                            parentNode.getProperty(Fields.PATH),
-                            change.getFile().getTitle()
-                    )
-            );
-
-            tx.success();
-
-            return true;
-
-        } catch (Exception exception) {
-            //@todo implement sl4j
-            logger.error("failed to save change in db" + change.getFile().getTitle());
-        }
-        return false;
-    }
-
-    /**
-     * Set node property
-     *
-     * @param dbNode Node
-     * @param change Change
-     */
-    private void setNode(Node dbNode, Change change) {
-        File file = change.getFile();
-
-        dbNode.addLabel(new FileLabel());
-        dbNode.setProperty(Fields.ID, file.getId());
-        dbNode.setProperty(Fields.TITLE, file.getTitle());
-        dbNode.setProperty(Fields.MIME_TYPE, file.getMimeType());
-
-        if (file.getCreatedDate() != null) {
-            dbNode.setProperty(Fields.CREATED_DATE, file.getCreatedDate().getValue());
-        }
-
-        if (file.getModifiedDate() != null) {
-            dbNode.setProperty(Fields.MODIFIED_DATE, file.getModifiedDate().getValue());
-        }
     }
 
     /**

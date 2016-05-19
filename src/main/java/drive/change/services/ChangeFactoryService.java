@@ -3,9 +3,11 @@ package drive.change.services;
 import com.google.inject.Guice;
 import drive.change.model.CustomChange;
 import drive.change.modules.ChangeModule;
+import io.filesystem.modules.FileSystemModule;
+
 
 /**
- * Created by david on 2016-05-12.
+ * Created by David Maignan <davidmaignan@gmail.com> on 2016-05-12.
  */
 public class ChangeFactoryService {
 
@@ -14,25 +16,39 @@ public class ChangeFactoryService {
 
         switch (structure.getType()){
             case DELETE:
-                service = Guice.createInjector(new ChangeModule()).getInstance(DeleteChange.class);
+                service = Guice.createInjector(
+                        new ChangeModule(),
+                        new FileSystemModule()).getInstance(DeleteChange.class);
                 break;
             case MOVE:
-                service = Guice.createInjector(new ChangeModule()).getInstance(MoveChange.class);
+                service = Guice.createInjector(
+                        new ChangeModule(),
+                        new FileSystemModule()).getInstance(MoveChange.class);
                 break;
             case FILE_UPDATE:
-                service = Guice.createInjector(new ChangeModule()).getInstance(FileChange.class);
+                service = Guice.createInjector(
+                        new ChangeModule(),
+                        new FileSystemModule()).getInstance(FileChange.class);
                 break;
             case FOLDER_UPDATE:
-                service = Guice.createInjector(new ChangeModule()).getInstance(FolderChange.class);
+                service = Guice.createInjector(
+                        new ChangeModule(),
+                        new FileSystemModule()).getInstance(FolderChange.class);
                 break;
             case DOCUMENT:
-                service = Guice.createInjector(new ChangeModule()).getInstance(DocumentChange.class);
+                service = Guice.createInjector(
+                        new ChangeModule(),
+                        new FileSystemModule()).getInstance(DocumentChange.class);
                 break;
             case TRASHED:
-                service = Guice.createInjector(new ChangeModule()).getInstance(TrashChange.class);
+                service = Guice.createInjector(
+                        new ChangeModule(),
+                        new FileSystemModule()).getInstance(TrashChange.class);
                 break;
             default:
-                service = Guice.createInjector(new ChangeModule()).getInstance(NullChange.class);
+                service = Guice.createInjector(
+                        new ChangeModule(),
+                        new FileSystemModule()).getInstance(NullChange.class);
                 break;
         }
 

@@ -3,6 +3,8 @@ package io;
 import com.google.inject.Inject;
 import database.repository.FileRepository;
 import drive.api.DriveService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 import java.io.FileOutputStream;
@@ -16,9 +18,9 @@ import java.io.OutputStream;
  * David Maignan <davidmaignan@gmail.com>
  */
 public class File implements WriterInterface {
+    private static Logger logger = LoggerFactory.getLogger(File.class.getSimpleName());
     private final DriveService driveService;
     private final FileRepository fileRepository;
-
     private String fileId;
 
     @Inject
@@ -26,16 +28,9 @@ public class File implements WriterInterface {
         this.driveService = driveService;
         this.fileRepository = fileRepository;
     }
-
+    @Override
     public void setFileId(String fileId) {
         this.fileId = fileId;
-    }
-
-    @Override
-    public boolean delete(String path) {
-        java.io.File file = new java.io.File(path);
-
-        return file.delete();
     }
 
     @Override
@@ -46,7 +41,6 @@ public class File implements WriterInterface {
             OutputStream outputStream = new FileOutputStream(path);
 
             if (inputStream == null) {
-                System.out.println("no inputStream");
                 return false;
             }
 
@@ -70,13 +64,16 @@ public class File implements WriterInterface {
         return false;
     }
 
+    @Override
+    public boolean write(String oldPath, String newPath) {
+        return false;
+    }
+
     private InputStream downloadFile(DriveService service, String id) throws IOException {
         try {
             return driveService.getDrive().files().get(id).executeMediaAsInputStream();
         } catch (IOException e) {
-            // An error occurred.
-            System.out.println("error");
-            e.printStackTrace();
+            logger.error("Cannot get file from google drive api: " + id);
             return null;
         }
     }

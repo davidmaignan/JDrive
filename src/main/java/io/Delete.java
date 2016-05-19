@@ -1,6 +1,8 @@
 package io;
 
+import com.google.api.services.drive.model.Change;
 import com.google.inject.Inject;
+import database.repository.ChangeRepository;
 import database.repository.FileRepository;
 import org.neo4j.graphdb.Node;
 import org.slf4j.Logger;
@@ -14,29 +16,27 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Created by david on 2016-05-12.
+ * Created by David Maignan <davidmaignan@gmail.com> on 2016-05-12.
  */
 public class Delete {
     private static Logger logger = LoggerFactory.getLogger(Delete.class);
 
-    private FileRepository fileRepository;
+    private ChangeRepository changeRepository;
 
     @Inject
-    public Delete(FileRepository fileRepository){
-        this.fileRepository = fileRepository;
+    public Delete(ChangeRepository changeRepository){
+        this.changeRepository = changeRepository;
     }
 
     public boolean execute(Node node){
         boolean result;
         try{
-            Path path = Paths.get(fileRepository.getNodeAbsolutePath(node));
+            Path path = Paths.get(changeRepository.getNodeAbsolutePath(node));
             if (Files.isDirectory(path)) {
                 deleteDirectory(path);
             }
 
-            result = Files.deleteIfExists(path);
-            result = true;
-
+            return Files.deleteIfExists(path);
         } catch (FileNotFoundException exception) {
             result = true;
             exception.printStackTrace();
@@ -49,11 +49,11 @@ public class Delete {
         }
 
         if(result){
-            result = fileRepository.delete(node);
+            result = changeRepository.delete(node);
         }
 
         if( ! result){
-            logger.error("Error while deleting node for file deleted: " + fileRepository.getTitle(node));
+            logger.error("Error while deleting node for file deleted: " + node);
         }
 
         return result;

@@ -18,7 +18,7 @@ public class ChangeModule extends AbstractModule {
         bind(ChangeUpdateInterface.class).annotatedWith(Delete.class).to(DeleteChangeUpdate.class);
 
         //Trash
-        bind(ChangeServiceInterface.class).annotatedWith(Trash.class).to(TrashedService.class);
+        bind(ChangeServiceInterface.class).annotatedWith(Trash.class).to(TrashService.class);
         bind(ChangeUpdateInterface.class).annotatedWith(Trash.class).to(TrashChangeUpdate.class);
 
         //Move
@@ -26,7 +26,7 @@ public class ChangeModule extends AbstractModule {
         bind(ChangeUpdateInterface.class).annotatedWith(Move.class).to(MoveChangeUpdate.class);
 
         //Null
-        bind(ChangeServiceInterface.class).annotatedWith(Null.class).to(NullWriter.class);
+        bind(ChangeServiceInterface.class).annotatedWith(Null.class).to(NullService.class);
         bind(ChangeUpdateInterface.class).annotatedWith(Null.class).to(NullChangeUpdate.class);
 
         //File update

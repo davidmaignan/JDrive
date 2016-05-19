@@ -1,10 +1,13 @@
-package drive;
+package drive.services;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.ParentReference;
 import com.google.api.services.drive.model.User;
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+import com.tngtech.java.junit.dataprovider.UseDataProvider;
 import database.repository.ChangeRepository;
 import database.repository.FileRepository;
 import drive.change.model.CustomChange;
@@ -13,22 +16,21 @@ import drive.change.model.ChangeTypes;
 import drive.api.change.ChangeService;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.neo4j.graphdb.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * Created by david on 2016-05-04.
+ * Created by David Maignan <davidmaignan@gmail.com> on 2016-05-04.
  */
+@RunWith(DataProviderRunner.class)
 public class ConverterServiceTest {
     private ChangeRepository spyChangeRepository;
     private FileRepository spyFileRepository;
@@ -40,7 +42,7 @@ public class ConverterServiceTest {
 
     @BeforeClass
     public static void init() {
-        logger = LoggerFactory.getLogger("DatabaseServiceTest");
+        logger = LoggerFactory.getLogger(ConverterServiceTest.class.getSimpleName());
     }
 
     @Before
@@ -68,11 +70,12 @@ public class ConverterServiceTest {
     public void testFileNodeNotExists() throws Exception {
         Node spyNode = mock(Node.class);
         Change change = new Change();
+        String fileId = "fileId";
+        change.setFileId(fileId);
 
         when(spyChangeRepository.getId(spyNode)).thenReturn("mockNodeId");
         when(spyChangeService.get("mockNodeId")).thenReturn(change);
-        when(spyFileRepository.getFileNodeFromChange(spyNode)).thenReturn(null);
-        when(spyChangeRepository.update(change)).thenReturn(true);
+        when(spyFileRepository.getNodeById(fileId)).thenReturn(null);
 
         CustomChange result = service.execute(spyNode);
         assertEquals(ChangeTypes.NULL, result.getType());
@@ -84,13 +87,14 @@ public class ConverterServiceTest {
         Node parentNode = mock(Node.class);
         Node fileNode = mock(Node.class);
         Change change = new Change();
-        change.setFileId("fileId");
+        String fileId = "fileId";
+        change.setFileId(fileId);
         change.setDeleted(true);
 
 
         when(spyChangeRepository.getId(changeNode)).thenReturn("mockNodeId");
         when(spyChangeService.get("mockNodeId")).thenReturn(change);
-        when(spyFileRepository.getFileNodeFromChange(changeNode)).thenReturn(fileNode);
+        when(spyFileRepository.getNodeById(fileId)).thenReturn(fileNode);
         when(spyFileRepository.getParent("fileId")).thenReturn(parentNode);
         when(spyFileRepository.getTitle(fileNode)).thenReturn("fileTitle");
 
@@ -109,11 +113,13 @@ public class ConverterServiceTest {
         Node fileNode = mock(Node.class);
         Node oldParentNode = mock(Node.class);
         Change change = new Change();
+        String fileId = "fileId";
+        change.setFileId(fileId);
         change.setDeleted(false);
 
         when(spyChangeRepository.getId(changeNode)).thenReturn("mockNodeId");
         when(spyChangeService.get("mockNodeId")).thenReturn(change);
-        when(spyFileRepository.getFileNodeFromChange(changeNode)).thenReturn(fileNode);
+        when(spyFileRepository.getNodeById(fileId)).thenReturn(fileNode);
 
 
         String oldParent = "oldParent";
@@ -122,7 +128,6 @@ public class ConverterServiceTest {
 
         File file = createFile(newName, oldParent);
         change.setFile(file);
-        change.setFileId(file.getId());
 
         when(spyFileRepository.getParent(change.getFileId())).thenReturn(oldParentNode);
         when(spyFileRepository.getTitle(fileNode)).thenReturn(oldName);
@@ -135,8 +140,6 @@ public class ConverterServiceTest {
         assertEquals(newName, result.getNewName());
         assertEquals(oldParentNode, result.getOldParentNode());
         assertEquals(oldParentNode, result.getNewParentNode());
-
-
         assertEquals(ChangeTypes.MOVE, result.getType());
     }
 
@@ -147,11 +150,13 @@ public class ConverterServiceTest {
         Node oldParentNode = mock(Node.class);
         Node newParentNode = mock(Node.class);
         Change change = new Change();
+        String fileId = "fileId";
+        change.setFileId(fileId);
         change.setDeleted(false);
 
         when(spyChangeRepository.getId(changeNode)).thenReturn("mockNodeId");
         when(spyChangeService.get("mockNodeId")).thenReturn(change);
-        when(spyFileRepository.getFileNodeFromChange(changeNode)).thenReturn(fileNode);
+        when(spyFileRepository.getNodeById(fileId)).thenReturn(fileNode);
 
 
         String newParent = "newParent";
@@ -160,7 +165,6 @@ public class ConverterServiceTest {
 
         File file = createFile(newName, newParent);
         change.setFile(file);
-        change.setFileId(file.getId());
 
         when(spyFileRepository.getParent(change.getFileId())).thenReturn(oldParentNode);
         when(spyFileRepository.getTitle(fileNode)).thenReturn(oldName);
@@ -184,11 +188,13 @@ public class ConverterServiceTest {
         Node fileNode = mock(Node.class);
         Node oldParentNode = mock(Node.class);
         Change change = new Change();
+        String fileId = "fileId";
+        change.setFileId(fileId);
         change.setDeleted(false);
 
         when(spyChangeRepository.getId(changeNode)).thenReturn("mockNodeId");
         when(spyChangeService.get("mockNodeId")).thenReturn(change);
-        when(spyFileRepository.getFileNodeFromChange(changeNode)).thenReturn(fileNode);
+        when(spyFileRepository.getNodeById(fileId)).thenReturn(fileNode);
 
 
         String oldParent = "oldParent";
@@ -201,7 +207,6 @@ public class ConverterServiceTest {
         labels.setTrashed(true);
         file.setLabels(labels);
         change.setFile(file);
-        change.setFileId(file.getId());
 
         when(spyFileRepository.getParent(change.getFileId())).thenReturn(oldParentNode);
         when(spyFileRepository.getTitle(fileNode)).thenReturn(oldName);
@@ -221,12 +226,16 @@ public class ConverterServiceTest {
     }
 
     @Test(timeout = 10000)
-    @Ignore
     public void testUpdateContent(){
         Node changeNode = mock(Node.class);
         Node fileNode = mock(Node.class);
         Node parentNode = mock(Node.class);
+
+        String parentName = "parent";
+        String fileName = "fileId";
+
         Change change = new Change();
+        change.setFileId(fileName);
         change.setDeleted(false);
 
         Long changeVersion = new Long(100l);
@@ -234,36 +243,53 @@ public class ConverterServiceTest {
 
         when(spyChangeRepository.getId(changeNode)).thenReturn("mockNodeId");
         when(spyChangeService.get("mockNodeId")).thenReturn(change);
-        when(spyFileRepository.getFileNodeFromChange(changeNode)).thenReturn(fileNode);
+        when(spyFileRepository.getNodeById(fileName)).thenReturn(fileNode);
 
-        String newParent = "oldParent";
-        String oldParent = "oldParent";
-        String fileName = "mockFile";
 
-        File file = createFile(fileName, newParent);
+        File file = createFile(fileName, parentName);
         file.setMimeType("image/png");
         change.setFile(file);
-        change.setFileId(file.getId());
 
-        when(spyFileRepository.getParent(change.getFileId())).thenReturn(parentNode);
-        when(parentNode.toString()).thenReturn(oldParent);
-
-        String oldParentPath = "/mock/oldparent";
-        when(spyFileRepository.getNodeAbsolutePath(oldParent)).thenReturn(oldParentPath);
-
+        when(spyFileRepository.getNodeById(parentName)).thenReturn(parentNode);
+        when(spyFileRepository.getParent(fileName)).thenReturn(parentNode);
         when(spyFileRepository.getTitle(fileNode)).thenReturn(fileName);
 
         CustomChange result = service.execute(changeNode);
 
-//        assertEquals(oldParentPath, result.getOldParentPath());
-//        assertEquals(oldParentPath, result.getNewParentPath());
-//        assertEquals(oldParent, result.getOldParent());
-//        assertEquals(newParent, result.getNewParent());
-//        assertEquals(fileName, result.getOldName());
-//        assertEquals(fileName, result.getNewName());
-//        assertEquals(oldParentPath+ "/" + fileName, result.getNewPath());
-//        assertEquals(oldParentPath+ "/" + fileName, result.getOldPath());
         assertEquals(ChangeTypes.FILE_UPDATE, result.getType());
+    }
+
+    @DataProvider
+    public static Object[][] dataProviderGetTrashed(){
+        return new Object[][]{
+                {null, null, null, null, false},
+                {new File(), null, null, null, false},
+                {new File(), false, null, null, false},
+                {new File(), false, new File.Labels(), false, false},
+                {new File(), true, null, false, true},
+                {new File(), false, new File.Labels(), true, true},
+                {new File(), true, new File.Labels(), true, true}
+        };
+    }
+
+    @Test
+    @UseDataProvider("dataProviderGetTrashed")
+    public void testGetTrashed(File file, Boolean explicitely,
+                               File.Labels labels, Boolean trashed,
+                               boolean expected){
+        Change change = new Change();
+
+        if(file != null) {
+            file.setExplicitlyTrashed(explicitely);
+            if(labels != null){
+                labels.setTrashed(trashed);
+            }
+            file.setLabels(labels);
+        }
+
+        change.setFile(file);
+
+        assertEquals(expected, service.getTrashed(change));
     }
 
     private File createFile(String title, String parent){
@@ -312,15 +338,5 @@ public class ConverterServiceTest {
         owner.setIsAuthenticatedUser(isAuthenticatedUser);
 
         return owner;
-    }
-
-    @Test(timeout = 10000)
-    public void testFileNewContent(){
-
-    }
-
-    @Test(timeout = 10000)
-    public void testFileDriveMimeType(){
-
     }
 }
