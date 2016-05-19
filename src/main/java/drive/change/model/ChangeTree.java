@@ -37,9 +37,9 @@ public class ChangeTree {
             }
 
             // @todo investiqge if this condition is necessary
-            if(validChange.isTrashed()) {
-                trashedNode = fileRepository.getTrashedList();
-            }
+//            if(validChange.isTrashed()) {
+//                trashedNode = fileRepository.getTrashedList();
+//            }
 
             if(result){
                 //If trashed files get untrashed and is also moved

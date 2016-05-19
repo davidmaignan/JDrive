@@ -60,18 +60,4 @@ public class ValidChange {
     public boolean isNewFile(){
         return change.getFile() != null && fileNode == null;
     }
-
-    /**
-     * Get trashed label value if available
-     *
-     * @return boolean
-     */
-    public boolean isTrashed() {
-        return (change.getFile() != null
-                && change.getFile().getExplicitlyTrashed() != null
-                && change.getFile().getExplicitlyTrashed())
-                || (change.getFile() != null
-                && change.getFile().getLabels() != null
-                && change.getFile().getLabels().getTrashed());
-    }
 }

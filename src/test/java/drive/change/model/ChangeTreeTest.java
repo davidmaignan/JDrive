@@ -59,7 +59,6 @@ public class ChangeTreeTest {
         when(changeList.isEmpty()).thenReturn(false, true);
         when(changeList.remove(0)).thenReturn(validChange);
         when(validChange.isNewFile()).thenReturn(false);
-        when(validChange.isTrashed()).thenReturn(false);
         when(validChange.getFileNode()).thenReturn(fileNode);
         when(trashedNode.contains(fileNode)).thenReturn(false);
         when(validChange.getChange()).thenReturn(change);
@@ -94,8 +93,6 @@ public class ChangeTreeTest {
         when(fileRepository.getNodeById("parentId")).thenReturn(parentNode);
         when(fileRepository.createNode(file)).thenReturn(newFileNode);
         when(fileRepository.createParentRelation(newFileNode, parentNode)).thenReturn(true);
-
-        when(validChange.isTrashed()).thenReturn(false);
         when(validChange.getFileNode()).thenReturn(null);
         when(trashedNode.contains(newFileNode)).thenReturn(false);
         when(validChange.getChange()).thenReturn(change);
@@ -123,8 +120,6 @@ public class ChangeTreeTest {
         when(changeList.isEmpty()).thenReturn(false, true);
         when(changeList.remove(0)).thenReturn(validChange);
         when(validChange.isNewFile()).thenReturn(false);
-
-        when(validChange.isTrashed()).thenReturn(true);
         when(validChange.getFileNode()).thenReturn(fileNode);
         when(trashedNode.contains(fileNode)).thenReturn(true);
 
