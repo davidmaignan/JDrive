@@ -5,6 +5,7 @@ import drive.change.model.CustomChange;
 import drive.change.modules.ChangeModule;
 import drive.change.services.apply.TrashService;
 import drive.change.services.update.TrashChangeUpdate;
+import io.filesystem.modules.FileSystemModule;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -37,7 +38,9 @@ public class TrashChangeTest {
 
     @Test
     public void testAnnotation(){
-        TrashChange service = Guice.createInjector(new ChangeModule()).getInstance(TrashChange.class);
+        TrashChange service = Guice.createInjector(
+                new ChangeModule(),
+                new FileSystemModule()).getInstance(TrashChange.class);
         assertTrue(service.getService() instanceof TrashService);
         assertTrue(service.getUpdate() instanceof TrashChangeUpdate);
     }

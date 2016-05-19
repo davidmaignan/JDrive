@@ -5,6 +5,7 @@ import drive.change.model.CustomChange;
 import drive.change.modules.ChangeModule;
 import drive.change.services.apply.FileService;
 import drive.change.services.update.FileChangeUpdate;
+import io.filesystem.modules.FileSystemModule;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -37,7 +38,9 @@ public class FileChangeTest {
 
     @Test
     public void testAnnotation(){
-        FileChange service = Guice.createInjector(new ChangeModule()).getInstance(FileChange.class);
+        FileChange service = Guice.createInjector(
+                new ChangeModule(),
+                new FileSystemModule()).getInstance(FileChange.class);
         assertTrue(service.getService() instanceof FileService);
         assertTrue(service.getUpdate() instanceof FileChangeUpdate);
     }

@@ -1,13 +1,16 @@
 package drive.change.services;
 
 import com.google.inject.Guice;
+import com.google.inject.util.Modules;
 import drive.change.model.CustomChange;
 import drive.change.modules.ChangeModule;
 import drive.change.services.apply.FolderService;
 import drive.change.services.update.FolderChangeUpdate;
+import io.filesystem.modules.FileSystemModule;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.neo4j.graphdb.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +24,7 @@ import static org.mockito.Mockito.*;
 public class FolderChangeTest {
     private static Logger logger = LoggerFactory.getLogger(FolderChange.class.getSimpleName());
 
-    FolderChange FolderChange;
+    FolderChange folderChange;
     FolderService service;
     FolderChangeUpdate update;
     CustomChange structure;
@@ -31,20 +34,22 @@ public class FolderChangeTest {
         service = mock(FolderService.class);
         update = mock(FolderChangeUpdate.class);
 
-        FolderChange = new FolderChange(service, update);
+        folderChange = new FolderChange(service, update);
         structure = mock(CustomChange.class);
-        FolderChange.setStructure(structure);
+        folderChange.setStructure(structure);
     }
 
     @Test
     public void testAnnotation(){
-        FolderChange service = Guice.createInjector(new ChangeModule()).getInstance(FolderChange.class);
+        FolderChange service = Guice.createInjector(
+                new ChangeModule(),
+                new FileSystemModule()
+        ).getInstance(FolderChange.class);
         assertTrue(service.getService() instanceof FolderService);
         assertTrue(service.getUpdate() instanceof FolderChangeUpdate);
     }
 
     @Test
-    @Ignore
     public void executeSuccess() throws Exception {
         boolean resultService = true;
         boolean resultUpdate = true;
@@ -52,23 +57,20 @@ public class FolderChangeTest {
         when(service.execute()).thenReturn(resultService);
         when(update.execute()).thenReturn(resultUpdate);
 
-        assertTrue(FolderChange.execute());
+        assertTrue(folderChange.execute());
     }
 
     @Test
-    @Ignore
     public void executeServiceFails() throws Exception {
         boolean resultService = false;
 
         when(service.execute()).thenReturn(resultService);
 
-        assertFalse(FolderChange.execute());
+        assertFalse(folderChange.execute());
         verify(update, never()).execute();
     }
 
     @Test
-
-    @Ignore
     public void executeUpdateFails() throws Exception {
         boolean resultService = true;
         boolean resultUpdate = false;
@@ -76,7 +78,7 @@ public class FolderChangeTest {
         when(service.execute()).thenReturn(resultService);
         when(update.execute()).thenReturn(resultUpdate);
 
-        assertFalse(FolderChange.execute());
+        assertFalse(folderChange.execute());
     }
 
 }

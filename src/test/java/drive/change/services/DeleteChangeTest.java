@@ -7,6 +7,7 @@ import drive.change.services.apply.DeleteService;
 import drive.change.services.apply.MoveService;
 import drive.change.services.update.DeleteChangeUpdate;
 import drive.change.services.update.MoveChangeUpdate;
+import io.filesystem.modules.FileSystemModule;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -39,7 +40,9 @@ public class DeleteChangeTest {
 
     @Test
     public void testAnnotation(){
-        DeleteChange service = Guice.createInjector(new ChangeModule()).getInstance(DeleteChange.class);
+        DeleteChange service = Guice.createInjector(
+                new ChangeModule(),
+                new FileSystemModule()).getInstance(DeleteChange.class);
         assertTrue(service.getService() instanceof DeleteService);
         assertTrue(service.getUpdate() instanceof DeleteChangeUpdate);
     }

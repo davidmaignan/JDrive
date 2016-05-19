@@ -47,7 +47,7 @@ public class Document implements WriterInterface {
 
     @Override
     public void setFileId(String fileId) {
-        this.id = fileId;
+
     }
 
     private String setContent() {
@@ -60,12 +60,5 @@ public class Document implements WriterInterface {
                 "",
                 this.id
         );
-    }
-
-
-
-    @Override
-    public boolean delete(String path) {
-        return false;
     }
 }

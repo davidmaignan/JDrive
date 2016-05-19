@@ -233,13 +233,6 @@ public class JDriveMain {
             if (result) {
                 result = fileRepository.markAsProcessed(node);
             }
-
-            if(result){
-                logger.error("Success to write: " + path);
-            } else {
-                logger.error("Failed to write: " + path);
-                writer.delete(path);
-            }
         }
     }
 

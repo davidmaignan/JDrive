@@ -5,6 +5,7 @@ import drive.change.model.CustomChange;
 import drive.change.modules.ChangeModule;
 import drive.change.services.apply.NullService;
 import drive.change.services.update.NullChangeUpdate;
+import io.filesystem.modules.FileSystemModule;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -37,7 +38,9 @@ public class NullChangeTest {
 
     @Test
     public void testAnnotation(){
-        NullChange service = Guice.createInjector(new ChangeModule()).getInstance(NullChange.class);
+        NullChange service = Guice.createInjector(
+                new ChangeModule(),
+                new FileSystemModule()).getInstance(NullChange.class);
         assertTrue(service.getService() instanceof NullService);
         assertTrue(service.getUpdate() instanceof NullChangeUpdate);
     }

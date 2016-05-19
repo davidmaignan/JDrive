@@ -5,6 +5,7 @@ import drive.change.model.CustomChange;
 import drive.change.modules.ChangeModule;
 import drive.change.services.apply.DocumentService;
 import drive.change.services.update.DocumentChangeUpdate;
+import io.filesystem.modules.FileSystemModule;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -37,7 +38,9 @@ public class DocumentChangeTest {
 
     @Test
     public void testAnnotation(){
-        DocumentChange service = Guice.createInjector(new ChangeModule()).getInstance(DocumentChange.class);
+        DocumentChange service = Guice.createInjector(
+                new ChangeModule(),
+                new FileSystemModule()).getInstance(DocumentChange.class);
         assertTrue(service.getService() instanceof DocumentService);
         assertTrue(service.getUpdate() instanceof DocumentChangeUpdate);
     }
