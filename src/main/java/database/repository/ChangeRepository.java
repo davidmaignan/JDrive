@@ -359,7 +359,8 @@ public class ChangeRepository extends DatabaseService {
         changeNode.setProperty(Fields.DELETED, change.getDeleted());
         changeNode.setProperty(Fields.PROCESSED, false);
         changeNode.setProperty(Fields.TRASHED, false);
-        changeNode.setProperty(Fields.VERSION, change.getFile().getVersion());
+        if(change.getFile() != null)
+            changeNode.setProperty(Fields.VERSION, change.getFile().getVersion());
 
         return changeNode;
     }
