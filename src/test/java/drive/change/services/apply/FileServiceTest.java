@@ -6,11 +6,6 @@ import io.File;
 import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.graphdb.Node;
-import org.junit.Before;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
@@ -57,7 +52,7 @@ public class FileServiceTest {
         when(structure.getNewName()).thenReturn(newName);
         when(file.write("test/newName")).thenReturn(false);
 
-        assertTrue(service.execute());
+        assertFalse(service.execute());
     }
 
 }
