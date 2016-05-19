@@ -40,6 +40,18 @@ public class ValidChangeTest {
     }
 
     @Test
+    public void testGetters() throws Exception {
+        Change change = this.getChange(true);
+
+        when(fileRepository.getNodeById("file1")).thenReturn(fileNode);
+
+        validChange.execute(change);
+
+        assertEquals(change, validChange.getChange());
+        assertEquals(fileNode, validChange.getFileNode());
+    }
+
+    @Test
     public void testValidDeleteFileThatExists() throws Exception {
         Change change = this.getChange(true);
 
