@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
  * David Maignan <davidmaignan@gmail.com>
  */
 public class DeleteService implements ChangeServiceInterface {
-    private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
     private CustomChange structure;
 
     @Override
