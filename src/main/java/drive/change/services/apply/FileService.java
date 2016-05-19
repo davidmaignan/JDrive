@@ -16,10 +16,12 @@ public class FileService implements ChangeServiceInterface {
     private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
     private CustomChange structure;
     private FileRepository fileRepository;
+    private File file;
 
     @Inject
-    public FileService(FileRepository fileRepository){
+    public FileService(FileRepository fileRepository, File file){
         this.fileRepository = fileRepository;
+        this.file = file;
     }
 
     @Override
@@ -30,8 +32,6 @@ public class FileService implements ChangeServiceInterface {
 
     @Override
     public boolean execute() {
-        File file = Guice.createInjector(new DatabaseModule()).getInstance(File.class);
-
         file.setFileId(fileRepository.getFileId(this.structure.getFileNode()));
 
         return file.write(getNewPath());
