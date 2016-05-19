@@ -3,6 +3,7 @@ package drive.change.services.apply;
 import com.google.inject.Inject;
 import database.repository.FileRepository;
 import drive.change.model.CustomChange;
+import io.Move;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,13 +19,14 @@ import java.nio.file.StandardCopyOption;
  * David Maignan <davidmaignan@gmail.com>
  */
 public class MoveService implements ChangeServiceInterface {
-    private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
     private CustomChange structure;
     private FileRepository fileRepository;
+    private Move move;
 
     @Inject
-    public MoveService(FileRepository fileRepository){
+    public MoveService(FileRepository fileRepository, Move move){
         this.fileRepository = fileRepository;
+        this.move = move;
     }
 
     @Override
@@ -34,20 +36,7 @@ public class MoveService implements ChangeServiceInterface {
 
     @Override
     public boolean execute() {
-        try {
-            Path oldPath = FileSystems.getDefault().getPath(getOldPath());
-            Path newPath = FileSystems.getDefault().getPath(getNewPath());
-
-            Files.move(oldPath, newPath, StandardCopyOption.REPLACE_EXISTING);
-            return true;
-
-        }catch (IOException exception){
-            logger.error(exception.getMessage());
-        } catch (Exception exception){
-            logger.error(exception.getMessage());
-        }
-
-        return false;
+        return move.write(getOldPath(), getNewPath());
     }
 
     private String getOldPath(){

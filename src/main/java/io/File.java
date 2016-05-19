@@ -64,6 +64,11 @@ public class File implements WriterInterface {
         return false;
     }
 
+    @Override
+    public boolean write(String oldPath, String newPath) {
+        return false;
+    }
+
     private InputStream downloadFile(DriveService service, String id) throws IOException {
         try {
             return driveService.getDrive().files().get(id).executeMediaAsInputStream();

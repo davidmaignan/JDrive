@@ -42,6 +42,11 @@ public class Folder implements WriterInterface{
     }
 
     @Override
+    public boolean write(String oldPath, String newPath) {
+        return false;
+    }
+
+    @Override
     public void setFileId(String fileId) {
         this.fileId = fileId;
     }
