@@ -67,7 +67,7 @@ public class FolderChangeTest {
     }
 
     @Test
-    
+
     @Ignore
     public void executeUpdateFails() throws Exception {
         boolean resultService = true;
