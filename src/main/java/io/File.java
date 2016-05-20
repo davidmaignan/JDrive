@@ -3,14 +3,19 @@ package io;
 import com.google.inject.Inject;
 import database.repository.FileRepository;
 import drive.api.DriveService;
+import io.filesystem.FileSystemInterface;
+import io.filesystem.annotations.Real;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.nio.*;
+import java.nio.file.FileSystem;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.APPEND;
 
 /**
  * Write a file from a treeNode
@@ -19,14 +24,14 @@ import java.io.OutputStream;
  */
 public class File implements WriterInterface {
     private static Logger logger = LoggerFactory.getLogger(File.class.getSimpleName());
-    private final DriveService driveService;
-    private final FileRepository fileRepository;
+    private DriveService driveService;
+    private FileSystemInterface fileSystem;
     private String fileId;
 
     @Inject
-    public File(DriveService driveService, FileRepository fileRepository) {
+    public File(@Real FileSystemInterface fileSystem, DriveService driveService) {
+        this.fileSystem = fileSystem;
         this.driveService = driveService;
-        this.fileRepository = fileRepository;
     }
     @Override
     public void setFileId(String fileId) {
@@ -34,31 +39,27 @@ public class File implements WriterInterface {
     }
 
     @Override
-    public boolean write(String path) {
-        try {
-            FileOutputStream fos      = new FileOutputStream(path);
+    public boolean write(String pathString) {
+        Path path = fileSystem.getPath(pathString);
+        try{
             InputStream inputStream   = this.downloadFile(driveService, fileId);
-            OutputStream outputStream = new FileOutputStream(path);
+            OutputStream outputStream = new BufferedOutputStream(
+                    Files.newOutputStream(path, CREATE, APPEND));
 
             if (inputStream == null) {
                 return false;
             }
 
-            int numberOfBytesCopied = 0;
             int r;
 
             while ((r = inputStream.read()) != -1) {
                 outputStream.write((byte) r);
-                numberOfBytesCopied++;
             }
-
-            inputStream.close();
-            outputStream.close();
 
             return true;
 
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException exception){
+            exception.printStackTrace();
         }
 
         return false;
