@@ -32,8 +32,8 @@ public class Move implements WriterInterface {
     @Override
     public boolean write(String oldPathString, String newPathString) {
         try {
-            Path oldPath = fileSystem.getPath(oldPathString);
-            Path newPath = fileSystem.getPath(newPathString);
+            Path oldPath = fileSystem.getRootPath().resolve(oldPathString);
+            Path newPath = fileSystem.getRootPath().resolve(newPathString);
 
             Files.move(oldPath, newPath, StandardCopyOption.REPLACE_EXISTING);
             return true;
@@ -50,5 +50,10 @@ public class Move implements WriterInterface {
     @Override
     public void setFileId(String fileId) {
 
+    }
+
+    @Override
+    public FileSystemInterface getFileSystem() {
+        return fileSystem;
     }
 }

@@ -8,9 +8,6 @@ import drive.change.services.update.FileChangeUpdate;
 import io.filesystem.modules.FileSystemModule;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
@@ -19,8 +16,6 @@ import static org.mockito.Mockito.*;
  * Created by david on 2016-05-18.
  */
 public class FileChangeTest {
-    private static Logger logger = LoggerFactory.getLogger(FileChange.class.getSimpleName());
-
     FileChange FileChange;
     FileService service;
     FileChangeUpdate update;

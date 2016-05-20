@@ -39,12 +39,6 @@ import static org.junit.Assert.*;
 public class FileRepositoryTest {
     protected GraphDatabaseService graphDb;
     private FileRepository repository;
-    private static Logger logger;
-
-    @BeforeClass
-    public static void init() {
-        logger = LoggerFactory.getLogger("DatabaseServiceTest");
-    }
 
     @Before
     public void setUp() throws Exception {
@@ -879,8 +873,6 @@ public class FileRepositoryTest {
             boolean result = repository.createParentRelation(fileNode, folderNode);
 
             assertTrue(result);
-            logger.debug(result + "");
-
 
             List<Relationship> incomingRelationshipList = getResultAsList(
                     folderNode.getRelationships(RelTypes.PARENT, Direction.INCOMING)

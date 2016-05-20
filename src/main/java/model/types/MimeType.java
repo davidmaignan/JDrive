@@ -39,6 +39,7 @@ public class MimeType {
         set.add(PRESENTATION);
         set.add(SCRIPTS);
         set.add(SPREADSHIT);
+        set.add(SITES);
         set.add(UNKNOW);
         set.add(VIDEO);
         return java.util.Collections.unmodifiableSet(set);

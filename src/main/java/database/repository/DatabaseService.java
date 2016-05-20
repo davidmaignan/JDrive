@@ -199,7 +199,7 @@ public class DatabaseService implements DatabaseServiceInterface {
             Result result = graphDB.execute(String.format(query, node.getProperty(Fields.ID).toString()));
 
             if ( ! result.hasNext()) {
-                return configuration.getRootFolder();
+                return "";
             }
 
             Map<String, Object> row = result.next();
@@ -220,10 +220,7 @@ public class DatabaseService implements DatabaseServiceInterface {
             logger.error(exception.getMessage());
         }
 
-        return String.format("%s%s",
-                configuration.getRootFolder(),
-                pathBuilder.substring(1).toString()
-        );
+        return pathBuilder.substring(2).toString();
     }
 
     //@todo do not return null - throw an exception instead

@@ -13,14 +13,12 @@ import database.repository.FileRepository;
 import drive.change.model.CustomChange;
 import drive.change.services.ConverterService;
 import drive.change.model.ChangeTypes;
-import drive.api.change.ChangeService;
+import drive.api.ChangeService;
+import model.types.MimeType;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.neo4j.graphdb.Node;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -37,13 +35,6 @@ public class ConverterServiceTest {
     private ChangeService spyChangeService;
 
     private ConverterService service;
-
-    private static Logger logger;
-
-    @BeforeClass
-    public static void init() {
-        logger = LoggerFactory.getLogger(ConverterServiceTest.class.getSimpleName());
-    }
 
     @Before
     public void setUp() throws Exception {
@@ -105,6 +96,10 @@ public class ConverterServiceTest {
         assertEquals("fileTitle", result.getOldName());
         assertEquals(parentNode, result.getNewParentNode());
         assertEquals(parentNode, result.getOldParentNode());
+        assertTrue(result.getDeleted());
+        assertEquals(change, result.getChange());
+        assertEquals(fileNode, result.getFileNode());
+        assertEquals(changeNode, result.getChangeNode());
     }
 
     @Test(timeout = 10000)
@@ -257,6 +252,96 @@ public class ConverterServiceTest {
         CustomChange result = service.execute(changeNode);
 
         assertEquals(ChangeTypes.FILE_UPDATE, result.getType());
+    }
+
+    @Test(timeout = 10000)
+    public void testUpdateFolderMimeType(){
+        Node changeNode = mock(Node.class);
+        Node fileNode = mock(Node.class);
+        Node parentNode = mock(Node.class);
+
+        String parentName = "parent";
+        String fileName = "fileId";
+
+        Change change = new Change();
+        change.setFileId(fileName);
+        change.setDeleted(false);
+
+        Long changeVersion = new Long(100l);
+        Long fileVersion = new Long(101l);
+
+        when(spyChangeRepository.getId(changeNode)).thenReturn("mockNodeId");
+        when(spyChangeService.get("mockNodeId")).thenReturn(change);
+        when(spyFileRepository.getNodeById(fileName)).thenReturn(fileNode);
+
+
+        File file = createFile(fileName, parentName);
+        file.setMimeType(MimeType.FOLDER);
+        change.setFile(file);
+
+        when(spyFileRepository.getNodeById(parentName)).thenReturn(parentNode);
+        when(spyFileRepository.getParent(fileName)).thenReturn(parentNode);
+        when(spyFileRepository.getTitle(fileNode)).thenReturn(fileName);
+
+        CustomChange result = service.execute(changeNode);
+
+        assertEquals(ChangeTypes.FOLDER_UPDATE, result.getType());
+    }
+
+    @DataProvider
+    public static Object[][] dataProviderMimeTypes(){
+        return new Object[][]{
+                {MimeType.AUDIO, true},
+                {MimeType.DOCUMENT, true},
+                {MimeType.DRAWING, true},
+                {MimeType.FILE, true},
+                {MimeType.FOLDER, false},
+                {MimeType.FORM, true},
+                {MimeType.FUSIONTABLE, true},
+                {MimeType.PHOTO, true},
+                {MimeType.PRESENTATION, true},
+                {MimeType.SCRIPTS, true},
+                {MimeType.SITES, true},
+                {MimeType.SPREADSHIT, true},
+                {MimeType.UNKNOW, true},
+                {MimeType.VIDEO, true},
+
+        };
+    }
+
+    @Test(timeout = 10000)
+    @UseDataProvider("dataProviderMimeTypes")
+    public void testUpdateDocumentMimeType(String mimeType, boolean expected){
+        Node changeNode = mock(Node.class);
+        Node fileNode = mock(Node.class);
+        Node parentNode = mock(Node.class);
+
+        String parentName = "parent";
+        String fileName = "fileId";
+
+        Change change = new Change();
+        change.setFileId(fileName);
+        change.setDeleted(false);
+
+        Long changeVersion = new Long(100l);
+        Long fileVersion = new Long(101l);
+
+        when(spyChangeRepository.getId(changeNode)).thenReturn("mockNodeId");
+        when(spyChangeService.get("mockNodeId")).thenReturn(change);
+        when(spyFileRepository.getNodeById(fileName)).thenReturn(fileNode);
+
+
+        File file = createFile(fileName, parentName);
+        file.setMimeType(mimeType);
+        change.setFile(file);
+
+        when(spyFileRepository.getNodeById(parentName)).thenReturn(parentNode);
+        when(spyFileRepository.getParent(fileName)).thenReturn(parentNode);
+        when(spyFileRepository.getTitle(fileNode)).thenReturn(fileName);
+
+        CustomChange result = service.execute(changeNode);
+
+        assertEquals(expected, result.getType().equals(ChangeTypes.DOCUMENT));
     }
 
     @DataProvider

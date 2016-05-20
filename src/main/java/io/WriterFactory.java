@@ -15,9 +15,9 @@ public class WriterFactory {
         if(mimeType.equals(MimeType.FOLDER)) {
             return Guice.createInjector(new FileSystemModule()).getInstance(Folder.class);
         } else if (! MimeType.all().contains(mimeType)) {
-            return Guice.createInjector(new DatabaseModule()).getInstance(File.class);
+            return Guice.createInjector(new FileSystemModule()).getInstance(File.class);
         }
 
-        return Guice.createInjector(new DatabaseModule()).getInstance(Document.class);
+        return Guice.createInjector(new FileSystemModule()).getInstance(Document.class);
     }
 }

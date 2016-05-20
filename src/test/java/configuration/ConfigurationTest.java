@@ -1,6 +1,10 @@
 package configuration;
 
+import org.junit.Before;
 import org.junit.Test;
+
+import java.io.IOException;
+
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -9,10 +13,11 @@ import static org.junit.Assert.assertEquals;
  * David Maignan <davidmaignan@gmail.com>
  */
 public class ConfigurationTest {
+    Configuration configConfiguration;
 
-    @Test(timeout = 1000)
-    public void testFileExists() throws Exception{
-        Configuration configConfiguration = new Configuration();
+    @Before
+    public void setUp() throws IOException{
+        configConfiguration = new Configuration();
     }
 
     @Test(timeout = 1000)

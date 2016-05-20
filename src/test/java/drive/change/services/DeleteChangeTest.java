@@ -4,14 +4,10 @@ import com.google.inject.Guice;
 import drive.change.model.CustomChange;
 import drive.change.modules.ChangeModule;
 import drive.change.services.apply.DeleteService;
-import drive.change.services.apply.MoveService;
 import drive.change.services.update.DeleteChangeUpdate;
-import drive.change.services.update.MoveChangeUpdate;
 import io.filesystem.modules.FileSystemModule;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -21,8 +17,6 @@ import static org.mockito.Mockito.*;
  * Created by david on 2016-05-18.
  */
 public class DeleteChangeTest {
-    private static Logger logger = LoggerFactory.getLogger(MoveChange.class.getSimpleName());
-
     DeleteChange deleteChange;
     DeleteService service;
     DeleteChangeUpdate update;

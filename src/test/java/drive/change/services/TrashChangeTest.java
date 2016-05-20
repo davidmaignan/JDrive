@@ -8,8 +8,6 @@ import drive.change.services.update.TrashChangeUpdate;
 import io.filesystem.modules.FileSystemModule;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -19,8 +17,6 @@ import static org.mockito.Mockito.*;
  * Created by david on 2016-05-18.
  */
 public class TrashChangeTest {
-    private static Logger logger = LoggerFactory.getLogger(TrashChange.class.getSimpleName());
-
     TrashChange TrashChange;
     TrashService service;
     TrashChangeUpdate update;
@@ -76,5 +72,4 @@ public class TrashChangeTest {
 
         assertFalse(TrashChange.execute());
     }
-
 }

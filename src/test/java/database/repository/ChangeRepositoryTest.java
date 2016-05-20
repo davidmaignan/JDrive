@@ -33,15 +33,8 @@ import static org.junit.Assert.*;
  * Created by David Maignan <davidmaignan@gmail.com> on 2015-12-30.
  */
 public class ChangeRepositoryTest {
-
-    protected GraphDatabaseService graphDb;
+    private GraphDatabaseService graphDb;
     private ChangeRepository repository;
-    private static Logger logger;
-
-    @BeforeClass
-    public static void init() {
-        logger = LoggerFactory.getLogger("DatabaseServiceTest");
-    }
 
     @Before
     public void setUp() throws Exception {

@@ -1,48 +1,53 @@
 package io;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import database.repository.FileRepository;
 import drive.api.DriveService;
 import drive.api.FileService;
+import io.filesystem.FileSystemInterface;
+import io.filesystem.annotations.Real;
 import org.neo4j.graphdb.Node;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
+
+import static java.nio.file.StandardOpenOption.*;
 
 /**
  * JDrive
  * Created by David Maignan <davidmaignan@gmail.com> on 15-07-19.
  */
 public class Document implements WriterInterface {
-    private Node node;
+    private static Logger logger = LoggerFactory.getLogger(Document.class.getSimpleName());
+    private FileSystemInterface fileSystem;
+    private Path path;
     private String id;
-    private File file;
-    private PrintWriter output;
-
-    private final DriveService driveService;
-    private final FileService fileService;
-    private final FileRepository fileRepository;
+    private String content;
 
     @Inject
-    public Document(DriveService driveService, FileRepository fileRepository, FileService fileService) {
-        this.driveService = driveService;
-        this.fileRepository = fileRepository;
-        this.fileService = fileService;
+    public Document(@Real FileSystemInterface fileSystem) {
+        this.fileSystem = fileSystem;
     }
 
     @Override
-    public boolean write(String path) {
+    public boolean write(String pathString) {
+        path = this.fileSystem.getRootPath().resolve(pathString);
+
+        content = setContent();
+
         try{
-            file      = new File(path);
-            output    = new PrintWriter(file);
-            output.write(this.setContent());
-            output.close();
-        } catch (IOException e) {
-            return false;
+            Files.write(path, ImmutableList.of(content), StandardCharsets.UTF_8);
+            return true;
+        } catch (IOException exception) {
+            logger.error(exception.getMessage());
         }
 
-        return true;
+
+        return false;
     }
 
     @Override
@@ -55,15 +60,22 @@ public class Document implements WriterInterface {
 
     }
 
+    public FileSystemInterface getFileSystem(){
+        return fileSystem;
+    }
+
     private String setContent() {
-        return String.format("" +
-                "{\"url\": \"https://docs.google.com/open?id=%s\", " +
+        return String.format("{\"url\": \"https://docs.google.com/open?id=%s\", " +
                 "\"doc_id\": \"%s\", \"email\": " +
-                "\"%s\", \"resource_id\": \"document:%s\"})",
+                "\"%s\", \"resource_id\": \"document:%s\"}",
                 this.id,
                 this.id,
                 "",
                 this.id
         );
+    }
+
+    public String getContent(){
+        return content;
     }
 }

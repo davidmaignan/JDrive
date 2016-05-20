@@ -24,17 +24,9 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 public class ChangeTreeTest {
-    protected GraphDatabaseService graphDb;
     private ChangeRepository changeRepository;
     private FileRepository fileRepository;
-    private static Logger logger;
-
     private ChangeTree changeTree;
-
-    @BeforeClass
-    public static void init() {
-        logger = LoggerFactory.getLogger(ChangeTreeTest.class);
-    }
 
     @Before
     public void setUp() throws IOException {

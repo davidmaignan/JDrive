@@ -29,12 +29,6 @@ import static org.junit.Assert.*;
 public class DatabaseServiceTest {
     protected GraphDatabaseService graphDb;
     private DatabaseService dbService;
-    private static Logger logger;
-
-    @BeforeClass
-    public static void init() {
-        logger = LoggerFactory.getLogger("DatabaseServiceTest");
-    }
 
     @Before
     public void setUp() throws Exception {
@@ -183,12 +177,13 @@ public class DatabaseServiceTest {
         dbService.save(this.getRootNode());
 
         try (Transaction tx = graphDb.beginTx()) {
-
+            Node node = dbService.getNodeById("folder1");
             Node node1 = dbService.getNodeById("file1");
             Node node2 = dbService.getNodeById("file3");
 
-            assertEquals("/Test/Path/folder1/file1", dbService.getNodeAbsolutePath(node1));
-            assertEquals("/Test/Path/folder2/folder3/file3", dbService.getNodeAbsolutePath(node2));
+            assertEquals("folder1", dbService.getNodeAbsolutePath(node));
+            assertEquals("folder1/file1", dbService.getNodeAbsolutePath(node1));
+            assertEquals("folder2/folder3/file3", dbService.getNodeAbsolutePath(node2));
         } catch (Exception exception) {
 
         }
@@ -200,7 +195,7 @@ public class DatabaseServiceTest {
 
         try (Transaction tx = graphDb.beginTx()) {
             Node node = dbService.getNodeById("root");
-            assertEquals("/Test/Path", dbService.getNodeAbsolutePath(node));
+            assertEquals("", dbService.getNodeAbsolutePath(node));
         } catch (Exception exception) {
 
         }

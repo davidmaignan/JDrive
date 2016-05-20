@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import static org.junit.Assert.*;
 
 public class TreeBuilderTest {
-
     private TreeBuilder treeBuilder;
 
     @Before
