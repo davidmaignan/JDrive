@@ -24,12 +24,9 @@ import static org.mockito.Mockito.when;
  * Created by David Maignan <davidmaignan@gmail.com> on 2016-05-17.
  */
 public class ValidChangeTest {
-
-    private static Logger logger = LoggerFactory.getLogger(ValidChangeTest.class);
-
-    ValidChange validChange;
-    FileRepository fileRepository;
-    Node fileNode;
+    private ValidChange validChange;
+    private FileRepository fileRepository;
+    private Node fileNode;
 
     @Before
     public void setUp(){

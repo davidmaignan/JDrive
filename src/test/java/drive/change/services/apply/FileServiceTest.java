@@ -18,7 +18,6 @@ public class FileServiceTest {
     private FileRepository fileRepository;
     private File file;
     private CustomChange structure;
-    private Node fileNode;
     private Node newParentNode;
     private String newName;
 
@@ -27,7 +26,6 @@ public class FileServiceTest {
         fileRepository = mock(FileRepository.class);
         file = mock(File.class);
         structure = mock(CustomChange.class);
-        fileNode = mock(Node.class);
         newParentNode = mock(Node.class);
         newName = "newName";
 

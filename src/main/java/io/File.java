@@ -39,8 +39,13 @@ public class File implements WriterInterface {
     }
 
     @Override
+    public FileSystemInterface getFileSystem() {
+        return fileSystem;
+    }
+
+    @Override
     public boolean write(String pathString) {
-        Path path = fileSystem.getPath(pathString);
+        Path path = fileSystem.getRootPath().resolve(pathString);
         try{
             InputStream inputStream   = this.downloadFile(driveService, fileId);
             OutputStream outputStream = new BufferedOutputStream(

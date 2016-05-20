@@ -2,50 +2,50 @@ package io;
 
 import com.google.inject.Inject;
 import database.repository.FileRepository;
+import io.filesystem.FileSystemInterface;
+import io.filesystem.annotations.Real;
 import org.neo4j.graphdb.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.DirectoryNotEmptyException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 
 /**
  * Created by David Maignan <davidmaignan@gmail.com> on 2016-05-12.
  */
-public class Trashed {
+public class Trashed implements WriterInterface{
     private static Logger logger = LoggerFactory.getLogger(Trashed.class);
 
+    private FileSystemInterface fileSystem;
     private FileRepository fileRepository;
+    private String fileId;
 
     @Inject
-    public Trashed(FileRepository fileRepository){
+    public Trashed(@Real FileSystemInterface fileSystem, FileRepository fileRepository){
+        this.fileSystem = fileSystem;
         this.fileRepository = fileRepository;
     }
 
     public boolean execute(Node node){
         boolean result;
-        try{
-            Path path = Paths.get(fileRepository.getNodeAbsolutePath(node));
+        Path path;
+        try {
+            path = fileSystem.getRootPath().resolve(fileRepository.getNodeAbsolutePath(node));
+
             if (Files.isDirectory(path)) {
                 deleteDirectory(path);
             }
 
-            result = Files.deleteIfExists(path);
-            result = true;
+            Files.delete(path);
 
-        } catch (FileNotFoundException exception) {
             result = true;
-            exception.printStackTrace();
+        } catch (NoSuchFileException exception) {
+            result = true;
         } catch (DirectoryNotEmptyException exception){
             result = true;
-            exception.printStackTrace();
-        } catch(IOException exception){
-            result = true;
-            exception.printStackTrace();
+        } catch (Exception exception){
+            result = false;
+            logger.error(exception.getMessage());
         }
 
         if(result){
@@ -53,7 +53,7 @@ public class Trashed {
         }
 
         if( ! result){
-            logger.error("Error while deleting node for file deleted: " + fileRepository.getTitle(node));
+            logger.error("Error while trashing a file: " + fileRepository.getTitle(node));
         }
 
         return result;
@@ -85,5 +85,25 @@ public class Trashed {
         });
 
         Files.deleteIfExists(path);
+    }
+
+    @Override
+    public boolean write(String path) {
+        return false;
+    }
+
+    @Override
+    public boolean write(String oldPath, String newPath) {
+        return false;
+    }
+
+    @Override
+    public void setFileId(String fileId) {
+        this.fileId = fileId;
+    }
+
+    @Override
+    public FileSystemInterface getFileSystem() {
+        return fileSystem;
     }
 }

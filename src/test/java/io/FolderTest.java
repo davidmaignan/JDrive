@@ -1,34 +1,55 @@
 package io;
 
-import io.filesystem.modules.FileSystemWrapperTest;
+import configuration.Configuration;
+import io.filesystem.FileSystemWrapperTest;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static org.junit.Assert.*;
 
 /**
  * Created by david on 2016-05-19.
  */
 public class FolderTest {
-    private static Logger logger = LoggerFactory.getLogger(FolderTest.class.getSimpleName());
     Folder folder;
     FileSystemWrapperTest fs;
 
     @Before
     public void setUp() throws Exception {
-        fs = new FileSystemWrapperTest();
+        Configuration configuration = new Configuration();
+        fs = new FileSystemWrapperTest(configuration);
         folder = new Folder(fs);
+
+        Files.createDirectories(fs.getRootPath());
     }
 
     @Test
     public void testWrite() throws Exception {
-        assertTrue(folder.write("/root"));
+        folder.setFileId("fileId");
+        assertTrue(folder.write("test"));
+        assertEquals(1, getList().size());
+        assertEquals(fs.getPath("test"), folder.getPath());
     }
 
     @Test
-    public void testWriteFileAlreadyExistsException(){
-        assertTrue(folder.write("/root"));
-        assertFalse(folder.write("/root"));
+    public void testWrite2() throws Exception{
+        assertFalse(folder.write("test", "test"));
+    }
+
+    private List<Path> getList() throws IOException {
+        return Files.list(folder.getFileSystem().getRootPath()).collect(Collectors.toList());
+    }
+
+    @Test
+    public void testWriteFileAlreadyExistsException() throws IOException {
+        assertTrue(folder.write("test"));
+        assertFalse(folder.write("test"));
+
+        assertEquals(1, getList().size());
     }
 }

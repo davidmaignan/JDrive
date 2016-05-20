@@ -115,16 +115,4 @@ public class CustomChange {
     }
 
 //    @todo implements equals & hascode
-
-    @Override
-    public String toString() {
-        return "CustomChange{" +
-                "oldParentNode=" + oldParentNode +
-                ", newParentNode=" + newParentNode +
-                ", oldName='" + oldName + '\'' +
-                ", newName='" + newName + '\'' +
-                ", deleted=" + deleted +
-                ", trashed=" + trashed +
-                '}';
-    }
 }

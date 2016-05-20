@@ -12,7 +12,6 @@ public class TestLogger {
     @Test
     public void testLogger(){
         Logger logger = LoggerFactory.getLogger("Test logger");
-
         logger.info("Test logger 3");
     }
 }

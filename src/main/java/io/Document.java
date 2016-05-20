@@ -1,5 +1,6 @@
 package io;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import database.repository.FileRepository;
 import drive.api.DriveService;
@@ -12,8 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
+
 import static java.nio.file.StandardOpenOption.*;
 
 /**
@@ -25,6 +26,7 @@ public class Document implements WriterInterface {
     private FileSystemInterface fileSystem;
     private Path path;
     private String id;
+    private String content;
 
     @Inject
     public Document(@Real FileSystemInterface fileSystem) {
@@ -33,18 +35,19 @@ public class Document implements WriterInterface {
 
     @Override
     public boolean write(String pathString) {
-        path = this.fileSystem.getPath(pathString);
-        byte data[] = setContent().getBytes(StandardCharsets.UTF_8);
-        try (
-                OutputStream out = new BufferedOutputStream(
-                Files.newOutputStream(path, CREATE, APPEND))
-        ) {
-            out.write(data, 0, data.length);
+        path = this.fileSystem.getRootPath().resolve(pathString);
+
+        content = setContent();
+
+        try{
+            Files.write(path, ImmutableList.of(content), StandardCharsets.UTF_8);
+            return true;
         } catch (IOException exception) {
             logger.error(exception.getMessage());
         }
 
-        return true;
+
+        return false;
     }
 
     @Override
@@ -57,15 +60,22 @@ public class Document implements WriterInterface {
 
     }
 
+    public FileSystemInterface getFileSystem(){
+        return fileSystem;
+    }
+
     private String setContent() {
-        return String.format("" +
-                "{\"url\": \"https://docs.google.com/open?id=%s\", " +
+        return String.format("{\"url\": \"https://docs.google.com/open?id=%s\", " +
                 "\"doc_id\": \"%s\", \"email\": " +
-                "\"%s\", \"resource_id\": \"document:%s\"})",
+                "\"%s\", \"resource_id\": \"document:%s\"}",
                 this.id,
                 this.id,
                 "",
                 this.id
         );
+    }
+
+    public String getContent(){
+        return content;
     }
 }

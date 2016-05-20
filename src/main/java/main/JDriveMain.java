@@ -13,11 +13,12 @@ import drive.change.model.ValidChange;
 import drive.change.services.ChangeFactoryService;
 import drive.change.services.ChangeInterface;
 import io.*;
-import drive.api.change.ChangeService;
+import drive.api.ChangeService;
 import configuration.Configuration;
 import drive.api.FileService;
 import database.DatabaseModule;
 import database.repository.DatabaseService;
+import io.filesystem.modules.FileSystemModule;
 import model.tree.TreeBuilder;
 import org.neo4j.graphdb.*;
 import org.slf4j.Logger;
@@ -237,7 +238,10 @@ public class JDriveMain {
     }
 
     private static void initJDrive() {
-        injector = Guice.createInjector(new DatabaseModule());
+        injector = Guice.createInjector(
+                new DatabaseModule(),
+                new FileSystemModule()
+        );
     }
 
     private static void initServices() {

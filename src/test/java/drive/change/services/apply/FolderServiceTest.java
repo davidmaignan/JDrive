@@ -16,12 +16,12 @@ import static org.mockito.Mockito.*;
  * Created by david on 2016-05-19.
  */
 public class FolderServiceTest {
-    CustomChange structure;
-    FileRepository fileRepository;
-    Folder folder;
-    Node newParentNode;
-    String newName;
-    FolderService service;
+    private CustomChange structure;
+    private FileRepository fileRepository;
+    private Folder folder;
+    private Node newParentNode;
+    private String newName;
+    private FolderService service;
 
     @Before
     public void setUp() throws Exception {

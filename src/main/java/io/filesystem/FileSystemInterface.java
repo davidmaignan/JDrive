@@ -1,5 +1,6 @@
 package io.filesystem;
 
+import java.nio.file.FileSystem;
 import java.nio.file.Path;
 
 /**
@@ -7,4 +8,6 @@ import java.nio.file.Path;
  */
 public interface FileSystemInterface {
     Path getPath(String path);
+    Path getRootPath();
+    FileSystem getFileSystem();
 }

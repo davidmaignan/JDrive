@@ -4,7 +4,7 @@ import com.google.api.services.drive.model.Change;
 import com.google.inject.Inject;
 import database.repository.ChangeRepository;
 import database.repository.FileRepository;
-import drive.api.change.ChangeService;
+import drive.api.ChangeService;
 import drive.change.model.CustomChange;
 import org.neo4j.graphdb.Node;
 import org.slf4j.Logger;

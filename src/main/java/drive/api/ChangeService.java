@@ -1,10 +1,9 @@
-package drive.api.change;
+package drive.api;
 
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.ChangeList;
 import com.google.inject.Inject;
-import drive.api.DriveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,51 +1,51 @@
 package io;
 
-import com.google.api.services.drive.model.Change;
 import com.google.inject.Inject;
 import database.repository.ChangeRepository;
-import database.repository.FileRepository;
+import io.filesystem.FileSystemInterface;
+import io.filesystem.annotations.Real;
 import org.neo4j.graphdb.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.DirectoryNotEmptyException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 
 /**
  * Created by David Maignan <davidmaignan@gmail.com> on 2016-05-12.
  */
-public class Delete {
+public class Delete implements WriterInterface{
     private static Logger logger = LoggerFactory.getLogger(Delete.class);
 
+    private FileSystemInterface fileSystem;
     private ChangeRepository changeRepository;
 
     @Inject
-    public Delete(ChangeRepository changeRepository){
+    public Delete(@Real FileSystemInterface fileSystem, ChangeRepository changeRepository){
+        this.fileSystem = fileSystem;
         this.changeRepository = changeRepository;
     }
 
     public boolean execute(Node node){
         boolean result;
+        Path path;
         try{
-            Path path = Paths.get(changeRepository.getNodeAbsolutePath(node));
+            path = fileSystem.getRootPath().resolve(changeRepository.getNodeAbsolutePath(node));
+
             if (Files.isDirectory(path)) {
                 deleteDirectory(path);
             }
 
-            return Files.deleteIfExists(path);
-        } catch (FileNotFoundException exception) {
+            Files.delete(path);
+
             result = true;
-            exception.printStackTrace();
+
+        } catch (NoSuchFileException exception) {
+            result = true;
         } catch (DirectoryNotEmptyException exception){
             result = true;
-            exception.printStackTrace();
-        } catch(IOException exception){
-            result = true;
-            exception.printStackTrace();
+        } catch (Exception exception){
+            result = false;
+            logger.error(exception.getMessage());
         }
 
         if(result){
@@ -85,5 +85,25 @@ public class Delete {
         });
 
         Files.deleteIfExists(path);
+    }
+
+    @Override
+    public boolean write(String path) {
+        return false;
+    }
+
+    @Override
+    public boolean write(String oldPath, String newPath) {
+        return false;
+    }
+
+    @Override
+    public void setFileId(String fileId) {
+
+    }
+
+    @Override
+    public FileSystemInterface getFileSystem() {
+        return fileSystem;
     }
 }

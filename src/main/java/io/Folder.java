@@ -26,19 +26,20 @@ public class Folder implements WriterInterface{
 
     @Override
     public boolean write(String pathString) {
-        path = fileSystem.getPath(pathString);
+        path = fileSystem.getRootPath().resolve(pathString);
 
         try {
-            Path newDir = Files.createDirectory(path);
+            Files.createDirectory(path);
             return true;
-        } catch(FileSystemAlreadyExistsException e){
-            logger.error(e.getMessage());
         } catch (IOException e) {
             logger.error(e.getMessage());
-        } catch (Exception exception){
         }
 
         return false;
+    }
+
+    public FileSystemInterface getFileSystem(){
+        return fileSystem;
     }
 
     @Override
