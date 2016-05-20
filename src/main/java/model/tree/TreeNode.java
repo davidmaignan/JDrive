@@ -198,37 +198,6 @@ public class TreeNode {
         return isTrashed;
     }
 
-    @Override
-    public String toString() {
-        return String.format(
-                "TreeNode[ title: %10s, id: %25s isFolder: %5b, parent %10s, children: %d\n",
-                this.title,
-                this.id,
-                this.isFolder,
-                (this.parent != null) ? this.parent.getTitle() : null,
-                this.children.size());
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        TreeNode treeNode = (TreeNode) o;
-
-        if (!id.equals(treeNode.id)) return false;
-        if (!parentId.equals(treeNode.parentId)) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = id.hashCode();
-        result = 31 * result + parentId.hashCode();
-        return result;
-    }
-
     /**
      * Get first parent reference
      *
