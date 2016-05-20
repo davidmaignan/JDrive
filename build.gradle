@@ -95,14 +95,11 @@ jacocoTestReport {
     }
 }
 
-task('clean') <<
-{
-    println("Clean")
-    delete "db"
-    delete "/Users/david/JDrive"
-}
+//task('clean') <<
+//{
+//    println("Clean")
+//    delete "db"
+//    delete "/Users/david/JDrive"
+//}
 
 defaultTasks 'clean', 'run'
-
-
-//gradle -Dtest.single=TreeBuilderTest test
