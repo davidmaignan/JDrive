@@ -4,8 +4,6 @@ import java.util.*;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.model.File;
-import com.google.api.services.drive.model.ParentReference;
-import com.google.api.services.drive.model.User;
 import model.types.MimeType;
 
 /**
@@ -15,36 +13,29 @@ import model.types.MimeType;
  */
 
 public class TreeNode {
-    private File data;
     private String id;
     private String parentId;
     private TreeNode parent;
     private List<TreeNode> children;
-    private String title;
+    private String name;
     private boolean isFolder;
     private boolean isRoot;
-    private boolean isSuperRoot;
-    private boolean isAuthenticatedUser;
     private DateTime createdDate;
     private DateTime modifiedDate;
     private boolean isTrashed;
     private long version;
+    private String mimeType;
 
     /**
      * No args constructor
      */
     public TreeNode(){
         super();
-        this.title               = "";
-        this.isFolder            = true;
-        this.isSuperRoot         = true;
-        this.isRoot              = false;
-        this.isAuthenticatedUser = true;
-        this.children            = new ArrayList<>();
-        this.data                = new File();
-        this.isTrashed           = false;
-        this.version             = 0l;
-        data.setMimeType(MimeType.FOLDER);
+        this.name     = "";
+        this.isFolder = true;
+        this.isRoot   = true;
+        this.children = new ArrayList<>();
+        this.mimeType = MimeType.FOLDER;
     }
 
     /**
@@ -53,43 +44,30 @@ public class TreeNode {
      * @param file
      */
     public TreeNode(File file) {
-        this.data                = file;
         this.id                  = file.getId();
-        this.parentId            = this.getParentReferenceId();
-        this.isFolder            = true;
+        this.parentId            = this.getParentId(file);
         this.isRoot              = false;
-        this.isSuperRoot         = false;
-        this.title               = this.data.getTitle();
-        this.isAuthenticatedUser = this.getOwnerShip();
+        this.name                = file.getName();
         this.children            = new ArrayList<>();
-        this.modifiedDate        = this.data.getModifiedDate();
-        this.createdDate         = this.data.getCreatedDate();
-        this.isTrashed           = false;
-        this.version             = this.data.getVersion();
-
-        if (file.getLabels() != null && file.getLabels().size() > 0) {
-            this.isTrashed = file.getLabels().getTrashed().booleanValue();
-        }
+        this.modifiedDate        = file.getModifiedTime();
+        this.createdDate         = file.getCreatedTime();
+        this.isTrashed           = file.getTrashed();
+        this.version             = file.getVersion();
+        this.mimeType            = file.getMimeType();
 
         if ( ! file.getMimeType().equals(MimeType.FOLDER)) {
             isFolder = false;
-        }
-
-        if(this.parentId != null) {
-            this.isRoot = this.getParentReference().getIsRoot();
+        } else {
+            this.isFolder = true;
         }
     }
 
-    /**
-     * Add child
-     *
-     * @param file
-     */
-    public void addChild(File file) {
-        TreeNode node = new TreeNode(file);
-        node.setParent(this);
-        this.setId(node.getParentId());
-        children.add(new TreeNode(file));
+    private String getParentId(File file){
+        if(file.getParents() == null || file.getParents().isEmpty()){
+            return null;
+        }
+
+        return file.getParents().get(0);
     }
 
     /**
@@ -116,12 +94,12 @@ public class TreeNode {
      * @return
      */
     private StringBuilder getAbsolutePath(TreeNode node, StringBuilder path) {
-        if(! node.isSuperRoot()) {
+        if(! node.isRoot()) {
             getAbsolutePath(node.getParent(), path);
         }
 
         path.append("/");
-        path.append(node.getTitle());
+        path.append(node.getName());
 
         return path;
     }
@@ -132,10 +110,6 @@ public class TreeNode {
      */
     public List<TreeNode> getChildren() {
         return children;
-    }
-
-    public File getData() {
-        return data;
     }
 
     public boolean isFolder() {
@@ -150,20 +124,12 @@ public class TreeNode {
         this.parent = parent;
     }
 
-    public String getTitle() {
-        return title;
+    public String getName() {
+        return name;
     }
 
     public boolean isRoot() {
         return isRoot;
-    }
-
-    public boolean isSuperRoot() {
-        return isSuperRoot;
-    }
-
-    public boolean isAuthenticatedUser() {
-        return isAuthenticatedUser;
     }
 
     public void setId(String id) {
@@ -179,7 +145,7 @@ public class TreeNode {
     }
 
     public String getMimeType() {
-        return data.getMimeType();
+        return mimeType;
     }
 
     public DateTime getCreatedDate() {
@@ -198,55 +164,12 @@ public class TreeNode {
         return isTrashed;
     }
 
-    /**
-     * Get first parent reference
-     *
-     * @return ParentReference
-     */
-    private ParentReference getParentReference() {
-        if (data.getParents().size() > 0) {
-            return data.getParents().get(0);
-        }
-
-        return null;
-    }
-
-    /**
-     * Get first parent id
-     *
-     * @return String
-     */
-    private String getParentReferenceId(){
-        if(this.getParentReference() != null) {
-            return this.getParentReference().getId();
-        }
-
-        return null;
-    }
-
-    /**
-     * Get owner of the file
-     *
-     * @return User
-     */
-    private User getOwner(){
-        if(data.getOwners().size() > 0) {
-            return data.getOwners().get(0);
-        }
-
-        return null;
-    }
-
-    /**
-     * Get if file is own by authenticated user
-     *
-     * @return boolean
-     */
-    private boolean getOwnerShip(){
-        if (this.getOwner() != null) {
-            return this.getOwner().getIsAuthenticatedUser();
-        }
-
-        return false;
+    @Override
+    public String toString() {
+        return "TreeNode{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", parentId='" + parentId + '\'' +
+                '}';
     }
 }
