@@ -16,7 +16,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Created by david on 2016-05-21.
  */
-public abstract class TestDatabaseExtensions implements FixturesInterface{
+public abstract class TestDatabaseExtensions implements FixturesInterface<fixtures.model.File> {
     protected GraphDatabaseService graphDb;
     protected static Configuration configuration;
 

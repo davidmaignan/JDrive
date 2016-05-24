@@ -10,6 +10,7 @@ import configuration.Configuration;
 import database.RelTypes;
 import database.labels.FileLabel;
 import fixtures.deserializer.DateTimeDeserializer;
+import fixtures.extensions.FixturesInterface;
 import fixtures.extensions.TestDatabaseExtensions;
 import model.types.MimeType;
 import org.junit.After;
@@ -32,7 +33,7 @@ import static org.junit.Assert.*;
  * Created by David Maignan <davidmaignan@gmail.com> on 2015-12-31.
  */
 @RunWith(DataProviderRunner.class)
-public class FileRepositoryTest extends TestDatabaseExtensions<fixtures.model.File> {
+public class FileRepositoryTest extends TestDatabaseExtensions {
     private FileRepository repository;
     private static Logger logger = LoggerFactory.getLogger(FileRepositoryTest.class.getSimpleName());
     private String rootId = "0AHmMPOF_fWirUk9PVA";
