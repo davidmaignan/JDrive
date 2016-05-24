@@ -8,7 +8,7 @@ package database;
 public class Fields {
     //File node
     public static final String ID             = "identifier";
-    public static final String TITLE          = "title";
+    public static final String NAME           = "na";
     public static final String PATH           = "path";
     public static final String CREATED_DATE   = "createdDate";
     public static final String MODIFIED_DATE  = "modifiedDate";
