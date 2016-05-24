@@ -44,43 +44,53 @@ public class FileRepository extends DatabaseService {
         super(dbConfig, configuration);
     }
 
-    public String getTitle(Node node){
+    public String getName(Node node){
+        String name = null;
         try(Transaction tx = graphDB.beginTx()) {
-            return node.getProperty(Fields.TITLE).toString();
+            name = node.getProperty(Fields.NAME).toString();
 
+            tx.success();
+
+            return name;
         } catch (Exception exception){
             return null;
         }
     }
 
-    public Long getVersion(Node node){
+    public boolean createRootNode(File file){
         try(Transaction tx = graphDB.beginTx()) {
-            return new Long((long)node.getProperty(Fields.VERSION));
+            Node node = graphDB.createNode(new FileLabel());
+
+            node.setProperty(Fields.IS_ROOT, true);
+            node.setProperty(Fields.ID, file.getId());
+
+            tx.success();
+            return true;
 
         } catch (Exception exception){
-            return null;
+            logger.error(exception.getMessage());
         }
+
+        return false;
     }
 
     public Node getRootNode(){
         Node result = null;
         try(Transaction tx = graphDB.beginTx()) {
-
-            String query = "match (file:File {IsRoot: true}) return file";
-
-            Result queryResult = graphDB.execute(query);
+            Result queryResult = graphDB.execute(
+                    String.format("match (file:File {%s: %b}) return file", Fields.IS_ROOT, true)
+            );
 
             if(queryResult.hasNext()){
                 result = (Node)queryResult.next().get("file");
             }
 
             tx.success();
-
-            return result;
-
         } catch (Exception exception){
-            return null;
+            logger.error(exception.getMessage());
         }
+
+        return result;
     }
 
     /**
@@ -133,15 +143,23 @@ public class FileRepository extends DatabaseService {
      * @return true
      */
     public boolean markAsDeleted(Node fileNode) {
-        try(Transaction tx = graphDB.beginTx())
-        {
+        if(fileNode == null)
+            return false;
+
+        try(Transaction tx = graphDB.beginTx()) {
             fileNode.setProperty(Fields.DELETED, true);
             fileNode.setProperty(Fields.PROCESSED, false);
+
+            Iterable<Relationship> relationships = fileNode.getRelationships(RelTypes.PARENT, Direction.INCOMING);
+
+            relationships.forEach( relationship -> {
+                Node childNode = relationship.getStartNode();
+                markAsDeleted(childNode);
+            });
 
             tx.success();
 
             return true;
-
         } catch (Exception exception) {
             logger.error(exception.getMessage());
         }
@@ -155,10 +173,19 @@ public class FileRepository extends DatabaseService {
      * @return true
      */
     public boolean markAsTrashed(Node fileNode) {
-        try(Transaction tx = graphDB.beginTx())
-        {
+        if(fileNode == null)
+            return false;
+
+        try(Transaction tx = graphDB.beginTx()) {
             fileNode.setProperty(Fields.TRASHED, true);
             fileNode.setProperty(Fields.PROCESSED, false);
+
+            Iterable<Relationship> relationships = fileNode.getRelationships(RelTypes.PARENT, Direction.INCOMING);
+
+            relationships.forEach( relationship -> {
+                Node childNode = relationship.getStartNode();
+                markAsTrashed(childNode);
+            });
 
             tx.success();
 
@@ -221,13 +248,10 @@ public class FileRepository extends DatabaseService {
      */
     public boolean markAsProcessed(Node node) {
         try (Transaction tx = graphDB.beginTx()){
-
             node.setProperty(Fields.PROCESSED, true);
-
             tx.success();
 
             return true;
-
         } catch (Exception exception) {
             logger.error(exception.getMessage());
         }
@@ -235,13 +259,14 @@ public class FileRepository extends DatabaseService {
         return false;
     }
 
+    //@todo - Check why trashed is false
     public boolean update(Node fileNode, File file){
         try(Transaction tx = graphDB.beginTx()) {
             fileNode.setProperty(Fields.VERSION, file.getVersion());
-            fileNode.setProperty(Fields.TITLE, file.getTitle());
+            fileNode.setProperty(Fields.NAME, file.getName());
             fileNode.setProperty(Fields.MIME_TYPE, file.getMimeType());
             fileNode.setProperty(Fields.PROCESSED, true);
-            fileNode.setProperty(Fields.MODIFIED_DATE, file.getModifiedDate().getValue());
+            fileNode.setProperty(Fields.MODIFIED_DATE, file.getModifiedTime().getValue());
             fileNode.setProperty(Fields.DELETED, false);
             fileNode.setProperty(Fields.TRASHED, false);
 
@@ -367,37 +392,33 @@ public class FileRepository extends DatabaseService {
     }
 
     public boolean createIfNotExists(File file) {
+        if(this.getNodeById(file.getId()) != null) {
+            return false;
+        }
+
         try(Transaction tx = graphDB.beginTx()) {
-
-            if(this.getNodeById(file.getId()) != null) {
-                return false;
-            }
-
             Node dbNode = graphDB.createNode(new FileLabel());
-
-            dbNode.addLabel(new FileLabel());
             dbNode.setProperty(Fields.ID, file.getId());
-            dbNode.setProperty(Fields.TITLE, file.getTitle());
+            dbNode.setProperty(Fields.NAME, file.getName());
             dbNode.setProperty(Fields.MIME_TYPE, file.getMimeType());
             dbNode.setProperty(Fields.IS_ROOT, false);
             dbNode.setProperty(Fields.PROCESSED, false);
             dbNode.setProperty(Fields.VERSION, file.getVersion());
+            dbNode.setProperty(Fields.CREATED_DATE, file.getCreatedTime().getValue());
 
-            if (file.getCreatedDate() != null) {
-                dbNode.setProperty(Fields.CREATED_DATE, file.getCreatedDate().getValue());
+            if (file.getModifiedTime() != null) {
+                dbNode.setProperty(Fields.MODIFIED_DATE, file.getModifiedTime().getValue());
+            } else {
+                dbNode.setProperty(Fields.MODIFIED_DATE, file.getCreatedTime().getValue());
             }
 
-            if (file.getModifiedDate() != null) {
-                dbNode.setProperty(Fields.MODIFIED_DATE, file.getModifiedDate().getValue());
-            }
+            Node parent = this.getNodeById(file.getParents().get(0));
 
-            Node parent = this.getNodeById(file.getParents().get(0).getId());
-
-            dbNode.createRelationshipTo(parent, RelTypes.PARENT);
+            Relationship relation = dbNode.createRelationshipTo(parent, RelTypes.PARENT);
 
             tx.success();
 
-            return true;
+            return relation != null;
 
         } catch (Exception exception) {
             logger.error(exception.getMessage());
@@ -406,34 +427,38 @@ public class FileRepository extends DatabaseService {
         return false;
     }
 
-    public Node createNode(File file) throws Exception{
-        try(Transaction tx = graphDB.beginTx()) {
-
-            Node dbNode = graphDB.createNode(new FileLabel());
-
-            dbNode.addLabel(new FileLabel());
-            dbNode.setProperty(Fields.ID, file.getId());
-            dbNode.setProperty(Fields.TITLE, file.getTitle());
-            dbNode.setProperty(Fields.MIME_TYPE, file.getMimeType());
-            dbNode.setProperty(Fields.IS_ROOT, false);
-            dbNode.setProperty(Fields.PROCESSED, false);
-            dbNode.setProperty(Fields.VERSION, file.getVersion());
-            dbNode.setProperty(Fields.DELETED, false);
-            dbNode.setProperty(Fields.TRASHED, isTrash(file));
-
-            if (file.getCreatedDate() != null) {
-                dbNode.setProperty(Fields.CREATED_DATE, file.getCreatedDate().getValue());
-            }
-
-            if (file.getModifiedDate() != null) {
-                dbNode.setProperty(Fields.MODIFIED_DATE, file.getModifiedDate().getValue());
-            }
-
-            tx.success();
-
-            return dbNode;
-        }
-    }
+//    public Node createNode(File file) throws Exception{
+//        try(Transaction tx = graphDB.beginTx()) {
+//
+//            Node dbNode = graphDB.createNode(new FileLabel());
+//
+//            dbNode.addLabel(new FileLabel());
+//            dbNode.setProperty(Fields.ID, file.getId());
+//            dbNode.setProperty(Fields.NAME, file.getName());
+//            dbNode.setProperty(Fields.MIME_TYPE, file.getMimeType());
+//            dbNode.setProperty(Fields.IS_ROOT, false);
+//            dbNode.setProperty(Fields.PROCESSED, false);
+//            dbNode.setProperty(Fields.VERSION, file.getVersion());
+//            dbNode.setProperty(Fields.DELETED, false);
+//            dbNode.setProperty(Fields.TRASHED, isTrash(file));
+//
+//            if (file.getCreatedTime() != null) {
+//                dbNode.setProperty(Fields.CREATED_DATE, file.getCreatedTime().getValue());
+//            }
+//
+//            if (file.getModifiedTime() != null) {
+//                dbNode.setProperty(Fields.MODIFIED_DATE, file.getModifiedTime().getValue());
+//            }
+//
+//            tx.success();
+//
+//            return dbNode;
+//        } catch (Exception exception) {
+//            logger.error(exception.getMessage());
+//        }
+//
+//        return null;
+//    }
 
     public boolean createParentRelation(Node child, Node parent){
         try(Transaction tx = graphDB.beginTx()) {
@@ -507,9 +532,9 @@ public class FileRepository extends DatabaseService {
     private void setNode(Node dbNode, TreeNode tNode) {
         dbNode.addLabel(new FileLabel());
         dbNode.setProperty(Fields.ID, tNode.getId());
-        dbNode.setProperty(Fields.TITLE, tNode.getTitle());
+        dbNode.setProperty(Fields.NAME, tNode.getName());
         dbNode.setProperty(Fields.MIME_TYPE, tNode.getMimeType());
-        dbNode.setProperty(Fields.IS_ROOT, tNode.isSuperRoot());
+        dbNode.setProperty(Fields.IS_ROOT, tNode.isRoot());
         dbNode.setProperty(Fields.PROCESSED, false);
         dbNode.setProperty(Fields.TRASHED, false);
         dbNode.setProperty(Fields.DELETED, false);
@@ -533,8 +558,6 @@ public class FileRepository extends DatabaseService {
          return (file != null
                 && file.getExplicitlyTrashed() != null
                 && file.getExplicitlyTrashed())
-                || (file != null
-                && file.getLabels() != null
-                && file.getLabels().getTrashed());
+                 && file.getTrashed();
     }
 }
