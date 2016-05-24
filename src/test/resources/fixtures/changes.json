@@ -1,0 +1,638 @@
+{
+  "kind": "drive#changeList",
+  "newStartPageToken": "18688",
+  "changes": [
+    {
+      "kind": "drive#change",
+      "fileId": "0B7yo2HclmjI4Q0xnUmRNWV9WMjg",
+      "removed": false,
+      "time": "2016-05-21T18:23:55.481Z",
+      "file": {
+        "kind": "drive#file",
+        "id": "0B7yo2HclmjI4Q0xnUmRNWV9WMjg",
+        "name": "JAXBDemo_List_Set.zip",
+        "mimeType": "application/zip",
+        "starred": false,
+        "trashed": false,
+        "explicitlyTrashed": false,
+        "spaces": [
+          "drive"
+        ],
+        "version": "69765",
+        "webContentLink": "https://docs.google.com/uc?id=0B7yo2HclmjI4Q0xnUmRNWV9WMjg&export=download",
+        "webViewLink": "https://drive.google.com/file/d/0B7yo2HclmjI4Q0xnUmRNWV9WMjg/view?usp=drivesdk",
+        "iconLink": "https://ssl.gstatic.com/docs/doclist/images/icon_9_archive_list.png",
+        "viewedByMe": true,
+        "viewedByMeTime": "2016-05-21T18:23:54.782Z",
+        "createdTime": "2013-07-29T11:27:32.849Z",
+        "modifiedTime": "2014-07-04T17:06:56.560Z",
+        "owners": [
+          {
+            "kind": "drive#user",
+            "displayName": "Lokesh Gupta",
+            "photoLink": "https://lh3.googleusercontent.com/-Nzls6uW9mZA/AAAAAAAAAAI/AAAAAAAAC-c/B8q0CSdmxLQ/s64/photo.jpg",
+            "me": false,
+            "permissionId": "17646254489097005352",
+            "emailAddress": "lokeshgupta1981@gmail.com"
+          }
+        ],
+        "lastModifyingUser": {
+          "kind": "drive#user",
+          "displayName": "Lokesh Gupta",
+          "photoLink": "https://lh3.googleusercontent.com/-Nzls6uW9mZA/AAAAAAAAAAI/AAAAAAAAC-c/B8q0CSdmxLQ/s64/photo.jpg",
+          "me": false,
+          "permissionId": "17646254489097005352",
+          "emailAddress": "lokeshgupta1981@gmail.com"
+        },
+        "shared": true,
+        "ownedByMe": false,
+        "capabilities": {
+          "canEdit": false,
+          "canComment": false,
+          "canShare": false,
+          "canCopy": true,
+          "canReadRevisions": false
+        },
+        "viewersCanCopyContent": true,
+        "writersCanShare": true,
+        "originalFilename": "JAXBDemo_List_Set.zip",
+        "fullFileExtension": "zip",
+        "fileExtension": "zip",
+        "md5Checksum": "36adc4853ae21e69af6bc6b8d8ca46b6",
+        "size": "10830",
+        "quotaBytesUsed": "0",
+        "headRevisionId": "0B7yo2HclmjI4RXNmTnVkbFBkZjhPUUlEZGdCRFhoV2tkSGNnPQ",
+        "isAppAuthorized": false
+      }
+    },
+    {
+      "kind": "drive#change",
+      "fileId": "1Cyism50KXTMXcvYNbqUXi3gaaNKaXDgjXjpx4rPNet8",
+      "removed": false,
+      "time": "2016-05-24T14:51:41.107Z",
+      "file": {
+        "kind": "drive#file",
+        "id": "1Cyism50KXTMXcvYNbqUXi3gaaNKaXDgjXjpx4rPNet8",
+        "name": "GuiceBerry 3.0 tutorial",
+        "mimeType": "application/vnd.google-apps.document",
+        "starred": false,
+        "trashed": false,
+        "explicitlyTrashed": false,
+        "spaces": [
+          "drive"
+        ],
+        "version": "245704",
+        "webViewLink": "https://docs.google.com/document/d/1Cyism50KXTMXcvYNbqUXi3gaaNKaXDgjXjpx4rPNet8/edit?usp=drivesdk",
+        "iconLink": "https://ssl.gstatic.com/docs/doclist/images/icon_11_document_list.png",
+        "thumbnailLink": "https://docs.google.com/feeds/vt?gd=true&id=1Cyism50KXTMXcvYNbqUXi3gaaNKaXDgjXjpx4rPNet8&v=88&s=AMedNnoAAAAAV0TCLDN10A5Zjhr738CpUMHbjzqsbmuq&sz=s220",
+        "viewedByMe": true,
+        "viewedByMeTime": "2016-05-17T16:37:52.382Z",
+        "createdTime": "2012-03-02T21:38:42.012Z",
+        "modifiedTime": "2015-10-22T16:46:32.229Z",
+        "owners": [
+          {
+            "kind": "drive#user",
+            "displayName": "Luiz-Otavio Zorzella",
+            "me": false,
+            "permissionId": "04375058702891570090",
+            "emailAddress": "zorzella@gmail.com"
+          }
+        ],
+        "lastModifyingUser": {
+          "kind": "drive#user",
+          "displayName": "Luiz-Otavio Zorzella",
+          "me": false,
+          "permissionId": "04375058702891570090",
+          "emailAddress": "zorzella@gmail.com"
+        },
+        "shared": true,
+        "ownedByMe": false,
+        "capabilities": {
+          "canEdit": false,
+          "canComment": false,
+          "canShare": false,
+          "canCopy": true,
+          "canReadRevisions": false
+        },
+        "viewersCanCopyContent": true,
+        "writersCanShare": true,
+        "quotaBytesUsed": "0",
+        "isAppAuthorized": false
+      }
+    },
+    {
+      "kind": "drive#change",
+      "fileId": "0B3mMPOF_fWircUNVWDZKb1Q3Slk",
+      "removed": false,
+      "time": "2016-05-24T16:42:48.572Z",
+      "file": {
+        "kind": "drive#file",
+        "id": "0B3mMPOF_fWircUNVWDZKb1Q3Slk",
+        "name": "folder",
+        "mimeType": "application/vnd.google-apps.folder",
+        "starred": false,
+        "trashed": false,
+        "explicitlyTrashed": false,
+        "parents": [
+          "0AHmMPOF_fWirUk9PVA"
+        ],
+        "spaces": [
+          "drive"
+        ],
+        "version": "18665",
+        "webViewLink": "https://docs.google.com/folderview?id=0B3mMPOF_fWircUNVWDZKb1Q3Slk&usp=drivesdk",
+        "iconLink": "https://ssl.gstatic.com/docs/doclist/images/icon_11_collection_list_1.png",
+        "viewedByMe": true,
+        "viewedByMeTime": "2016-05-24T16:42:48.424Z",
+        "createdTime": "2016-05-10T19:04:27.788Z",
+        "modifiedTime": "2016-05-11T15:37:47.677Z",
+        "modifiedByMeTime": "2016-05-11T15:37:47.677Z",
+        "owners": [
+          {
+            "kind": "drive#user",
+            "displayName": "Timo Whall",
+            "me": true,
+            "permissionId": "00395318281981764853",
+            "emailAddress": "sparke2929@gmail.com"
+          }
+        ],
+        "lastModifyingUser": {
+          "kind": "drive#user",
+          "displayName": "Timo Whall",
+          "me": true,
+          "permissionId": "00395318281981764853",
+          "emailAddress": "sparke2929@gmail.com"
+        },
+        "shared": false,
+        "ownedByMe": true,
+        "capabilities": {
+          "canEdit": true,
+          "canComment": true,
+          "canShare": true,
+          "canCopy": false,
+          "canReadRevisions": false
+        },
+        "viewersCanCopyContent": true,
+        "writersCanShare": true,
+        "permissions": [
+          {
+
+            "kind": "drive#permission",
+            "id": "00395318281981764853",
+            "type": "user",
+            "emailAddress": "sparke2929@gmail.com",
+            "role": "owner",
+            "displayName": "Timo Whall"
+          }
+        ],
+        "folderColorRgb": "#8f8f8f",
+        "quotaBytesUsed": "0",
+        "isAppAuthorized": false
+      }
+    },
+    {
+      "kind": "drive#change",
+      "fileId": "0B3mMPOF_fWirZUM4cmFQaWlScUE",
+      "removed": false,
+      "time": "2016-05-24T18:55:42.481Z",
+      "file": {
+        "kind": "drive#file",
+        "id": "0B3mMPOF_fWirZUM4cmFQaWlScUE",
+        "name": "datas.xml",
+        "mimeType": "text/xml",
+        "starred": false,
+        "trashed": false,
+        "explicitlyTrashed": false,
+        "parents": [
+          "0AHmMPOF_fWirUk9PVA"
+        ],
+        "spaces": [
+          "drive"
+        ],
+        "version": "18668",
+        "webContentLink": "https://docs.google.com/uc?id=0B3mMPOF_fWirZUM4cmFQaWlScUE&export=download",
+        "webViewLink": "https://drive.google.com/file/d/0B3mMPOF_fWirZUM4cmFQaWlScUE/view?usp=drivesdk",
+        "iconLink": "https://ssl.gstatic.com/docs/doclist/images/generic_app_icon_16.png",
+        "viewedByMe": true,
+        "viewedByMeTime": "2016-05-11T17:22:22.310Z",
+        "createdTime": "2016-05-11T17:22:22.310Z",
+        "modifiedTime": "2016-05-11T17:22:22.310Z",
+        "modifiedByMeTime": "2016-05-11T17:22:22.310Z",
+        "owners": [
+          {
+            "kind": "drive#user",
+            "displayName": "Timo Whall",
+            "me": true,
+            "permissionId": "00395318281981764853",
+            "emailAddress": "sparke2929@gmail.com"
+          }
+        ],
+        "lastModifyingUser": {
+          "kind": "drive#user",
+          "displayName": "Timo Whall",
+          "me": true,
+          "permissionId": "00395318281981764853",
+          "emailAddress": "sparke2929@gmail.com"
+        },
+        "shared": false,
+        "ownedByMe": true,
+        "capabilities": {
+          "canEdit": true,
+          "canComment": true,
+          "canShare": true,
+          "canCopy": true,
+          "canReadRevisions": true
+        },
+        "viewersCanCopyContent": true,
+        "writersCanShare": true,
+        "permissions": [
+          {
+
+            "kind": "drive#permission",
+            "id": "00395318281981764853",
+            "type": "user",
+            "emailAddress": "sparke2929@gmail.com",
+            "role": "owner",
+            "displayName": "Timo Whall"
+          }
+        ],
+        "originalFilename": "datas.xml",
+        "fullFileExtension": "xml",
+        "fileExtension": "xml",
+        "md5Checksum": "747dab3895b4e2c95af7610816bc02f4",
+        "size": "461910",
+        "quotaBytesUsed": "461910",
+        "headRevisionId": "0B3mMPOF_fWirRWZuK2dySjVyUmF3b1pndVVVWnlOUmdsbVNjPQ",
+        "isAppAuthorized": false
+      }
+    },
+    {
+      "kind": "drive#change",
+      "fileId": "0B3mMPOF_fWirU2tqQU5PTjdWd3c",
+      "removed": false,
+      "time": "2016-05-24T19:04:52.347Z",
+      "file": {
+        "kind": "drive#file",
+        "id": "0B3mMPOF_fWirU2tqQU5PTjdWd3c",
+        "name": "destination.csv",
+        "mimeType": "text/csv",
+        "starred": false,
+        "trashed": true,
+        "explicitlyTrashed": true,
+        "parents": [
+          "0B3mMPOF_fWirWlhxRXlfMmlPSmM"
+        ],
+        "spaces": [
+          "drive"
+        ],
+        "version": "18674",
+        "webContentLink": "https://docs.google.com/uc?id=0B3mMPOF_fWirU2tqQU5PTjdWd3c&export=download",
+        "webViewLink": "https://drive.google.com/file/d/0B3mMPOF_fWirU2tqQU5PTjdWd3c/view?usp=drivesdk",
+        "iconLink": "https://ssl.gstatic.com/docs/doclist/images/icon_10_generic_list.png",
+        "viewedByMe": true,
+        "viewedByMeTime": "2016-05-11T17:22:23.070Z",
+        "createdTime": "2016-05-11T17:22:23.070Z",
+        "modifiedTime": "2016-05-11T17:22:23.070Z",
+        "modifiedByMeTime": "2016-05-11T17:22:23.070Z",
+        "owners": [
+          {
+            "kind": "drive#user",
+            "displayName": "Timo Whall",
+            "me": true,
+            "permissionId": "00395318281981764853",
+            "emailAddress": "sparke2929@gmail.com"
+          }
+        ],
+        "lastModifyingUser": {
+          "kind": "drive#user",
+          "displayName": "Timo Whall",
+          "me": true,
+          "permissionId": "00395318281981764853",
+          "emailAddress": "sparke2929@gmail.com"
+        },
+        "shared": false,
+        "ownedByMe": true,
+        "capabilities": {
+          "canEdit": true,
+          "canComment": true,
+          "canShare": true,
+          "canCopy": true,
+          "canReadRevisions": true
+        },
+        "viewersCanCopyContent": true,
+        "writersCanShare": true,
+        "permissions": [
+          {
+
+            "kind": "drive#permission",
+            "id": "00395318281981764853",
+            "type": "user",
+            "emailAddress": "sparke2929@gmail.com",
+            "role": "owner",
+            "displayName": "Timo Whall"
+          }
+        ],
+        "originalFilename": "destination.csv",
+        "fullFileExtension": "csv",
+        "fileExtension": "csv",
+        "md5Checksum": "6add043fe872fdae1a82e765c9a02317",
+        "size": "207",
+        "quotaBytesUsed": "207",
+        "headRevisionId": "0B3mMPOF_fWirb1JZUlpDSnFQKzBGZXk4ZUVJTXpvd1l5eXBNPQ",
+        "isAppAuthorized": false
+      }
+    },
+    {
+      "kind": "drive#change",
+      "fileId": "0B3mMPOF_fWirdEtBSVZXTzZIcUU",
+      "removed": true,
+      "time": "2016-05-24T19:05:00.095Z"
+    },
+    {
+      "kind": "drive#change",
+      "fileId": "0B3mMPOF_fWirWlhxRXlfMmlPSmM",
+      "removed": false,
+      "time": "2016-05-24T19:05:11.203Z",
+      "file": {
+        "kind": "drive#file",
+        "id": "0B3mMPOF_fWirWlhxRXlfMmlPSmM",
+        "name": "first_new_name",
+        "mimeType": "application/vnd.google-apps.folder",
+        "starred": false,
+        "trashed": false,
+        "explicitlyTrashed": false,
+        "parents": [
+          "0B3mMPOF_fWircUNVWDZKb1Q3Slk"
+        ],
+        "spaces": [
+          "drive"
+        ],
+        "version": "18680",
+        "webViewLink": "https://docs.google.com/folderview?id=0B3mMPOF_fWirWlhxRXlfMmlPSmM&usp=drivesdk",
+        "iconLink": "https://ssl.gstatic.com/docs/doclist/images/icon_11_collection_list_1.png",
+        "viewedByMe": true,
+        "viewedByMeTime": "2016-05-24T19:05:02.283Z",
+        "createdTime": "2016-05-11T17:22:20.741Z",
+        "modifiedTime": "2016-05-24T19:05:11.075Z",
+        "modifiedByMeTime": "2016-05-24T19:05:11.075Z",
+        "owners": [
+          {
+            "kind": "drive#user",
+            "displayName": "Timo Whall",
+            "me": true,
+            "permissionId": "00395318281981764853",
+            "emailAddress": "sparke2929@gmail.com"
+          }
+        ],
+        "lastModifyingUser": {
+          "kind": "drive#user",
+          "displayName": "Timo Whall",
+          "me": true,
+          "permissionId": "00395318281981764853",
+          "emailAddress": "sparke2929@gmail.com"
+        },
+        "shared": false,
+        "ownedByMe": true,
+        "capabilities": {
+          "canEdit": true,
+          "canComment": true,
+          "canShare": true,
+          "canCopy": false,
+          "canReadRevisions": false
+        },
+        "viewersCanCopyContent": true,
+        "writersCanShare": true,
+        "permissions": [
+          {
+
+            "kind": "drive#permission",
+            "id": "00395318281981764853",
+            "type": "user",
+            "emailAddress": "sparke2929@gmail.com",
+            "role": "owner",
+            "displayName": "Timo Whall"
+          }
+        ],
+        "folderColorRgb": "#8f8f8f",
+        "quotaBytesUsed": "0",
+        "isAppAuthorized": false
+      }
+    },
+    {
+      "kind": "drive#change",
+      "fileId": "0B3mMPOF_fWirUFMyeDR0ckI4WHM",
+      "removed": false,
+      "time": "2016-05-24T19:05:24.422Z",
+      "file": {
+        "kind": "drive#file",
+        "id": "0B3mMPOF_fWirUFMyeDR0ckI4WHM",
+        "name": "folder1",
+        "mimeType": "application/vnd.google-apps.folder",
+        "starred": false,
+        "trashed": false,
+        "explicitlyTrashed": false,
+        "parents": [
+          "0B3mMPOF_fWircUNVWDZKb1Q3Slk"
+        ],
+        "spaces": [
+          "drive"
+        ],
+        "version": "18681",
+        "webViewLink": "https://docs.google.com/folderview?id=0B3mMPOF_fWirUFMyeDR0ckI4WHM&usp=drivesdk",
+        "iconLink": "https://ssl.gstatic.com/docs/doclist/images/icon_11_collection_list_1.png",
+        "viewedByMe": true,
+        "viewedByMeTime": "2016-05-24T12:51:13.704Z",
+        "createdTime": "2016-05-10T19:04:28.438Z",
+        "modifiedTime": "2016-05-17T16:54:48.341Z",
+        "modifiedByMeTime": "2016-05-17T16:54:48.341Z",
+        "owners": [
+          {
+            "kind": "drive#user",
+            "displayName": "Timo Whall",
+            "me": true,
+            "permissionId": "00395318281981764853",
+            "emailAddress": "sparke2929@gmail.com"
+          }
+        ],
+        "lastModifyingUser": {
+          "kind": "drive#user",
+          "displayName": "Timo Whall",
+          "me": true,
+          "permissionId": "00395318281981764853",
+          "emailAddress": "sparke2929@gmail.com"
+        },
+        "shared": false,
+        "ownedByMe": true,
+        "capabilities": {
+          "canEdit": true,
+          "canComment": true,
+          "canShare": true,
+          "canCopy": false,
+          "canReadRevisions": false
+        },
+        "viewersCanCopyContent": true,
+        "writersCanShare": true,
+        "permissions": [
+          {
+
+            "kind": "drive#permission",
+            "id": "00395318281981764853",
+            "type": "user",
+            "emailAddress": "sparke2929@gmail.com",
+            "role": "owner",
+            "displayName": "Timo Whall"
+          }
+        ],
+        "folderColorRgb": "#8f8f8f",
+        "quotaBytesUsed": "0",
+        "isAppAuthorized": false
+      }
+    },
+    {
+      "kind": "drive#change",
+      "fileId": "0B3mMPOF_fWiraEduc29UclV3UDQ",
+      "removed": false,
+      "time": "2016-05-24T19:05:35.273Z",
+      "file": {
+        "kind": "drive#file",
+        "id": "0B3mMPOF_fWiraEduc29UclV3UDQ",
+        "name": "folder2",
+        "mimeType": "application/vnd.google-apps.folder",
+        "starred": false,
+        "trashed": true,
+        "explicitlyTrashed": true,
+        "parents": [
+          "0AHmMPOF_fWirUk9PVA"
+        ],
+        "spaces": [
+          "drive"
+        ],
+        "version": "18684",
+        "webViewLink": "https://docs.google.com/folderview?id=0B3mMPOF_fWiraEduc29UclV3UDQ&usp=drivesdk",
+        "iconLink": "https://ssl.gstatic.com/docs/doclist/images/icon_11_collection_list_1.png",
+        "viewedByMe": true,
+        "viewedByMeTime": "2016-05-24T19:05:30.817Z",
+        "createdTime": "2016-05-10T19:04:28.438Z",
+        "modifiedTime": "2016-05-10T19:04:28.438Z",
+        "modifiedByMeTime": "2016-05-10T19:04:28.438Z",
+        "owners": [
+          {
+            "kind": "drive#user",
+            "displayName": "Timo Whall",
+            "me": true,
+            "permissionId": "00395318281981764853",
+            "emailAddress": "sparke2929@gmail.com"
+          }
+        ],
+        "lastModifyingUser": {
+          "kind": "drive#user",
+          "displayName": "Timo Whall",
+          "me": true,
+          "permissionId": "00395318281981764853",
+          "emailAddress": "sparke2929@gmail.com"
+        },
+        "shared": false,
+        "ownedByMe": true,
+        "capabilities": {
+          "canEdit": true,
+          "canComment": true,
+          "canShare": true,
+          "canCopy": false,
+          "canReadRevisions": false
+        },
+        "viewersCanCopyContent": true,
+        "writersCanShare": true,
+        "permissions": [
+          {
+
+            "kind": "drive#permission",
+            "id": "00395318281981764853",
+            "type": "user",
+            "emailAddress": "sparke2929@gmail.com",
+            "role": "owner",
+            "displayName": "Timo Whall"
+          }
+        ],
+        "folderColorRgb": "#8f8f8f",
+        "quotaBytesUsed": "0",
+        "isAppAuthorized": false
+      }
+    },
+    {
+      "kind": "drive#change",
+      "fileId": "0B3mMPOF_fWirUS01X0VHQm9CdTA",
+      "removed": false,
+      "time": "2016-05-24T19:05:37.465Z",
+      "file": {
+        "kind": "drive#file",
+        "id": "0B3mMPOF_fWirUS01X0VHQm9CdTA",
+        "name": "file2",
+        "mimeType": "application/octet-stream",
+        "starred": false,
+        "trashed": true,
+        "explicitlyTrashed": false,
+        "parents": [
+          "0B3mMPOF_fWiraEduc29UclV3UDQ"
+        ],
+        "spaces": [
+          "drive"
+        ],
+        "version": "18686",
+        "webContentLink": "https://docs.google.com/uc?id=0B3mMPOF_fWirUS01X0VHQm9CdTA&export=download",
+        "webViewLink": "https://drive.google.com/file/d/0B3mMPOF_fWirUS01X0VHQm9CdTA/view?usp=drivesdk",
+        "iconLink": "https://ssl.gstatic.com/docs/doclist/images/icon_10_generic_list.png",
+        "viewedByMe": true,
+        "viewedByMeTime": "2016-05-10T19:04:29.696Z",
+        "createdTime": "2016-05-10T19:04:29.696Z",
+        "modifiedTime": "2016-05-10T19:04:29.696Z",
+        "modifiedByMeTime": "2016-05-10T19:04:29.696Z",
+        "owners": [
+          {
+            "kind": "drive#user",
+            "displayName": "Timo Whall",
+            "me": true,
+            "permissionId": "00395318281981764853",
+            "emailAddress": "sparke2929@gmail.com"
+          }
+        ],
+        "lastModifyingUser": {
+          "kind": "drive#user",
+          "displayName": "Timo Whall",
+          "me": true,
+          "permissionId": "00395318281981764853",
+          "emailAddress": "sparke2929@gmail.com"
+        },
+        "shared": false,
+        "ownedByMe": true,
+        "capabilities": {
+          "canEdit": true,
+          "canComment": true,
+          "canShare": true,
+          "canCopy": true,
+          "canReadRevisions": true
+        },
+        "viewersCanCopyContent": true,
+        "writersCanShare": true,
+        "permissions": [
+          {
+
+            "kind": "drive#permission",
+            "id": "00395318281981764853",
+            "type": "user",
+            "emailAddress": "sparke2929@gmail.com",
+            "role": "owner",
+            "displayName": "Timo Whall"
+          }
+        ],
+        "originalFilename": "file2",
+        "fullFileExtension": "",
+        "fileExtension": "",
+        "md5Checksum": "d41d8cd98f00b204e9800998ecf8427e",
+        "size": "0",
+        "quotaBytesUsed": "0",
+        "headRevisionId": "0B3mMPOF_fWireDhRSVhGV3dWSWpQeWdBYmk1a0tPUERkc0NzPQ",
+        "isAppAuthorized": false
+      }
+    }
+  ]
+}
