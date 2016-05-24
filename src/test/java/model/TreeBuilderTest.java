@@ -4,7 +4,7 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.model.File;
 import com.google.gson.GsonBuilder;
 import fixtures.deserializer.DateTimeDeserializer;
-import fixtures.extensions.Test_Database_Extensions;
+import fixtures.extensions.TestDatabaseExtensions;
 import model.tree.TreeNode;
 import org.junit.Before;
 import model.tree.TreeBuilder;
@@ -19,13 +19,12 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-public class TreeBuilderTest extends Test_Database_Extensions<fixtures.model.File> {
+public class TreeBuilderTest extends TestDatabaseExtensions {
     private static Logger logger = LoggerFactory.getLogger(TreeBuilderTest.class.getSimpleName());
     private TreeBuilder treeBuilder;
 
     @Before
     public void setUp() throws IOException {
-        //@todo Mock reader object injected
         treeBuilder = new TreeBuilder("0AHmMPOF_fWirUk9PVA");
         List<File> list = new ArrayList<>();
 
@@ -67,7 +66,7 @@ public class TreeBuilderTest extends Test_Database_Extensions<fixtures.model.Fil
     }
 
     @Override
-    protected List<fixtures.model.File> getDataSet() throws IOException {
+    public List<fixtures.model.File> getDataSet() throws IOException {
         GsonBuilder gson = new GsonBuilder();
         gson.registerTypeAdapter(DateTime.class, new DateTimeDeserializer());
         fixtures.model.File[] fileList = gson.create().fromJson(new FileReader(
