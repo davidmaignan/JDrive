@@ -33,7 +33,7 @@ public class ChangeTree {
             boolean result = true;
 
             if(validChange.isNewFile()){
-                result = createNode(validChange.getChange());
+                result = fileRepository.createIfNotExists(validChange.getChange().getFile());
             }
 
             // @todo investiqge if this condition is necessary
@@ -54,23 +54,25 @@ public class ChangeTree {
     }
 
     private boolean createNode(Change change) throws Exception{
-        try {
-            String parentId = change.getFile().getParents().get(0).getId();
-
-            Node parentNode = fileRepository.getNodeById(parentId);
-
-            if (parentNode == null) {
-                logger.error(change.toPrettyString());
-                throw new Exception("Cannot create a node if parent does not exists");
-            }
-
-            Node newNode = fileRepository.createNode(change.getFile());
-
-            return fileRepository.createParentRelation(newNode, parentNode);
-        }catch (Exception exception){
-            logger.error(change.toPrettyString());
-            logger.error(exception.getMessage(), exception);
-            return false;
-        }
+        //@todo - update v3
+//        try {
+//            String parentId = change.getFile().getParents().get(0).getId();
+//
+//            Node parentNode = fileRepository.getNodeById(parentId);
+//
+//            if (parentNode == null) {
+//                logger.error(change.toPrettyString());
+//                throw new Exception("Cannot create a node if parent does not exists");
+//            }
+//
+//            Node newNode = fileRepository.createNode(change.getFile());
+//
+//            return fileRepository.createParentRelation(newNode, parentNode);
+//        }catch (Exception exception){
+//            logger.error(change.toPrettyString());
+//            logger.error(exception.getMessage(), exception);
+//            return false;
+//        }
+        return false;
     }
 }

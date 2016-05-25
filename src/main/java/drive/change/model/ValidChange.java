@@ -39,7 +39,7 @@ public class ValidChange {
     }
 
     public boolean isValid(){
-        if(change.getDeleted()){
+        if(change.getRemoved()){
             return fileNode != null;
         }
 

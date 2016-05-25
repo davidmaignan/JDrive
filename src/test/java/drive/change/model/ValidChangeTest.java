@@ -3,18 +3,28 @@ package drive.change.model;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.File;
-import com.google.api.services.drive.model.ParentReference;
-import com.google.api.services.drive.model.User;
+import com.google.gson.GsonBuilder;
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import database.repository.FileRepository;
+import fixtures.deserializer.DateTimeDeserializer;
+import fixtures.extensions.FixturesInterface;
 import model.types.MimeType;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.neo4j.graphdb.Node;
+import org.neo4j.register.Register;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
@@ -23,141 +33,103 @@ import static org.mockito.Mockito.when;
 /**
  * Created by David Maignan <davidmaignan@gmail.com> on 2016-05-17.
  */
-public class ValidChangeTest {
+@RunWith(DataProviderRunner.class)
+public class ValidChangeTest implements FixturesInterface<fixtures.model.Change>{
+    private static Logger logger = LoggerFactory.getLogger(ValidChangeTest.class.getSimpleName());
     private ValidChange validChange;
     private FileRepository fileRepository;
     private Node fileNode;
 
+
+    private List<Change> list;
+
     @Before
-    public void setUp(){
+    public void setUp() throws IOException {
         fileRepository = mock(FileRepository.class);
         fileNode = mock(Node.class);
 
         validChange = new ValidChange(fileRepository);
+
+        list = getDataSet().stream().map(this::setChange).collect(Collectors.toList());
     }
 
-    @Test
-    public void testGetters() throws Exception {
-        Change change = this.getChange(true);
+    @Override
+    public List<fixtures.model.Change> getDataSet() throws IOException {
+        GsonBuilder gson = new GsonBuilder();
+        gson.registerTypeAdapter(DateTime.class, new DateTimeDeserializer());
+        fixtures.model.Change[] fileList = gson.create().fromJson(new FileReader(
+                        this.getClass().getClassLoader().getResource("fixtures/changes.json").getFile()),
+                fixtures.model.Change[].class
+        );
 
-        when(fileRepository.getNodeById("file1")).thenReturn(fileNode);
-
-        validChange.execute(change);
-
-        assertEquals(change, validChange.getChange());
-        assertEquals(fileNode, validChange.getFileNode());
+        return Arrays.asList(fileList);
     }
 
-    @Test
-    public void testValidDeleteFileThatExists() throws Exception {
-        Change change = this.getChange(true);
-
-        when(fileRepository.getNodeById("file1")).thenReturn(fileNode);
-
-        validChange.execute(change);
-
-        assertTrue(validChange.isValid());
-    }
-
-    @Test
-    public void testValidDeleteFileThatDoesNotExists() throws Exception {
-        Change change = this.getChange(true);
-
-        when(fileRepository.getNodeById("file1")).thenReturn(null);
-
-        validChange.execute(change);
-
-        assertFalse(validChange.isValid());
-    }
-
-    @Test
-    public void testIsNewFile() throws Exception {
-        Change change = this.getChange(false);
-
-        when(fileRepository.getNodeById("file1")).thenReturn(null);
-
-        validChange.execute(change);
-
-        assertTrue(validChange.isNewFile());
-    }
-
-    @Test
-    public void testIsValid(){
-        Change change = this.getChange(false);
-
-        when(fileRepository.getNodeById("file1")).thenReturn(fileNode);
-
-        validChange.execute(change);
-
-        assertTrue(validChange.isValid());
-    }
-
-    @Test
-    public void testIsNotValidFileIsMissing(){
-        Change change = this.getChange(false);
-
-        change.setFile(null);
-
-        when(fileRepository.getNodeById("file1")).thenReturn(fileNode);
-
-        validChange.execute(change);
-
-        assertFalse(validChange.isValid());
-    }
-
-    private Change getChange(boolean deleted){
+    private Change setChange(fixtures.model.Change c){
         Change change = new Change();
-        change.setId(1l);
-        change.setModificationDate(new DateTime(1l));
-        change.setDeleted(deleted);
-        change.setSelfLink("mockSelfLink");
-        change.setFileId("file1");
-
-        File file1 = new File();
-        file1.setTitle("file1");
-        file1.setId("file1");
-        file1.setMimeType(MimeType.FOLDER);
-        file1.setVersion(0l);
-
-        file1.setParents(this.getParentReferenceList(
-                "root",
-                false
-        ));
-
-        file1.setOwners(this.getOwnerList("David Maignan", true));
-
-        change.setFile(file1);
+        change.setFileId(c.fileId);
+        change.setKind(c.kind);
+        change.setTime(c.time);
+        change.setRemoved(c.removed);
+        change.setFile(setFile(c.file));
 
         return change;
     }
 
-    private ArrayList<ParentReference> getParentReferenceList(String id, boolean bool) {
-        ArrayList<ParentReference> parentList = new ArrayList<>();
-        parentList.add(this.getParentReference(id, bool));
+    private File setFile(fixtures.model.File f){
+        if(f == null)
+            return null;
 
-        return parentList;
+        File file = new File();
+        file.setId(f.id);
+        file.setName(f.name);
+        file.setMimeType(f.mimeType);
+        file.setTrashed(f.trashed);
+        file.setParents(f.parents);
+        file.setVersion(f.version);
+        file.setCreatedTime(f.createdTime);
+        file.setModifiedTime(f.modifiedTime);
+
+        return file;
+    }
+    @Test
+    public void testValidDeleteFileThatExists() throws IOException {
+        for(Change change : list){
+            ValidChange validChange = new ValidChange(fileRepository);
+            when(fileRepository.getNodeById(change.getFileId())).thenReturn(fileNode);
+            validChange.execute(change);
+            assertTrue(validChange.isValid());
+        }
     }
 
-    private ParentReference getParentReference(String id, boolean bool) {
-        ParentReference parentReference = new ParentReference();
-        parentReference.setId(id);
-        parentReference.setIsRoot(bool);
 
-        return parentReference;
+    @Test
+    public void testGetters() throws Exception {
+        for(Change change : list){
+            ValidChange validChange = new ValidChange(fileRepository);
+            when(fileRepository.getNodeById(change.getFileId())).thenReturn(fileNode);
+            validChange.execute(change);
+            assertTrue(validChange.isValid());
+            assertEquals(change, validChange.getChange());
+            assertEquals(fileNode, validChange.getFileNode());
+        }
     }
 
-    private ArrayList<User> getOwnerList(String displayName, boolean isAuthenticatedUser) {
-        ArrayList<User> ownerList = new ArrayList<>();
-        ownerList.add(this.getOwner(displayName, isAuthenticatedUser));
-
-        return ownerList;
-    }
-
-    private User getOwner(String displayName, boolean isAuthenticatedUser) {
-        User owner = new User();
-        owner.setDisplayName(displayName);
-        owner.setIsAuthenticatedUser(isAuthenticatedUser);
-
-        return owner;
+    @Test
+    public void testValidDeleteFileThatDoesNotExists() throws Exception {
+        //Check changes.json. The 5th one is removed = true.
+        Change changeRemoved = list.remove(5);
+        when(fileRepository.getNodeById(changeRemoved.getFileId())).thenReturn(null);
+        validChange.execute(changeRemoved);
+        assertFalse(validChange.isValid());
+        assertFalse(validChange.isNewFile());
+        
+        for(Change change : list){
+            ValidChange validChange = new ValidChange(fileRepository);
+            when(fileRepository.getNodeById(change.getFileId())).thenReturn(null);
+            validChange.execute(change);
+            assertTrue(validChange.isValid());
+            assertTrue(validChange.isNewFile());
+        }
     }
 }
