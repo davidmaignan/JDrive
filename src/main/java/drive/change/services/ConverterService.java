@@ -14,70 +14,65 @@ import org.slf4j.LoggerFactory;
  * Created by david on 2016-05-04.
  */
 public class ConverterService {
-
     private FileRepository fileRepository;
-    private ChangeRepository changeRepository;
-    private ChangeService changeService;
     private Node fileNode;
     private Change change;
-
-    private CustomChange customChange;
 
     private static Logger logger = LoggerFactory.getLogger(ConverterService.class);
 
     @Inject
-    public ConverterService(FileRepository fileRepository, ChangeRepository changeRepository, ChangeService changeService){
+    public ConverterService(FileRepository fileRepository){
         this.fileRepository = fileRepository;
-        this.changeRepository = changeRepository;
-        this.changeService = changeService;
-
-        customChange = new CustomChange();
     }
 
-    public CustomChange execute(Node changeNode){
-        customChange.setChangeNode(changeNode);
+    public CustomChange execute(Change change){
 
-        String changeId = changeRepository.getId(changeNode);
+        CustomChange customChange = new CustomChange();
 
-        change = changeService.get(changeId);
         customChange.setChange(change);
-
-        if(change == null){
-            return customChange;
-        }
 
         fileNode = fileRepository.getNodeById(change.getFileId());
         customChange.setFileNode(fileNode);
 
+        //Case new file
         if(fileNode == null){
+            customChange.setNew(true);
+            Node parentNode = fileRepository.getNodeById(change.getFile().getParents().get(0));
+            customChange.setNewParentNode(parentNode);
+            customChange.setOldParentNode(parentNode);
+
+            customChange.setOldName(change.getFile().getName());
+            customChange.setNewName(change.getFile().getName());
+
             return customChange;
         }
 
-        //Check if deleted
-        customChange.setDeleted(change.getDeleted());
+        //Case deletion
+        customChange.setDeleted(change.getRemoved());
 
-
-
-        if(change.getDeleted()) {
+        if(change.getRemoved()) {
             Node parentNode = fileRepository.getParent(change.getFileId());
             customChange.setNewParentNode(parentNode);
             customChange.setOldParentNode(parentNode);
-            String title = fileRepository.getTitle(fileNode);
-            customChange.setOldName(title);
-            customChange.setNewName(title);
+            String name = fileRepository.getName(fileNode);
+            customChange.setOldName(name);
+            customChange.setNewName(name);
             return customChange;
         }
 
-        customChange.setTrashed(getTrashed(change));
+        //Case trashed
+        if (getTrashed(change)){
+            customChange.setTrashed(true);
+        }
 
-        Node newParentNode = fileRepository.getNodeById(change.getFile().getParents().get(0).getId());
+        Node newParentNode = fileRepository.getNodeById(change.getFile().getParents().get(0));
         Node oldParentNode = fileRepository.getParent(change.getFileId());
 
         customChange.setNewParentNode(newParentNode);
         customChange.setOldParentNode(oldParentNode);
 
-        customChange.setOldName(fileRepository.getTitle(fileNode));
-        customChange.setNewName(change.getFile().getTitle());
+        customChange.setOldName(fileRepository.getName(fileNode));
+        customChange.setNewName(change.getFile().getName());
 
         return customChange;
     }
@@ -90,14 +85,11 @@ public class ConverterService {
      * @return boolean
      */
     public boolean getTrashed(Change change) {
-        boolean result;
-        result =  (change.getFile() != null
+        return (change.getFile() != null
                 && change.getFile().getExplicitlyTrashed() != null
                 && change.getFile().getExplicitlyTrashed())
                 || (change.getFile() != null
-                && change.getFile().getLabels() != null
-                && change.getFile().getLabels().getTrashed());
-
-        return result;
+                && change.getFile().getTrashed() != null
+                && change.getFile().getTrashed());
     }
 }
