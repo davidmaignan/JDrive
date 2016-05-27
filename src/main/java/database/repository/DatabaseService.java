@@ -1,7 +1,5 @@
 package database.repository;
 
-import com.google.api.services.drive.model.Change;
-import com.google.api.services.drive.model.File;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import database.*;
@@ -30,8 +28,7 @@ public class DatabaseService implements DatabaseServiceInterface {
     protected GraphDatabaseService graphDB;
     private static Logger logger = LoggerFactory.getLogger(DatabaseService.class.getSimpleName());
 
-    public DatabaseService() {
-    }
+    public DatabaseService() {}
 
     public DatabaseService(GraphDatabaseService graphDB, Configuration configuration) {
         this.graphDB = graphDB;
@@ -44,7 +41,7 @@ public class DatabaseService implements DatabaseServiceInterface {
                     .create();
             tx.success();
         } catch (Exception exception) {
-//            logger.error(exception.getMessage());
+            logger.error(exception.getMessage());
         }
 
         try (Transaction tx = graphDB.beginTx()) {
@@ -54,7 +51,7 @@ public class DatabaseService implements DatabaseServiceInterface {
                     .create();
             tx.success();
         } catch (Exception exception) {
-//            logger.error(exception.getMessage());
+            logger.error(exception.getMessage());
         }
     }
 
@@ -136,10 +133,10 @@ public class DatabaseService implements DatabaseServiceInterface {
     public Node getParent(String id) {
         Node resultNode = null;
 
-        String query = "match (file {identifier: '%s'}) MATCH (folder)<-[:PARENT]-(file) return folder;";
+        String query = "match (file {%s: '%s'}) MATCH (folder)<-[:PARENT]-(file) return folder;";
         try (
                 Transaction tx = graphDB.beginTx();
-                Result result = graphDB.execute(String.format(query, id))
+                Result result = graphDB.execute(String.format(query, Fields.ID, id))
         ) {
             if (result.hasNext()) {
                 resultNode = (Node) result.next().get("folder");
@@ -163,10 +160,10 @@ public class DatabaseService implements DatabaseServiceInterface {
     public Node getNodeById(String value) {
         Node node = null;
 
-        String query = "match (file {identifier:'%s'}) return file";
+        String query = "match (file {%s:'%s'}) return file";
 
         try (Transaction tx = graphDB.beginTx()) {
-            Result result = graphDB.execute(String.format(query, value));
+            Result result = graphDB.execute(String.format(query, Fields.ID, value));
 
             tx.success();
 
@@ -192,11 +189,17 @@ public class DatabaseService implements DatabaseServiceInterface {
     public String getNodeAbsolutePath(Node node) {
         StringBuilder pathBuilder = new StringBuilder();
 
-        String query = "match (file {identifier:'%s'}) match (file)-[r*]->(m {IsRoot:true}) return r";
+        String query = "match (file {%s:'%s'}) match (file)-[r*]->(m {%s:%b}) return r";
 
         try (Transaction tx = graphDB.beginTx())
         {
-            Result result = graphDB.execute(String.format(query, node.getProperty(Fields.ID).toString()));
+            Result result = graphDB.execute(String.format(
+                    query,
+                    Fields.ID,
+                    node.getProperty(Fields.ID).toString(),
+                    Fields.IS_ROOT,
+                    true
+            ));
 
             if ( ! result.hasNext()) {
                 return "";
@@ -207,20 +210,22 @@ public class DatabaseService implements DatabaseServiceInterface {
             List<Relationship> relationshipList = (List<Relationship>) row.get("r");
 
             for (Relationship rel : relationshipList) {
-                pathBuilder.insert(0, rel.getEndNode().getProperty(Fields.TITLE).toString());
+                pathBuilder.insert(0, rel.getEndNode().getProperty(Fields.NAME).toString());
                 pathBuilder.insert(0, "/");
             }
 
             pathBuilder.append("/");
-            pathBuilder.append(node.getProperty(Fields.TITLE).toString());
+            pathBuilder.append(node.getProperty(Fields.NAME).toString());
 
             tx.success();
+
+            return pathBuilder.substring(2).toString();
 
         } catch (Exception exception) {
             logger.error(exception.getMessage());
         }
 
-        return pathBuilder.substring(2).toString();
+        return "";
     }
 
     //@todo do not return null - throw an exception instead
@@ -295,9 +300,9 @@ public class DatabaseService implements DatabaseServiceInterface {
     private void setNode(Node dbNode, TreeNode tNode) {
         dbNode.addLabel(new FileLabel());
         dbNode.setProperty(Fields.ID, tNode.getId());
-        dbNode.setProperty(Fields.TITLE, tNode.getTitle());
+        dbNode.setProperty(Fields.NAME, tNode.getName());
         dbNode.setProperty(Fields.MIME_TYPE, tNode.getMimeType());
-        dbNode.setProperty(Fields.IS_ROOT, tNode.isSuperRoot());
+        dbNode.setProperty(Fields.IS_ROOT, tNode.isRoot());
         dbNode.setProperty(Fields.PROCESSED, false);
         dbNode.setProperty(Fields.VERSION, tNode.getVersion());
         dbNode.setProperty(Fields.DELETED, false);
