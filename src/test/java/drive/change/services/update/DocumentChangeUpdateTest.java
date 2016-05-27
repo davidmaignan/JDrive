@@ -26,9 +26,7 @@ public class DocumentChangeUpdateTest {
 
     DocumentChangeUpdate service;
     FileRepository fileRepository;
-    ChangeRepository changeRepository;
     CustomChange structure;
-    Node changeNode;
     Node fileNode;
     Change change;
     File file;
@@ -36,34 +34,28 @@ public class DocumentChangeUpdateTest {
     @Before
     public void setUp() throws Exception {
         fileRepository = mock(FileRepository.class);
-        changeRepository = mock(ChangeRepository.class);
         structure = mock(CustomChange.class);
-        changeNode = mock(Node.class);
         change = new Change();
         file = new File();
         change.setFile(file);
         fileNode = mock(Node.class);
-        service = new DocumentChangeUpdate(fileRepository, changeRepository);
+        service = new DocumentChangeUpdate(fileRepository);
         service.setStructure(structure);
     }
 
     @DataProvider
     public static Object[][] dataProvider(){
         return new Object[][]{
-                {false, false, false},
-                {true, false, false},
-                {false, true, false},
-                {true, true, true},
+                {false, false},
+                {true, true},
         };
     }
 
     @Test
     @UseDataProvider("dataProvider")
-    public void testExecute(boolean changeProcessed, boolean fileTrashed, boolean expected) throws Exception {
-        when(changeRepository.markAsProcessed(changeNode)).thenReturn(changeProcessed);
-        when(fileRepository.update(fileNode, file)).thenReturn(fileTrashed);
+    public void testExecute(boolean updated, boolean expected) throws Exception {
+        when(fileRepository.update(fileNode, file)).thenReturn(updated);
 
-        when(structure.getChangeNode()).thenReturn(changeNode);
         when(structure.getFileNode()).thenReturn(fileNode);
         when(structure.getChange()).thenReturn(change);
 

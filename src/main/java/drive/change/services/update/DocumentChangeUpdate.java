@@ -11,15 +11,14 @@ public class DocumentChangeUpdate implements ChangeUpdateInterface{
     private ChangeRepository changeRepository;
 
     @Inject
-    public DocumentChangeUpdate(FileRepository fileRepository, ChangeRepository changeRepository){
+    public DocumentChangeUpdate(FileRepository fileRepository){
         this.fileRepository = fileRepository;
         this.changeRepository = changeRepository;
     }
 
     @Override
     public boolean execute() {
-        return changeRepository.markAsProcessed(structure.getChangeNode())
-                && fileRepository.update(structure.getFileNode(), structure.getChange().getFile());
+        return fileRepository.update(structure.getFileNode(), structure.getChange().getFile());
 
     }
 

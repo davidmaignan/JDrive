@@ -11,15 +11,13 @@ public class NullChangeUpdate implements ChangeUpdateInterface{
     private ChangeRepository changeRepository;
 
     @Inject
-    public NullChangeUpdate(FileRepository fileRepository, ChangeRepository changeRepository){
+    public NullChangeUpdate(FileRepository fileRepository){
         this.fileRepository = fileRepository;
-        this.changeRepository = changeRepository;
     }
 
     @Override
     public boolean execute() {
-        return changeRepository.markAsProcessed(structure.getChangeNode())
-                && fileRepository.update(structure.getFileNode(), structure.getChange().getFile());
+        return fileRepository.update(structure.getFileNode(), structure.getChange().getFile());
 
     }
 

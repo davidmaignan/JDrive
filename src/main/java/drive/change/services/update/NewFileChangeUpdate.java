@@ -5,18 +5,18 @@ import database.repository.ChangeRepository;
 import database.repository.FileRepository;
 import drive.change.model.CustomChange;
 
-public class TrashChangeUpdate implements ChangeUpdateInterface{
+public class NewFileChangeUpdate implements ChangeUpdateInterface{
     private CustomChange structure;
     private FileRepository fileRepository;
 
     @Inject
-    public TrashChangeUpdate(FileRepository fileRepository){
+    public NewFileChangeUpdate(FileRepository fileRepository){
         this.fileRepository = fileRepository;
     }
 
     @Override
     public boolean execute() {
-        return fileRepository.markAsTrashed(structure.getFileNode());
+        return fileRepository.update(structure.getFileNode(), structure.getChange().getFile());
     }
 
     @Override
