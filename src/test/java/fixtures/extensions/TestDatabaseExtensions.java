@@ -1,14 +1,20 @@
 package fixtures.extensions;
 
+import com.google.api.client.util.DateTime;
+import com.google.api.services.drive.model.File;
+import com.google.gson.GsonBuilder;
 import configuration.Configuration;
 import database.Fields;
+import fixtures.deserializer.DateTimeDeserializer;
 import org.junit.BeforeClass;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -59,5 +65,31 @@ public abstract class TestDatabaseExtensions implements FixturesInterface<fixtur
         for (Relationship rel : relationshipList) {
             System.out.printf("Type: %s - Start: %s - End :%s\n", rel.getType(), rel.getStartNode(), rel.getEndNode());
         }
+    }
+
+    @Override
+    public List<fixtures.model.File> getDataSet() throws IOException {
+        GsonBuilder gson = new GsonBuilder();
+        gson.registerTypeAdapter(DateTime.class, new DateTimeDeserializer());
+        fixtures.model.File[] fileList = gson.create().fromJson(new FileReader(
+                        this.getClass().getClassLoader().getResource("fixtures/files.json").getFile()),
+                fixtures.model.File[].class
+        );
+
+        return Arrays.asList(fileList);
+    }
+
+    protected File setFile(fixtures.model.File f){
+        File file = new File();
+        file.setId(f.id);
+        file.setName(f.name);
+        file.setMimeType(f.mimeType);
+        file.setTrashed(f.trashed);
+        file.setParents(f.parents);
+        file.setVersion(f.version);
+        file.setCreatedTime(f.createdTime);
+        file.setModifiedTime(f.modifiedTime);
+
+        return file;
     }
 }

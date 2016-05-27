@@ -56,12 +56,27 @@ public class FileRepositoryTest extends TestDatabaseExtensions {
 
         treeBuilder.build(list);
 
+        File rootFile = new File();
+        rootFile.setId(rootId);
+        repository.createRootNode(rootFile);
+
         repository.save(treeBuilder.getRoot());
     }
 
     @After
     public void tearDown() throws Exception {
         graphDb.shutdown();
+    }
+
+    @Test
+    public void testGetDepth(){
+        Node firstNode = repository.getNodeById(first);
+
+        try(Transaction tx = graphDb.beginTx()){
+            assertEquals(2L, repository.getDepth(firstNode));
+        }catch (Exception exception){
+            fail();
+        }
     }
 
     @Test
@@ -124,12 +139,6 @@ public class FileRepositoryTest extends TestDatabaseExtensions {
         }catch (Exception exception){
             fail();
         }
-    }
-
-    @Test
-    public void testGetNodeById(){
-        assertNotNull(repository.getNodeById("0B3mMPOF_fWirUFMyeDR0ckI4WHM"));
-        assertNull(repository.getNodeById("idNotExists"));
     }
 
     @Test(timeout = 10000)
@@ -209,7 +218,6 @@ public class FileRepositoryTest extends TestDatabaseExtensions {
 
             tx.success();
         } catch (Exception exception) {
-            exception.printStackTrace();
             fail();
         }
     }
@@ -308,7 +316,6 @@ public class FileRepositoryTest extends TestDatabaseExtensions {
             tx.success();
 
         }catch(Exception exception){
-            exception.printStackTrace();
             fail();
         }
     }
@@ -454,7 +461,7 @@ public class FileRepositoryTest extends TestDatabaseExtensions {
         file.setVersion(0l);
         file.setParents(Arrays.asList(new String[]{rootId}));
 
-        assertTrue(repository.createIfNotExists(file));
+        assertNotNull(repository.createIfNotExists(file));
 
         try(Transaction tx = graphDb.beginTx()){
             assertEquals(15, getResultAsList(graphDb.getAllNodes()).size());
@@ -478,7 +485,7 @@ public class FileRepositoryTest extends TestDatabaseExtensions {
         file.setVersion(0l);
         file.setParents(Arrays.asList(new String[]{rootId}));
 
-        assertTrue(repository.createIfNotExists(file));
+        assertNotNull(repository.createIfNotExists(file));
 
         try(Transaction tx = graphDb.beginTx()){
             assertEquals(15, getResultAsList(graphDb.getAllNodes()).size());
@@ -503,7 +510,7 @@ public class FileRepositoryTest extends TestDatabaseExtensions {
         file.setVersion(0l);
         file.setParents(new ArrayList<String>());
 
-        assertFalse(repository.createIfNotExists(file));
+        assertNull(repository.createIfNotExists(file));
 
         try(Transaction tx = graphDb.beginTx()){
             assertEquals(14, getResultAsList(graphDb.getAllNodes()).size());
@@ -528,7 +535,7 @@ public class FileRepositoryTest extends TestDatabaseExtensions {
         file.setVersion(0l);
         file.setParents(Arrays.asList(new String[]{rootId}));
 
-        assertFalse(repository.createIfNotExists(file));
+        assertNotNull(repository.createIfNotExists(file));
 
         try(Transaction tx = graphDb.beginTx()){
             assertEquals(14, getResultAsList(graphDb.getAllNodes()).size());
@@ -595,13 +602,11 @@ public class FileRepositoryTest extends TestDatabaseExtensions {
             first.setMimeType("application/vnd.google-apps.document");
             first.setCreatedTime(new DateTime("2016-01-07T15:14:10.751Z"));
             first.setModifiedTime(new DateTime("2016-01-07T15:14:10.751Z"));
-            first.setVersion(1l);
             first.setParents(Arrays.asList(new String[]{rootId}));
 
             assertTrue(repository.update(node, first));
 
             assertEquals("newTitle", node.getProperty(Fields.NAME));
-            assertEquals(new Long(1l), node.getProperty(Fields.VERSION));
             assertEquals("application/vnd.google-apps.document", node.getProperty(Fields.MIME_TYPE));
 
             tx.success();
@@ -746,29 +751,14 @@ public class FileRepositoryTest extends TestDatabaseExtensions {
         assertFalse(repository.createParentRelation(newNode, rootNode));
     }
 
-    @Override
-    public List<fixtures.model.File> getDataSet() throws IOException {
-        GsonBuilder gson = new GsonBuilder();
-        gson.registerTypeAdapter(DateTime.class, new DateTimeDeserializer());
-        fixtures.model.File[] fileList = gson.create().fromJson(new FileReader(
-                        this.getClass().getClassLoader().getResource("fixtures/files.json").getFile()),
-                fixtures.model.File[].class
-        );
-
-        return Arrays.asList(fileList);
+    @Test
+    public void testGetStartPageToken(){
+        assertEquals("1", repository.getStartTokenPage());
     }
 
-    private File setFile(fixtures.model.File f){
-        File file = new File();
-        file.setId(f.id);
-        file.setName(f.name);
-        file.setMimeType(f.mimeType);
-        file.setTrashed(f.trashed);
-        file.setParents(f.parents);
-        file.setVersion(f.version);
-        file.setCreatedTime(f.createdTime);
-        file.setModifiedTime(f.modifiedTime);
-
-        return file;
+    @Test
+    public void testUpdateStartPageToken(){
+        assertTrue(repository.updateStartPageToken("123"));
+        assertEquals("123", repository.getStartTokenPage());
     }
 }
