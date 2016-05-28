@@ -24,7 +24,7 @@ public class FileService {
     public FileService(){}
 
     @Inject
-    public FileService(DriveService driveService) {
+    public FileService(DriveService driveService) throws IOException {
         this.driveService = driveService;
     }
 
