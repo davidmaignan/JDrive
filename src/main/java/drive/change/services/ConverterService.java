@@ -65,6 +65,11 @@ public class ConverterService {
             customChange.setTrashed(true);
         }
 
+        //Case untrashed
+        if(fileRepository.getTrashed(fileNode) && ! getTrashed(change)) {
+            customChange.setUnTrashed(true);
+        }
+
         Node newParentNode = fileRepository.getNodeById(change.getFile().getParents().get(0));
         Node oldParentNode = fileRepository.getParent(change.getFileId());
 

@@ -24,7 +24,10 @@ public class ChangeFactoryServiceTest {
                 ChangeTypes.DOCUMENT,
                 ChangeTypes.TRASHED,
                 ChangeTypes.NULL,
-                ChangeTypes.VERSION
+                ChangeTypes.VERSION,
+                ChangeTypes.NEW_FILE,
+                ChangeTypes.NEW_FOLDER,
+                ChangeTypes.UNTRASHED
                 );
 
         assertTrue(ChangeFactoryService.get(structure) instanceof DeleteChange);
@@ -35,5 +38,8 @@ public class ChangeFactoryServiceTest {
         assertTrue(ChangeFactoryService.get(structure) instanceof TrashChange);
         assertTrue(ChangeFactoryService.get(structure) instanceof NullChange);
         assertTrue(ChangeFactoryService.get(structure) instanceof NullChange);
+        assertTrue(ChangeFactoryService.get(structure) instanceof NewFileChange);
+        assertTrue(ChangeFactoryService.get(structure) instanceof NewFolderChange);
+        assertTrue(ChangeFactoryService.get(structure) instanceof UntrashChange);
     }
 }
