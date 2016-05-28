@@ -5,3 +5,6 @@ sudo: true
 
 install: ./gradlew assemble --stacktrace
 test: ./gradelw test --stacktrace
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
