@@ -59,9 +59,15 @@ public class JDriveMain {
      * @throws IOException
      * @throws Throwable
      */
-    public static void main(String[] args) throws Throwable {
+    public static void main(String[] args) {
         initJDrive();
-        initServices();
+        try{
+            initServices();
+        }catch (Exception exception){
+            logger.error(exception.getMessage());
+            System.exit(1);
+        }
+
         setUp();
 
         try{
@@ -217,7 +223,7 @@ public class JDriveMain {
         return false;
     }
 
-    private static void initServices() {
+    private static void initServices() throws Exception{
         fileService = injector.getInstance(FileService.class);
         changeService = injector.getInstance(ChangeService.class);
         dbService = injector.getInstance(DatabaseService.class);
