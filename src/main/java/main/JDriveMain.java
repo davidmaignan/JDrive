@@ -60,15 +60,14 @@ public class JDriveMain {
      * @throws Throwable
      */
     public static void main(String[] args) {
-        initJDrive();
         try{
+            initJDrive();
             initServices();
+            setUp();
         }catch (Exception exception){
-            logger.error(exception.getMessage());
-            System.exit(1);
+            logger.error("Please check your configuration. You are missing something!");
+            System.exit(0);
         }
-
-        setUp();
 
         try{
             getLastChanges();
