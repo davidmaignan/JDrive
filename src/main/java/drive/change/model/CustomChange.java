@@ -175,6 +175,9 @@ public class CustomChange implements Comparable<CustomChange>{
     }
 
     private int convertTypeToInt(){
+        if(this.type == null)
+            this.type = getType();
+
         switch (this.type){
             case NEW_FOLDER:
                 return 0;
@@ -204,8 +207,12 @@ public class CustomChange implements Comparable<CustomChange>{
     @Override
     public String toString() {
         return "CustomChange{" +
-                type +
-                " depth: " + depth +
+                "oldName='" + oldName + '\'' +
+                ", newName='" + newName + '\'' +
+                ", oldParentNode=" + oldParentNode +
+                ", newParentNode=" + newParentNode +
+                ", type=" + type +
+                ", depth=" + depth +
                 '}';
     }
 
@@ -213,7 +220,8 @@ public class CustomChange implements Comparable<CustomChange>{
     public int compareTo(CustomChange o) {
         int convertTypeDiff = convertTypeToInt() - ((CustomChange) o).convertTypeToInt();
 
-        if(convertTypeDiff != 0) {
+
+        if(convertTypeDiff != 0 || depth == null || o.depth == null) {
             return convertTypeDiff;
         } else {
 //            int result = getDepth().compareTo(o.getDepth());
