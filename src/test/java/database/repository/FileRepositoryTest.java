@@ -1,29 +1,23 @@
 package database.repository;
 
 import com.google.api.client.util.DateTime;
-import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.File;
-import com.google.api.services.drive.model.ParentReference;
-import com.google.api.services.drive.model.User;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import com.tngtech.java.junit.dataprovider.UseDataProvider;
-import database.DatabaseModule;
+import configuration.Configuration;
 import database.Fields;
 import database.RelTypes;
-import configuration.Configuration;
 import database.labels.FileLabel;
+import fixtures.extensions.TestDatabaseExtensions;
+import model.tree.TreeBuilder;
 import model.types.MimeType;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import model.tree.TreeBuilder;
-import model.tree.TreeNode;
 import org.junit.runner.RunWith;
-import org.neo4j.graphdb.*;
+import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.test.TestGraphDatabaseFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,13 +26,19 @@ import java.util.*;
 
 import static org.junit.Assert.*;
 
+//import com.google.api.services.drive.model.ParentReference;
+
 /**
  * Created by David Maignan <davidmaignan@gmail.com> on 2015-12-31.
  */
 @RunWith(DataProviderRunner.class)
-public class FileRepositoryTest {
-    protected GraphDatabaseService graphDb;
+public class FileRepositoryTest extends TestDatabaseExtensions {
     private FileRepository repository;
+    private static Logger logger = LoggerFactory.getLogger(FileRepositoryTest.class.getSimpleName());
+    private String rootId = "0AHmMPOF_fWirUk9PVA";
+    private String first = "0B3mMPOF_fWirWlhxRXlfMmlPSmM";
+    private String folder = "0B3mMPOF_fWircUNVWDZKb1Q3Slk";
+    private String c3p0 = "0B3mMPOF_fWirS2lwd2g2b0dRTkU";
 
     @Before
     public void setUp() throws Exception {
@@ -46,7 +46,20 @@ public class FileRepositoryTest {
         Configuration configuration = new Configuration();
         repository = new FileRepository(graphDb, configuration);
 
-        repository.save(this.getRootNode());
+        TreeBuilder treeBuilder = new TreeBuilder(rootId);
+        List<File> list = new ArrayList<>();
+
+        for(fixtures.model.File file : getDataSet()){
+            list.add(setFile(file));
+        }
+
+        treeBuilder.build(list);
+
+        File rootFile = new File();
+        rootFile.setId(rootId);
+        repository.createRootNode(rootFile);
+
+        repository.save(treeBuilder.getRoot());
     }
 
     @After
@@ -55,158 +68,379 @@ public class FileRepositoryTest {
     }
 
     @Test
+    public void testGetDepth(){
+        Node firstNode = repository.getNodeById(first);
+
+        try(Transaction tx = graphDb.beginTx()){
+            assertEquals(2L, repository.getDepth(firstNode));
+        }catch (Exception exception){
+            fail();
+        }
+    }
+
+    @Test
+    public void testCreateRootNodeFails(){
+        File rootFile = new File();
+        rootFile.setId(rootId);
+
+        assertFalse(repository.createRootNode(rootFile));
+    }
+
+    @Test
+    public void testCreateRootNode(){
+        File rootFile = new File();
+        rootFile.setId("mockRootId");
+
+        assertTrue(repository.createRootNode(rootFile));
+    }
+
+    @Test
+    public void getGetName(){
+        try(Transaction tx = graphDb.beginTx()){
+            Node folderNode = graphDb.findNode(new FileLabel(), Fields.ID, folder);
+
+            assertEquals("folder", repository.getName(folderNode));
+            tx.success();
+        } catch (Exception exception){
+            fail();
+        }
+    }
+
+    @Test
+    public void getGetNameFails(){
+        Node folderNode = null;
+        try(Transaction tx = graphDb.beginTx()){
+            folderNode = graphDb.findNode(new FileLabel(), Fields.ID, "notExists");
+            tx.success();
+        } catch (Exception exception){
+            fail();
+        }
+
+        assertNull(repository.getName(folderNode));
+    }
+
+    @Test
     public void testGetRootNode(){
-        try{
+        try(Transaction tx = graphDb.beginTx()){
             Node node = repository.getRootNode();
 
-            Map<String, Object> propertyList = node.getProperties(Fields.IS_ROOT, Fields.TITLE, Fields.MIME_TYPE);
+            Map<String, Object> propertyList = node.getProperties(
+                    Fields.IS_ROOT,
+                    Fields.NAME,
+                    Fields.MIME_TYPE
+            );
 
+            assertEquals(rootId, node.getProperty(Fields.ID));
             assertTrue((boolean)propertyList.get(Fields.IS_ROOT));
-            assertEquals("", propertyList.get(Fields.TITLE));
+            assertEquals("", propertyList.get(Fields.NAME));
             assertEquals(MimeType.FOLDER, propertyList.get(Fields.MIME_TYPE));
+            tx.success();
         }catch (Exception exception){
-
+            fail();
         }
     }
 
     @Test(timeout = 10000)
-    public void testGetProperties(){
-        try{
-            Node node = repository.getNodeById("folder1");
+    public void testNodePropertiesSetFromTreeNode(){
+        Node node = repository.getNodeById("0B3mMPOF_fWirUFMyeDR0ckI4WHM");
 
-            assertEquals(new Long(100l), repository.getVersion(node));
-            assertEquals("folder1", repository.getTitle(node));
+        try(Transaction tx = graphDb.beginTx()){
+            assertEquals("0B3mMPOF_fWirUFMyeDR0ckI4WHM", node.getProperty(Fields.ID));
+            assertEquals("folder1", node.getProperty(Fields.NAME));
+            assertEquals(18551L, node.getProperty(Fields.VERSION));
+            assertEquals(MimeType.FOLDER, node.getProperty(Fields.MIME_TYPE));
+            assertFalse((boolean)node.getProperty(Fields.TRASHED));
+            assertEquals(1462907068438L, node.getProperty(Fields.CREATED_DATE));
+            assertEquals(1463504088341L, node.getProperty(Fields.MODIFIED_DATE));
+            tx.success();
         }catch (Exception exception){
-
+            fail();
         }
     }
+
+    @Test(timeout = 10000)
+    public void testSave() {
+        try (Transaction tx = graphDb.beginTx()) {
+            assertEquals(14, getResultAsList(graphDb.getAllNodes()).size());
+
+            tx.success();
+
+        } catch (Exception exception) {
+            fail();
+        }
+    }
+
+    @Test(timeout = 10000)
+    public void testRelationShipRoot() {
+        try (Transaction tx = graphDb.beginTx()) {
+            Node rootNode = graphDb.findNode(new FileLabel(), Fields.ID, rootId);
+
+            assertEquals(13, getResultAsList(graphDb.getAllRelationships()).size());
+            assertEquals(0, getResultAsList(rootNode.getRelationships(RelTypes.PARENT, Direction.OUTGOING)).size());
+
+            List<Relationship> relationships = getResultAsList(rootNode.getRelationships(RelTypes.PARENT, Direction.INCOMING));
+            assertEquals(5, relationships.size());
+
+            tx.success();
+        } catch (Exception exception) {
+            fail();
+        }
+    }
+
+    @Test(timeout = 10000)
+    public void testRelationShipFolder() {
+        try (Transaction tx = graphDb.beginTx()) {
+            Node node = graphDb.findNode(new FileLabel(), Fields.ID, first);
+
+            assertEquals(4, getResultAsList(node.getRelationships()).size());
+
+            List<Relationship> incomingRelationshipList = getResultAsList(
+                    node.getRelationships(RelTypes.PARENT, Direction.INCOMING)
+            );
+
+            ArrayList<String> expected = new ArrayList<>(Arrays.asList(
+                    "destination.csv", "destination.csf", "datas.xml"));
+
+            for(Relationship rel : incomingRelationshipList) {
+                String name = rel.getStartNode().getProperty(Fields.NAME).toString();
+                assertTrue(expected.remove(name));
+            }
+
+            assertEquals(0, expected.size());
+
+            List<Relationship> outgoingRelationshipList = getResultAsList(
+                    node.getRelationships(RelTypes.PARENT, Direction.OUTGOING)
+            );
+
+            assertEquals(1, outgoingRelationshipList.size());
+            assertRelation(outgoingRelationshipList.get(0), first, folder);
+
+            tx.success();
+        } catch (Exception exception) {
+            fail();
+        }
+    }
+
+    @Test(timeout = 10000)
+    public void testLeaf() {
+        try (Transaction tx = graphDb.beginTx()) {
+            Node c3poFile = graphDb.findNode(new FileLabel(), Fields.ID, c3p0);
+
+            List<Relationship> list = getResultAsList(c3poFile.getRelationships(RelTypes.PARENT));
+
+            assertEquals(1, list.size());
+            assertRelation(list.get(0), c3p0, folder);
+
+            List<Relationship> outgoingRelationshipList = getResultAsList(
+                    c3poFile.getRelationships(RelTypes.PARENT, Direction.INCOMING)
+            );
+
+            assertEquals(0, outgoingRelationshipList.size());
+
+            tx.success();
+        } catch (Exception exception) {
+            fail();
+        }
+    }
+
+    @Test(timeout = 10000)
+    public void testGetParent() {
+        try (Transaction tx = graphDb.beginTx()) {
+            Node parentNode = repository.getParent(folder);
+            assertEquals(rootId, parentNode.getProperty(Fields.ID));
+
+            Node firstNode = repository.getParent(first);
+            assertEquals(folder, firstNode.getProperty(Fields.ID));
+
+            tx.success();
+        } catch (Exception exception) {
+            fail();
+        }
+    }
+
 
     @Test(timeout = 10000)
     public void testUpdateRelationship(){
-        Node nodeChild = repository.getNodeById("file2");
-        Node nodeParent = repository.getNodeById("folder3");
+        Node nodeChild = repository.getNodeById(first);
+        Node nodeParent = repository.getNodeById(rootId);
 
         assertTrue(repository.updateParentRelation(nodeChild, nodeParent));
 
         try(Transaction tx = graphDb.beginTx()) {
+            Node rootNode = graphDb.findNode(new FileLabel(), Fields.ID, rootId);
 
-            Node file2 = graphDb.findNode(new FileLabel(), Fields.ID, "file2");
-            Node folder3 = graphDb.findNode(new FileLabel(), Fields.ID, "folder3");
+            assertEquals(6, getResultAsList(rootNode.getRelationships(RelTypes.PARENT, Direction.INCOMING)).size());
 
-            assertEquals("folder3",
-                    file2.getSingleRelationship(RelTypes.PARENT, Direction.OUTGOING)
+            Node firstNode = graphDb.findNode(new FileLabel(), Fields.ID, first);
+
+            assertEquals(rootId,
+                    firstNode.getSingleRelationship(RelTypes.PARENT, Direction.OUTGOING)
                             .getEndNode()
                             .getProperty(Fields.ID));
 
-            Node folder2 = graphDb.findNode(new FileLabel(), Fields.ID, "folder2");
+            Node folderNode = graphDb.findNode(new FileLabel(), Fields.ID, folder);
 
-            List<Relationship> relationshipList = getResultAsList(folder2.getRelationships(RelTypes.PARENT, Direction.INCOMING));
+            List<Relationship> relationshipList = getResultAsList(folderNode.getRelationships(RelTypes.PARENT, Direction.INCOMING));
 
-            assertEquals(1, relationshipList.size());
-            assertEquals("folder3", relationshipList.get(0).getStartNode().getProperty(Fields.ID));
-            assertEquals("folder2", relationshipList.get(0).getEndNode().getProperty(Fields.ID));
+            assertEquals(2, relationshipList.size());
 
             tx.success();
         } catch (Exception exception){
+            fail();
+        }
+    }
 
+
+    @Test
+    public void testUpdateParentRelationFails() throws Exception {
+        Node rootNode = repository.getNodeById(rootId);
+        Node child = null;
+
+        try(Transaction tx = graphDb.beginTx()){
+            child = graphDb.createNode();
+            tx.success();
+        }catch (Exception e){
+
+        }
+
+        assertFalse(repository.updateParentRelation(child, rootNode));
+
+        try(Transaction tx = graphDb.beginTx()){
+
+            List<Relationship> incomingRelationshipList = getResultAsList(
+                    rootNode.getRelationships(RelTypes.PARENT, Direction.INCOMING)
+            );
+            assertEquals(5, incomingRelationshipList.size());
+
+            tx.success();
+
+        }catch(Exception exception){
+            fail();
         }
     }
 
     @Test(timeout = 10000)
     public void testMarkAsDeletedString(){
-        assertTrue(repository.markAsDeleted("folder2"));
+        assertTrue(repository.markAsDeleted(folder));
 
         try(Transaction tx = graphDb.beginTx()) {
-            Node folder2 = graphDb.findNode(new FileLabel(), Fields.ID, "folder2");
-            Node file2 = graphDb.findNode(new FileLabel(), Fields.ID, "file2");
-            Node folder3 = graphDb.findNode(new FileLabel(), Fields.ID, "folder3");
-            Node file3 = graphDb.findNode(new FileLabel(), Fields.ID, "file3");
+            Node folderNode = graphDb.findNode(new FileLabel(), Fields.ID, folder);
+            Node c3poNode = graphDb.findNode(new FileLabel(), Fields.ID, c3p0);
+            Node dsStoreNode = graphDb.findNode(new FileLabel(), Fields.ID, "0B3mMPOF_fWirVndxcFE3T0c5R1U");
+            Node firstNode = graphDb.findNode(new FileLabel(), Fields.ID, first);
+            Node file1 = graphDb.findNode(new FileLabel(), Fields.ID, "0B3mMPOF_fWirdEtBSVZXTzZIcUU");
+            Node file2 = graphDb.findNode(new FileLabel(), Fields.ID, "0B3mMPOF_fWirU2tqQU5PTjdWd3c");
+            Node file3 = graphDb.findNode(new FileLabel(), Fields.ID, "0B3mMPOF_fWirZUM4cmFQaWlScUE");
 
-            assertTrue((boolean)folder2.getProperty(Fields.DELETED));
-            assertTrue((boolean)file2.getProperty(Fields.DELETED));
-            assertTrue((boolean)folder3.getProperty(Fields.DELETED));
-            assertTrue((boolean)file3.getProperty(Fields.DELETED));
+            assertDeletion(folderNode);
+            assertDeletion(c3poNode);
+            assertDeletion(dsStoreNode);
+            assertDeletion(firstNode);
+            assertDeletion(file1);
+            assertDeletion(file2);
+            assertDeletion(file3);
 
+            tx.success();
         } catch (Exception exception) {
-
+            fail();
         }
+    }
+
+    private void assertDeletion(Node node){
+        Map<String, Object> result = node.getProperties(Fields.DELETED, Fields.PROCESSED);
+
+        assertTrue((boolean)result.get(Fields.DELETED));
+        assertFalse((boolean)result.get(Fields.PROCESSED));
     }
 
     @Test(timeout = 10000)
     public void testMarkAsDeletedStringFails(){
-        String fileId = null;
-        assertFalse(repository.markAsDeleted(fileId));
+        assertFalse(repository.markAsDeleted("notExist"));
     }
 
     @Test(timeout = 10000)
     public void testMarkAsDeletedNode(){
         try(Transaction tx = graphDb.beginTx()) {
-            Node folder2 = graphDb.findNode(new FileLabel(), Fields.ID, "folder2");
-            Node file2 = graphDb.findNode(new FileLabel(), Fields.ID, "file2");
-            Node folder3 = graphDb.findNode(new FileLabel(), Fields.ID, "folder3");
-            Node file3 = graphDb.findNode(new FileLabel(), Fields.ID, "file3");
+            Node folderNode = graphDb.findNode(new FileLabel(), Fields.ID, folder);
+            Node c3poNode = graphDb.findNode(new FileLabel(), Fields.ID, c3p0);
+            Node dsStoreNode = graphDb.findNode(new FileLabel(), Fields.ID, "0B3mMPOF_fWirVndxcFE3T0c5R1U");
+            Node firstNode = graphDb.findNode(new FileLabel(), Fields.ID, first);
+            Node file1 = graphDb.findNode(new FileLabel(), Fields.ID, "0B3mMPOF_fWirdEtBSVZXTzZIcUU");
+            Node file2 = graphDb.findNode(new FileLabel(), Fields.ID, "0B3mMPOF_fWirU2tqQU5PTjdWd3c");
+            Node file3 = graphDb.findNode(new FileLabel(), Fields.ID, "0B3mMPOF_fWirZUM4cmFQaWlScUE");
 
-            assertTrue(repository.markAsDeleted(folder2));
+            assertTrue(repository.markAsDeleted(folderNode));
 
-            assertTrue((boolean)folder2.getProperty(Fields.DELETED));
-            assertFalse((boolean) file2.getProperty(Fields.DELETED));
-            assertFalse((boolean) folder3.getProperty(Fields.DELETED));
-            assertFalse((boolean) file3.getProperty(Fields.DELETED));
+            assertDeletion(folderNode);
+            assertDeletion(c3poNode);
+            assertDeletion(dsStoreNode);
+            assertDeletion(firstNode);
+            assertDeletion(file1);
+            assertDeletion(file2);
+            assertDeletion(file3);
 
+            tx.success();
         } catch (Exception exception) {
-
+            fail();
         }
     }
 
     @Test(timeout = 10000)
     public void testMarkAsDeletedNodeFails(){
+        Node nodeNotExists = null;
+        assertFalse(repository.markAsDeleted(nodeNotExists));
+
         try(Transaction tx = graphDb.beginTx()) {
-            Node folder2 = graphDb.findNode(new FileLabel(), Fields.ID, "folder2");
-            Node file2 = graphDb.findNode(new FileLabel(), Fields.ID, "file2");
-            Node folder3 = graphDb.findNode(new FileLabel(), Fields.ID, "folder3");
-            Node file3 = graphDb.findNode(new FileLabel(), Fields.ID, "file3");
-
-            Node node = null;
-
-            assertFalse(repository.markAsDeleted(node));
-
-            assertFalse((boolean) folder2.getProperty(Fields.DELETED));
-            assertFalse((boolean) file2.getProperty(Fields.DELETED));
-            assertFalse((boolean) folder3.getProperty(Fields.DELETED));
-            assertFalse((boolean) file3.getProperty(Fields.DELETED));
-
+            graphDb.getAllNodes().forEach(this::assertDeletionFails);
+            tx.success();
         } catch (Exception exception) {
-
+            fail();
         }
+    }
+
+    @Test
+    public void testMarkAsDeletedNodeFails2(){
+        Node folderNode = null;
+        try(Transaction tx = graphDb.beginTx()){
+            folderNode = graphDb.findNode(new FileLabel(), Fields.ID, "notExists");
+            tx.success();
+        } catch (Exception exception){
+            fail();
+        }
+
+        assertFalse(repository.markAsDeleted(folderNode));
+    }
+
+    private void assertDeletionFails(Node node){
+        assertFalse((boolean)node.getProperty(Fields.DELETED));
     }
 
     @Test(timeout = 100000)
     public void testGetUnProcessedFile(){
         Queue<Node> result = repository.getUnprocessedQueue();
-
-        assertEquals(7, result.size());
-
-        try(Transaction tx = graphDb.beginTx()) {
-            assertEquals("root", result.remove().getProperty(Fields.ID));
-            assertEquals("folder1", result.remove().getProperty(Fields.ID));
-            assertEquals("file1", result.remove().getProperty(Fields.ID));
-            assertEquals("folder2", result.remove().getProperty(Fields.ID));
-            assertEquals("file2", result.remove().getProperty(Fields.ID));
-            assertEquals("folder3", result.remove().getProperty(Fields.ID));
-            assertEquals("file3", result.remove().getProperty(Fields.ID));
+        try(Transaction tx = graphDb.beginTx()){
+            assertEquals(getResultAsList(graphDb.getAllNodes()).size(), result.size());
+            tx.success();
+        }catch (Exception exception){
+            fail();;
         }
     }
 
     @Test
     public void testMarkAsProcessed() throws Exception {
         try(Transaction tx = graphDb.beginTx()){
-            Node folder1 = repository.getNodeById("folder1");
+            Node firstNode = repository.getNodeById(first);
 
-            assertTrue(repository.markAsProcessed(folder1));
+            assertTrue(repository.markAsProcessed(firstNode));
 
-            assertTrue((boolean) folder1.getProperty(Fields.PROCESSED));
+            assertTrue((boolean) firstNode.getProperty(Fields.PROCESSED));
+
+            Queue<Node> result = repository.getUnprocessedQueue();
+            assertEquals(getResultAsList(graphDb.getAllNodes()).size() - 1, result.size());
+
+            tx.success();
         }catch(Exception exception){
-
+            fail();
         }
     }
 
@@ -216,411 +450,108 @@ public class FileRepositoryTest {
     }
 
     @Test(timeout = 10000)
-    public void testSave() {
-        try (Transaction tx = graphDb.beginTx()) {
-            assertEquals(7, getResultAsList(graphDb.getAllNodes()).size());
-
-            tx.success();
-
-        } catch (Exception exception) {
-
-        }
-    }
-
-    @Test(timeout = 10000)
-    public void testRelationShipRoot() {
-        try (Transaction tx = graphDb.beginTx()) {
-            Node rootNode = graphDb.findNode(new FileLabel(), Fields.ID, "root");
-
-            assertEquals(2, getResultAsList(rootNode.getRelationships()).size());
-            assertEquals(0, getResultAsList(rootNode.getRelationships(RelTypes.PARENT, Direction.OUTGOING)).size());
-
-            List<Relationship> relationships = getResultAsList(rootNode.getRelationships(RelTypes.PARENT, Direction.INCOMING));
-            assertEquals(2, relationships.size());
-
-            List<String> nodeIds = new ArrayList<>(Arrays.asList(new String[]{"folder1", "folder2"}));
-
-            for (Relationship rel : relationships) {
-                assertEquals(rootNode, rel.getEndNode());
-                String nodeID = rel.getStartNode().getProperty(Fields.ID).toString();
-                assertTrue(nodeIds.remove(nodeID));
-            }
-
-            assertEquals(0, nodeIds.size());
-
-            tx.success();
-        } catch (Exception exception) {
-
-        }
-    }
-
-    @Test(timeout = 10000)
-    public void testRelationShipFolder() {
-        try (Transaction tx = graphDb.beginTx()) {
-            Node rootNode = graphDb.findNode(new FileLabel(), Fields.ID, "folder3");
-
-            assertEquals(2, getResultAsList(rootNode.getRelationships()).size());
-
-            List<Relationship> incomingRelationshipList = getResultAsList(
-                    rootNode.getRelationships(RelTypes.PARENT, Direction.INCOMING)
-            );
-            assertEquals(1, incomingRelationshipList.size());
-            assertRelation(incomingRelationshipList.get(0), "file3", "folder3");
-
-            List<Relationship> outgoingRelationshipList = getResultAsList(
-                    rootNode.getRelationships(RelTypes.PARENT, Direction.OUTGOING)
-            );
-
-            assertEquals(1, outgoingRelationshipList.size());
-            assertRelation(outgoingRelationshipList.get(0), "folder3", "folder2");
-
-            tx.success();
-        } catch (Exception exception) {
-
-        }
-    }
-
-    @Test(timeout = 10000)
-    public void testLeaf() {
-        try (Transaction tx = graphDb.beginTx()) {
-            Node file1 = graphDb.findNode(new FileLabel(), Fields.ID, "file1");
-
-            List<Relationship> list = getResultAsList(file1.getRelationships(RelTypes.PARENT));
-
-            assertEquals(1, list.size());
-            assertRelation(list.get(0), "file1", "folder1");
-        }
-    }
-
-    @Test(timeout = 10000)
-    public void testSetNodeProperties() {
-        try (Transaction tx = graphDb.beginTx()) {
-            Node node = graphDb.findNode(new FileLabel(), Fields.ID, "folder1");
-
-            assertNotNull(node);
-            assertEquals("folder1", node.getProperty(Fields.ID));
-            assertEquals("application/vnd.google-apps.folder", node.getProperty(Fields.MIME_TYPE));
-            assertEquals(1420643650751L, node.getProperty(Fields.CREATED_DATE));
-            assertEquals(1420643650751L, node.getProperty(Fields.MODIFIED_DATE));
-            assertFalse((boolean) node.getProperty(Fields.PROCESSED));
-
-            tx.success();
-        } catch (Exception exception) {
-
-        }
-    }
-
-    @Test(timeout = 10000)
-    public void testGetParent() {
-        try (Transaction tx = graphDb.beginTx()) {
-            Node parentNode = repository.getParent("folder1");
-            assertEquals("root", parentNode.getProperty(Fields.ID));
-
-            tx.success();
-        } catch (Exception exception) {
-
-        }
-    }
-
-    @Test(timeout = 10000)
-    public void testCreateIfNotExistsFailure(){
+    public void testCreateIfNotExists(){
         File file = new File();
-        file.setTitle("file1");
-        file.setId("file1");
+        file.setId("mockId");
+        file.setName("newFile");
         file.setMimeType("application/vnd.google-apps.document");
-        file.setCreatedDate(new DateTime("2015-01-07T15:14:10.751Z"));
+        file.setCreatedTime(new DateTime("2015-01-07T15:14:10.751Z"));
+        file.setModifiedTime(new DateTime("2015-01-07T15:14:10.751Z"));
         file.setVersion(0l);
+        file.setParents(Arrays.asList(new String[]{rootId}));
 
-        file.setParents(this.getParentReferenceList(
-                "folder1",
-                false
-        ));
+        assertNotNull(repository.createIfNotExists(file));
 
-        file.setOwners(this.getOwnerList("David Maignan", true));
+        try(Transaction tx = graphDb.beginTx()){
+            assertEquals(15, getResultAsList(graphDb.getAllNodes()).size());
+            Node rootNode = graphDb.findNode(new FileLabel(), Fields.ID, rootId);
 
-        assertFalse(repository.createIfNotExists(file));
+            assertEquals(6, getResultAsList(rootNode.getRelationships(RelTypes.PARENT, Direction.INCOMING)).size());
+
+            tx.success();
+        }catch (Exception exception) {
+            fail();
+        }
     }
 
     @Test(timeout = 10000)
-    public void testCreateIfNotExistsSuccess(){
+    public void testCreateIfNotExistsWithoutModifiedTime(){
         File file = new File();
-        file.setTitle("newFile");
-        file.setId("newFile");
+        file.setId("mockId");
+        file.setName("newFile");
         file.setMimeType("application/vnd.google-apps.document");
-        file.setCreatedDate(new DateTime("2015-01-07T15:14:10.751Z"));
+        file.setCreatedTime(new DateTime("2015-01-07T15:14:10.751Z"));
         file.setVersion(0l);
+        file.setParents(Arrays.asList(new String[]{rootId}));
 
-        file.setParents(this.getParentReferenceList(
-                "folder1",
-                false
-        ));
+        assertNotNull(repository.createIfNotExists(file));
 
-        file.setOwners(this.getOwnerList("David Maignan", true));
-
-        assertTrue(repository.createIfNotExists(file));
-
-        try (Transaction tx = graphDb.beginTx()) {
-            Node node = graphDb.findNode(new FileLabel(), Fields.ID, "newFile");
-
-            Relationship relationship = node.getSingleRelationship(RelTypes.PARENT, Direction.OUTGOING);
-
-            assertEquals("folder1", relationship.getEndNode().getProperty(Fields.ID));
-            assertEquals("newFile", relationship.getStartNode().getProperty(Fields.ID));
-        }
-    }
-
-    /**
-     * - root
-     * - folder 1
-     * - file1
-     * - folder 2
-     * - file2
-     */
-    private TreeNode getRootNode() {
-        ArrayList<File> listFile = new ArrayList<>();
-
-        File folder1 = new File();
-
-        folder1.setTitle("folder1");
-        folder1.setId("folder1");
-        folder1.setMimeType("application/vnd.google-apps.folder");
-        folder1.setCreatedDate(new DateTime("2015-01-07T15:14:10.751Z"));
-        folder1.setModifiedDate(new DateTime("2015-01-07T15:14:10.751Z"));
-        folder1.setVersion(100l);
-
-        folder1.setParents(this.getParentReferenceList(
-                "root", true
-        ));
-
-        folder1.setOwners(this.getOwnerList("David Maignan", true));
-
-        listFile.add(folder1);
-
-        File file1 = new File();
-        file1.setTitle("file1");
-        file1.setId("file1");
-        file1.setMimeType("application/vnd.google-apps.document");
-        file1.setCreatedDate(new DateTime("2015-01-07T15:14:10.751Z"));
-        file1.setModifiedDate(new DateTime("2015-01-07T15:14:10.751Z"));
-
-        file1.setVersion(0l);
-
-        file1.setParents(this.getParentReferenceList(
-                "folder1",
-                false
-        ));
-
-        file1.setOwners(this.getOwnerList("David Maignan", true));
-
-        listFile.add(file1);
-
-        File folder2 = new File();
-        folder2.setTitle("folder2");
-        folder2.setId("folder2");
-        folder2.setMimeType("application/vnd.google-apps.folder");
-        folder2.setCreatedDate(new DateTime("2015-01-07T15:14:10.751Z"));
-        folder2.setModifiedDate(new DateTime("2015-01-07T15:14:10.751Z"));
-        folder2.setVersion(0l);
-
-        folder2.setParents(this.getParentReferenceList(
-                "root", false
-        ));
-
-        folder2.setOwners(this.getOwnerList("David Maignan", true));
-
-        listFile.add(folder2);
-
-        File file2 = new File();
-        file2.setTitle("file2");
-        file2.setId("file2");
-        file2.setMimeType("application/vnd.google-apps.document");
-        file2.setCreatedDate(new DateTime("2015-01-07T15:14:10.751Z"));
-        file2.setModifiedDate(new DateTime("2015-01-07T15:14:10.751Z"));
-
-        file2.setVersion(0l);
-
-        file2.setParents(this.getParentReferenceList(
-                "folder2",
-                false
-        ));
-
-        file2.setOwners(this.getOwnerList("David Maignan", true));
-
-        listFile.add(file2);
-
-        File folder3 = new File();
-        folder3.setTitle("folder3");
-        folder3.setId("folder3");
-        folder3.setMimeType("application/vnd.google-apps.folder");
-        folder3.setCreatedDate(new DateTime("2015-01-07T15:14:10.751Z"));
-        folder3.setModifiedDate(new DateTime("2015-01-07T15:14:10.751Z"));
-        folder3.setVersion(0l);
-
-        folder3.setParents(this.getParentReferenceList(
-                "folder2", false
-        ));
-
-        folder3.setOwners(this.getOwnerList("David Maignan", true));
-
-        listFile.add(folder3);
-
-        File file3 = new File();
-        file3.setTitle("file3");
-        file3.setId("file3");
-        file3.setMimeType("application/vnd.google-apps.document");
-        file3.setCreatedDate(new DateTime("2015-01-07T15:14:10.751Z"));
-        file3.setCreatedDate(new DateTime("2015-01-07T15:14:10.751Z"));
-        file3.setVersion(0l);
-
-        file3.setParents(this.getParentReferenceList(
-                "folder3",
-                false
-        ));
-
-        file3.setOwners(this.getOwnerList("David Maignan", true));
-
-        listFile.add(file3);
-
-        Injector injector = Guice.createInjector(new DatabaseModule());
-        TreeBuilder treeBuilder = injector.getInstance(TreeBuilder.class);
-
-        treeBuilder.build(listFile);
-
-        return treeBuilder.getRoot();
-    }
-
-    private ArrayList<ParentReference> getParentReferenceList(String id, boolean bool) {
-        ArrayList<ParentReference> parentList = new ArrayList<>();
-        parentList.add(this.getParentReference(id, bool));
-
-        return parentList;
-    }
-
-    private ParentReference getParentReference(String id, boolean bool) {
-        ParentReference parentReference = new ParentReference();
-        parentReference.setId(id);
-        parentReference.setIsRoot(bool);
-
-        return parentReference;
-    }
-
-    private ArrayList<User> getOwnerList(String displayName, boolean isAuthenticatedUser) {
-        ArrayList<User> ownerList = new ArrayList<>();
-        ownerList.add(this.getOwner(displayName, isAuthenticatedUser));
-
-        return ownerList;
-    }
-
-    private User getOwner(String displayName, boolean isAuthenticatedUser) {
-        User owner = new User();
-        owner.setDisplayName(displayName);
-        owner.setIsAuthenticatedUser(isAuthenticatedUser);
-
-        return owner;
-    }
-
-    private void assertRelation(Relationship relation, String startNode, String endNode) {
-        assertEquals(startNode, relation.getStartNode().getProperty(Fields.ID).toString());
-        assertEquals(endNode, relation.getEndNode().getProperty(Fields.ID).toString());
-    }
-
-    private void debugDb(){
-
-        List<Node> nodeList = getResultAsList(graphDb.getAllNodes());
-
-        for(Node node : nodeList) {
-            System.out.printf("%s\n", node.getProperty(Fields.ID));
-        }
-
-        List<Relationship> relationshipList = getResultAsList(graphDb.getAllRelationships());
-
-        for (Relationship rel : relationshipList) {
-            System.out.printf("Type: %s - Start: %s - End :%s\n", rel.getType(), rel.getStartNode(), rel.getEndNode());
-        }
-    }
-
-    /**
-     * Get a list from an iterable
-     *
-     * @param iterable
-     * @param <E>
-     * @return
-     */
-    private <E> List<E> getResultAsList(Iterable<E> iterable) {
-        List<E> result = new ArrayList<E>();
-
-        iterable.forEach(s -> {
-            result.add(s);
-        });
-
-        return result;
-    }
-
-    @Test
-    public void testGetTitle() throws Exception {
         try(Transaction tx = graphDb.beginTx()){
-            Node node = repository.getNodeById("folder1");
-            assertEquals("folder1", repository.getTitle(node));
-        }catch(Exception exception){
+            assertEquals(15, getResultAsList(graphDb.getAllNodes()).size());
+            Node rootNode = graphDb.findNode(new FileLabel(), Fields.ID, rootId);
 
+            assertEquals(6, getResultAsList(rootNode.getRelationships(RelTypes.PARENT, Direction.INCOMING)).size());
+
+            tx.success();
+        }catch (Exception exception) {
+            fail();
         }
     }
 
-    @Test
-    public void testGetVersion() throws Exception {
-        try(Transaction tx = graphDb.beginTx()){
-            Node node = repository.getNodeById("folder1");
-            assertEquals(new Long(100), repository.getVersion(node));
-        }catch(Exception exception){
+    @Test(timeout = 10000)
+    public void testCreateIfNotExistsParentNull(){
+        File file = new File();
+        file.setId("mockId");
+        file.setName("newFile");
+        file.setMimeType("application/vnd.google-apps.document");
+        file.setCreatedTime(new DateTime("2015-01-07T15:14:10.751Z"));
+        file.setModifiedTime(new DateTime("2015-01-07T15:14:10.751Z"));
+        file.setVersion(0l);
+        file.setParents(new ArrayList<String>());
 
+        assertNull(repository.createIfNotExists(file));
+
+        try(Transaction tx = graphDb.beginTx()){
+            assertEquals(14, getResultAsList(graphDb.getAllNodes()).size());
+            Node rootNode = graphDb.findNode(new FileLabel(), Fields.ID, rootId);
+
+            assertEquals(5, getResultAsList(rootNode.getRelationships(RelTypes.PARENT, Direction.INCOMING)).size());
+
+            tx.success();
+        }catch (Exception exception) {
+            fail();
         }
     }
 
-    @Test
-    public void testUpdateParentRelation() throws Exception {
+    @Test(timeout = 10000)
+    public void testCreateIfNotExistsFailsNodeAlreadyExists(){
+        File file = new File();
+        file.setId(rootId);
+        file.setName("newFile");
+        file.setMimeType("application/vnd.google-apps.document");
+        file.setCreatedTime(new DateTime("2015-01-07T15:14:10.751Z"));
+        file.setModifiedTime(new DateTime("2015-01-07T15:14:10.751Z"));
+        file.setVersion(0l);
+        file.setParents(Arrays.asList(new String[]{rootId}));
+
+        assertNotNull(repository.createIfNotExists(file));
+
         try(Transaction tx = graphDb.beginTx()){
+            assertEquals(14, getResultAsList(graphDb.getAllNodes()).size());
+            Node rootNode = graphDb.findNode(new FileLabel(), Fields.ID, rootId);
 
-            Node folder3 = repository.getNodeById("folder3");
-            Node folder1 = repository.getNodeById("folder1");
+            assertEquals(5, getResultAsList(rootNode.getRelationships(RelTypes.PARENT, Direction.INCOMING)).size());
 
-            assertTrue(repository.updateParentRelation(folder3, folder1));
-
-            List<Relationship> incomingRelationshipList = getResultAsList(
-                    folder1.getRelationships(RelTypes.PARENT, Direction.INCOMING)
-            );
-            assertEquals(2, incomingRelationshipList.size());
-            assertRelation(incomingRelationshipList.get(0), "file1", "folder1");
-            assertRelation(incomingRelationshipList.get(1), "folder3", "folder1");
-
-
-        }catch(Exception exception){
-
-        }
-    }
-
-    @Test
-    public void testUpdateParentRelationFails() throws Exception {
-        try(Transaction tx = graphDb.beginTx()){
-
-            Node folder3 = repository.getNodeById("folder3");
-            Node folder1 = repository.getNodeById("folder1");
-
-            assertFalse(repository.updateParentRelation(folder3, null));
-
-            List<Relationship> incomingRelationshipList = getResultAsList(
-                    folder1.getRelationships(RelTypes.PARENT, Direction.INCOMING)
-            );
-            assertEquals(1, incomingRelationshipList.size());
-
-        }catch(Exception exception){
-
+            tx.success();
+        }catch (Exception exception) {
+            fail();
         }
     }
 
     @Test
     public void testMarkAsTrashed() throws Exception {
         try(Transaction tx = graphDb.beginTx()){
-            Node folder1 = repository.getNodeById("folder1");
+            Node folder1 = repository.getNodeById(first);
 
             repository.markAsTrashed(folder1);
 
@@ -642,233 +573,159 @@ public class FileRepositoryTest {
 
     @Test
     public void testMarkAsUnTrashed() throws Exception {
+        Node folder1 = repository.getNodeById(first);
+        assertTrue(repository.markAsUnTrashed(folder1));
+
         try(Transaction tx = graphDb.beginTx()){
-            Node folder1 = repository.getNodeById("folder1");
-
-            assertTrue(repository.markAsUnTrashed(folder1));
-
             assertFalse((boolean) folder1.getProperty(Fields.TRASHED));
             assertFalse((boolean)folder1.getProperty(Fields.PROCESSED));
+            tx.success();
         }catch(Exception exception){
-
+            fail();
         }
     }
 
     @Test
     public void testMarkAsUnTrashedFails() throws Exception {
-        try(Transaction tx = graphDb.beginTx()){
-            assertFalse(repository.markAsTrashed(null));
-        }catch(Exception exception){
-
-        }
+        assertFalse(repository.markAsTrashed(null));
     }
 
     @Test
     public void testUpdate() throws Exception {
         try(Transaction tx = graphDb.beginTx()){
-            Node node = repository.getNodeById("folder1");
+            Node node = repository.getNodeById(first);
 
-            File folder1 = new File();
+            File first = new File();
 
-            folder1.setTitle("newTitle");
-            folder1.setId("newId");
-            folder1.setMimeType("application/vnd.google-apps.document");
-            folder1.setCreatedDate(new DateTime("2016-01-07T15:14:10.751Z"));
-            folder1.setModifiedDate(new DateTime("2016-01-07T15:14:10.751Z"));
-            folder1.setVersion(1l);
+            first.setName("newTitle");
+            first.setMimeType("application/vnd.google-apps.document");
+            first.setCreatedTime(new DateTime("2016-01-07T15:14:10.751Z"));
+            first.setModifiedTime(new DateTime("2016-01-07T15:14:10.751Z"));
+            first.setParents(Arrays.asList(new String[]{rootId}));
 
-            folder1.setParents(this.getParentReferenceList(
-                    "root", true
-            ));
+            assertTrue(repository.update(node, first));
 
-            folder1.setOwners(this.getOwnerList("David Maignan", true));
-
-            assertTrue(repository.update(node, folder1));
-
-            assertEquals("newTitle", node.getProperty(Fields.TITLE));
-            assertEquals(new Long(1l), node.getProperty(Fields.VERSION));
+            assertEquals("newTitle", node.getProperty(Fields.NAME));
             assertEquals("application/vnd.google-apps.document", node.getProperty(Fields.MIME_TYPE));
-        }catch(Exception exception){
 
+            tx.success();
+        }catch(Exception exception){
+            fail();
         }
     }
 
     @Test
     public void testUpdateFails() throws Exception {
-        try(Transaction tx = graphDb.beginTx()){
-            Node node = repository.getNodeById("folder1");
-            assertFalse(repository.update(node, null));
-        }catch(Exception exception){
-
-        }
+        Node node = repository.getNodeById("folder1");
+        assertFalse(repository.update(node, null));
     }
 
     @Test
     public void testGetUnprocessedQueue() throws Exception {
-        try(Transaction tx = graphDb.beginTx()) {
-            Queue<Node> result = repository.getUnprocessedQueue();
-
-            assertEquals(7, result.size());
-        }catch (Exception exception) {
-
-        }
+        Queue<Node> result = repository.getUnprocessedQueue();
+        assertEquals(14, result.size());
     }
 
     @Test
     public void testGetTrashedList() throws Exception {
         try(Transaction tx = graphDb.beginTx()) {
-            Node folder1 = repository.getNodeById("folder1");
-            repository.markAsTrashed(folder1);
+            Node firstNode = repository.getNodeById(first);
+            repository.markAsTrashed(firstNode);
 
-            Node file1 = repository.getNodeById("file1");
-            repository.markAsTrashed(file1);
+            Node folderNode = repository.getNodeById(folder);
+            repository.markAsTrashed(folderNode);
 
             List<Node> result = repository.getTrashedList();
 
-            assertEquals(2, result.size());
-        }catch (Exception exception) {
+            assertEquals(7, result.size());
 
+            tx.success();
+        }catch (Exception exception) {
+            fail();
         }
+    }
+
+
+    @Test
+    public void testGetTrashedQueueEmpty() throws Exception {
+        Queue<Node> result = repository.getTrashedQueue();
+        assertEquals(0, result.size());
     }
 
     @Test
     public void testGetTrashedQueue() throws Exception {
         try(Transaction tx = graphDb.beginTx()) {
-            Node folder1 = repository.getNodeById("folder1");
-            repository.markAsTrashed(folder1);
+            Node firstNode = repository.getNodeById(first);
+            repository.markAsTrashed(firstNode);
 
-            Node file1 = repository.getNodeById("file1");
-            repository.markAsTrashed(file1);
+            Node folderNode = repository.getNodeById(folder);
+            repository.markAsTrashed(folderNode);
 
-            Queue<Node> result = repository.getTrashedQueue();
-
-            assertEquals(2, result.size());
+            assertEquals(7, repository.getTrashedQueue().size());
+            tx.success();
         }catch (Exception exception) {
+            fail();
+        }
+    }
 
+    @Test
+    public void testGetTrashedQueue2() throws Exception {
+        try(Transaction tx = graphDb.beginTx()) {
+            Node firstNode = repository.getNodeById(first);
+            repository.markAsTrashed(firstNode);
+
+            assertEquals(4, repository.getTrashedQueue().size());
+            tx.success();
+        }catch (Exception exception) {
+            fail();
         }
     }
 
     @Test
     public void testGetDeletedQueue() throws Exception {
         try(Transaction tx = graphDb.beginTx()) {
-            Node folder1 = repository.getNodeById("folder1");
-            repository.markAsDeleted(folder1);
+            Node firstNode = repository.getNodeById(first);
+            repository.markAsDeleted(firstNode);
 
-            Node file1 = repository.getNodeById("file1");
-            repository.markAsDeleted(file1);
+            Node folderNode = repository.getNodeById(folder);
+            repository.markAsDeleted(folderNode);
 
-            Queue<Node> result = repository.getDeletedQueue();
+            assertEquals(7, repository.getDeletedQueue().size());
 
-            assertEquals(2, result.size());
+            tx.success();
         }catch (Exception exception) {
-
+            fail();
         }
     }
 
     @Test
-    public void testCreateIfNotExists() throws Exception {
+    public void testGetDeletedQueue2() throws Exception {
         try(Transaction tx = graphDb.beginTx()) {
-            File file = new File();
+            Node firstNode = repository.getNodeById(first);
+            repository.markAsDeleted(firstNode);
 
-            file.setTitle("newTitle");
-            file.setId("newId");
-            file.setMimeType("application/vnd.google-apps.document");
-            file.setCreatedDate(new DateTime("2016-01-07T15:14:10.751Z"));
-            file.setModifiedDate(new DateTime("2016-01-07T15:14:10.751Z"));
-            file.setVersion(1l);
+            assertEquals(4, repository.getDeletedQueue().size());
 
-            file.setParents(this.getParentReferenceList(
-                    "root", true
-            ));
-
-            file.setOwners(this.getOwnerList("David Maignan", true));
-
-            assertTrue(repository.createIfNotExists(file));
-
-
+            tx.success();
         }catch (Exception exception) {
-
+            fail();
         }
     }
 
-    @DataProvider
-    public static Object[][] dataProviderCreateNode(){
-        return new Object[][]{
-                {false, false, false},
-                {true, false, true},
-                {true, true, true}
-        };
-    }
 
     @Test
-    @UseDataProvider("dataProviderCreateNode")
-    public void testCreateNode(boolean explicitly, boolean trashed, boolean expected) throws Exception {
-        try(Transaction tx = graphDb.beginTx()) {
-            File file = new File();
-
-            file.setTitle("newTitle");
-            file.setId("newId");
-            file.setMimeType("application/vnd.google-apps.document");
-            file.setCreatedDate(new DateTime("2016-01-07T15:14:10.751Z"));
-            file.setModifiedDate(new DateTime("2016-01-07T15:14:10.751Z"));
-            file.setVersion(1l);
-
-            file.setExplicitlyTrashed(explicitly);
-            file.getLabels().setTrashed(trashed);
-
-            file.setParents(this.getParentReferenceList(
-                    "root", true
-            ));
-
-            file.setOwners(this.getOwnerList("David Maignan", true));
-
-            Node result = repository.createNode(file);
-
-            assertEquals("newTitle", result.getProperty(Fields.TITLE));
-            assertEquals("newId", result.getProperty(Fields.ID));
-            assertEquals(expected, (boolean) result.getProperty(Fields.TRASHED));
-            assertFalse((boolean)result.getProperty(Fields.DELETED));
-        }catch (Exception exception) {
-
-        }
+    public void testGetDeletedQueueEmpty() throws Exception {
+        Queue<Node> result = repository.getDeletedQueue();
+        assertEquals(0, result.size());
     }
+
 
     @Test
     public void testCreateParentRelation() throws Exception {
         try(Transaction tx = graphDb.beginTx()) {
-            File file = new File();
 
-            file.setTitle("file");
-            file.setId("file");
-            file.setMimeType("application/vnd.google-apps.document");
-            file.setCreatedDate(new DateTime("2016-01-07T15:14:10.751Z"));
-            file.setModifiedDate(new DateTime("2016-01-07T15:14:10.751Z"));
-            file.setVersion(1l);
-
-            file.setParents(this.getParentReferenceList(
-                    "root", true
-            ));
-
-            file.setOwners(this.getOwnerList("David Maignan", true));
-
-            Node fileNode = repository.createNode(file);
-
-            File folder1 = new File();
-
-            folder1.setTitle("folder");
-            folder1.setId("folder");
-            folder1.setMimeType("application/vnd.google-apps.folder");
-            folder1.setCreatedDate(new DateTime("2016-01-07T15:14:10.751Z"));
-            folder1.setModifiedDate(new DateTime("2016-01-07T15:14:10.751Z"));
-            folder1.setVersion(1l);
-
-            folder1.setParents(this.getParentReferenceList(
-                    "root", true
-            ));
-
-            folder1.setOwners(this.getOwnerList("David Maignan", true));
-
-            Node folderNode = repository.createNode(file);
+            Node fileNode = graphDb.createNode();
+            Node folderNode = graphDb.createNode();
 
             boolean result = repository.createParentRelation(fileNode, folderNode);
 
@@ -877,41 +734,30 @@ public class FileRepositoryTest {
             List<Relationship> incomingRelationshipList = getResultAsList(
                     folderNode.getRelationships(RelTypes.PARENT, Direction.INCOMING)
             );
-            assertEquals(1, incomingRelationshipList.size());
-            assertRelation(incomingRelationshipList.get(0), "file", "folder");
-        }catch (Exception exception) {
 
+            assertEquals(1, incomingRelationshipList.size());
+            tx.success();
+
+        }catch (Exception exception) {
+            fail();
         }
     }
 
     @Test
     public void testCreateParentRelationFails() throws Exception {
-        try(Transaction tx = graphDb.beginTx()) {
-            File folder1 = new File();
+        Node rootNode = null;
+        Node newNode = null;
+        assertFalse(repository.createParentRelation(newNode, rootNode));
+    }
 
-            folder1.setTitle("folder");
-            folder1.setId("folder");
-            folder1.setMimeType("application/vnd.google-apps.folder");
-            folder1.setCreatedDate(new DateTime("2016-01-07T15:14:10.751Z"));
-            folder1.setModifiedDate(new DateTime("2016-01-07T15:14:10.751Z"));
-            folder1.setVersion(1l);
-            folder1.setParents(this.getParentReferenceList(
-                    "root", true
-            ));
-            folder1.setOwners(this.getOwnerList("David Maignan", true));
+    @Test
+    public void testGetStartPageToken(){
+        assertEquals("1", repository.getStartTokenPage());
+    }
 
-            Node folderNode = repository.createNode(folder1);
-
-            assertFalse(repository.createParentRelation(null, folderNode));
-
-            List<Relationship> incomingRelationshipList = getResultAsList(
-                    folderNode.getRelationships(RelTypes.PARENT, Direction.INCOMING)
-            );
-            assertEquals(0, incomingRelationshipList.size());
-
-            tx.success();
-        }catch (Exception exception) {
-
-        }
+    @Test
+    public void testUpdateStartPageToken(){
+        assertTrue(repository.updateStartPageToken("123"));
+        assertEquals("123", repository.getStartTokenPage());
     }
 }

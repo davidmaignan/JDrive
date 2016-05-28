@@ -40,5 +40,16 @@ public class ChangeModule extends AbstractModule {
         //Google mime types
         bind(ChangeServiceInterface.class).annotatedWith(Document.class).to(DocumentService.class);
         bind(ChangeUpdateInterface.class).annotatedWith(Document.class).to(DocumentChangeUpdate.class);
+
+        //NewFile File
+        bind(ChangeServiceInterface.class).annotatedWith(NewFile.class).to(NewFileService.class);
+        bind(ChangeUpdateInterface.class).annotatedWith(NewFile.class).to(NewFileChangeUpdate.class);
+
+        //NewFile Folder
+        bind(ChangeServiceInterface.class).annotatedWith(NewFolder.class).to(NewFolderService.class);
+        bind(ChangeUpdateInterface.class).annotatedWith(NewFolder.class).to(NewFolderChangeUpdate.class);
+
+        bind(ChangeServiceInterface.class).annotatedWith(UnTrash.class).to(UntrashService.class);
+        bind(ChangeUpdateInterface.class).annotatedWith(UnTrash.class).to(UntrashChangeUpdate.class);
     }
 }

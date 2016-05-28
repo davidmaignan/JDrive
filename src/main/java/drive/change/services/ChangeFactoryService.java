@@ -45,6 +45,21 @@ public class ChangeFactoryService {
                         new ChangeModule(),
                         new FileSystemModule()).getInstance(TrashChange.class);
                 break;
+            case NEW_FILE:
+                service = Guice.createInjector(
+                        new ChangeModule(),
+                        new FileSystemModule()).getInstance(NewFileChange.class);
+                break;
+            case NEW_FOLDER:
+                service = Guice.createInjector(
+                        new ChangeModule(),
+                        new FileSystemModule()).getInstance(NewFolderChange.class);
+                break;
+            case UNTRASHED:
+                service = Guice.createInjector(
+                        new ChangeModule(),
+                        new FileSystemModule()).getInstance(UntrashChange.class);
+                break;
             default:
                 service = Guice.createInjector(
                         new ChangeModule(),

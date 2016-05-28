@@ -6,9 +6,12 @@ package database;
  * David Maignan <davidmaignan@gmail.com>
  */
 public class Fields {
+    //Root node
+    public static final String START_PAGE_TOKEN = "startPageToken";
+
     //File node
     public static final String ID             = "identifier";
-    public static final String TITLE          = "title";
+    public static final String NAME           = "name";
     public static final String PATH           = "path";
     public static final String CREATED_DATE   = "createdDate";
     public static final String MODIFIED_DATE  = "modifiedDate";
@@ -23,7 +26,8 @@ public class Fields {
 
     //Change node
     public static final String FILE_ID        = "fileId";
-    public static final String SELF_LINK      = "selfLink";
+    public static final String KIND           = "kind";
     public static final String DELETED        = "deleted";
     public static final String TRASHED        = "trashed";
+    public static final String TIME           = "time";
 }

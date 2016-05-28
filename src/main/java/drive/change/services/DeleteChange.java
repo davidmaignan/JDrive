@@ -1,8 +1,8 @@
 package drive.change.services;
 
 import com.google.inject.Inject;
-import drive.change.model.CustomChange;
 import drive.change.annotations.Delete;
+import drive.change.model.CustomChange;
 import drive.change.services.apply.ChangeServiceInterface;
 import drive.change.services.update.ChangeUpdateInterface;
 

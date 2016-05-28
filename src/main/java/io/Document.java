@@ -2,20 +2,15 @@ package io;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
-import database.repository.FileRepository;
-import drive.api.DriveService;
-import drive.api.FileService;
 import io.filesystem.FileSystemInterface;
 import io.filesystem.annotations.Real;
-import org.neo4j.graphdb.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
-
-import static java.nio.file.StandardOpenOption.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * JDrive

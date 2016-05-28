@@ -2,11 +2,11 @@ package drive.change.services;
 
 import drive.change.model.ChangeTypes;
 import drive.change.model.CustomChange;
+import org.junit.Test;
+
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import org.junit.Test;
 
 /**
  * Created by david on 2016-05-18.
@@ -24,7 +24,10 @@ public class ChangeFactoryServiceTest {
                 ChangeTypes.DOCUMENT,
                 ChangeTypes.TRASHED,
                 ChangeTypes.NULL,
-                ChangeTypes.VERSION
+                ChangeTypes.VERSION,
+                ChangeTypes.NEW_FILE,
+                ChangeTypes.NEW_FOLDER,
+                ChangeTypes.UNTRASHED
                 );
 
         assertTrue(ChangeFactoryService.get(structure) instanceof DeleteChange);
@@ -35,5 +38,8 @@ public class ChangeFactoryServiceTest {
         assertTrue(ChangeFactoryService.get(structure) instanceof TrashChange);
         assertTrue(ChangeFactoryService.get(structure) instanceof NullChange);
         assertTrue(ChangeFactoryService.get(structure) instanceof NullChange);
+        assertTrue(ChangeFactoryService.get(structure) instanceof NewFileChange);
+        assertTrue(ChangeFactoryService.get(structure) instanceof NewFolderChange);
+        assertTrue(ChangeFactoryService.get(structure) instanceof UntrashChange);
     }
 }

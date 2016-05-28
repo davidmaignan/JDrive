@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +18,7 @@ import java.util.List;
  * David Maignan <davidmaignan@gmail.com>
  */
 public class FileService {
+    private static Logger logger = LoggerFactory.getLogger(FileService.class.getSimpleName());
     private DriveService driveService;
 
     public FileService(){}
@@ -35,13 +37,15 @@ public class FileService {
     public List<File> getAll() throws IOException{
         List<File> result = new ArrayList<>();
 
-        Drive.Files.List request = driveService.getDrive().files().list().setMaxResults(1000);
+        String fields = "files(createdTime,explicitlyTrashed,id,mimeType,modifiedTime,name,parents,size,trashed,version)";
+
+        Drive.Files.List request = driveService.getDrive().files().list().setFields(fields);
 
         do {
             try {
                 FileList files = request.execute();
 
-                result.addAll(files.getItems());
+                result.addAll(files.getFiles());
                 request.setPageToken(files.getNextPageToken());
 
             } catch (IOException e) {
@@ -54,6 +58,8 @@ public class FileService {
         return result;
     }
 
+//    files(createdTime,explicitlyTrashed,id,mimeType,modifiedTime,name,parents,size,trashed,version)
+
     /**
      * Get file by id
      * @param fileId
@@ -63,9 +69,39 @@ public class FileService {
         try {
             return driveService.getDrive().files().get(fileId).execute();
         } catch (IOException e) {
-            Logger logger = LoggerFactory.getLogger(this.getClass().getName());
+
             logger.error("Error: Cannot retrieve the file: " + fileId);
         }
+        return null;
+    }
+
+    /**
+     * Get InputStream for a fileId
+     * @param id
+     * @return
+     * @throws IOException
+     */
+    public InputStream downloadFile(String id) throws IOException {
+        try {
+            return driveService.getDrive().files().get(id).executeMediaAsInputStream();
+        } catch (IOException e) {
+            logger.error("Cannot get file from google drive api: " + id);
+            return null;
+        }
+    }
+
+    /**
+     * Get root id
+     *
+     * @return File root of the drive.
+     */
+    public File getRoot(){
+        try{
+            return driveService.getDrive().files().get("root").execute();
+        } catch (IOException exception) {
+            logger.error(exception.getMessage());
+        }
+
         return null;
     }
 }

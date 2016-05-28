@@ -1,28 +1,25 @@
 package model.tree;
 
 import com.google.api.services.drive.model.File;
-import com.google.inject.Inject;
-import configuration.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- * Tree File structure of the Google DriveMimeTypes
+ * Tree File structure
  *
  * David Maignan <davidmaignan@gmail.com>
  */
 public class TreeBuilder {
-    private List<File> fileList;
-
+    private static Logger logger = LoggerFactory.getLogger(TreeBuilder.class.getSimpleName());
     private TreeNode root;
 
-    private final Configuration configConfiguration;
-
-    @Inject
-    public TreeBuilder(Configuration configConfiguration) throws Exception {
-        this.configConfiguration = configConfiguration;
+    public TreeBuilder(String rootId) {
         root = new TreeNode();
+        root.setId(rootId);
     }
 
     /**
@@ -31,17 +28,12 @@ public class TreeBuilder {
      * @return
      */
     public TreeNode build(List<File> list) {
-        this.fileList           = list;
         List<TreeNode> nodeList = this.getNodeList(list);
 
         while (! nodeList.isEmpty()) {
-            ArrayList<TreeNode> tmp = new ArrayList<>();
-
-            for (TreeNode node : nodeList) {
-                if (insertNode(root, node)) {
-                    tmp.add(node);
-                }
-            }
+            ArrayList<TreeNode> tmp = nodeList.stream()
+                    .filter(node -> insertNode(root, node))
+                    .collect(Collectors.toCollection(ArrayList::new));
 
             nodeList.removeAll(tmp);
         }
@@ -63,7 +55,7 @@ public class TreeBuilder {
      * @param node
      */
     public static void printTree(TreeNode node) {
-        System.out.println(node);
+        logger.debug(node.toString());
 
         List<TreeNode> children = node.getChildren();
 
@@ -83,19 +75,11 @@ public class TreeBuilder {
     private boolean insertNode(TreeNode root, TreeNode node) {
         Boolean result = false;
 
-        if (! node.isAuthenticatedUser()) {
-            //@todo shared with me files/folder
-            result = true;
+        if(node.getParentId() == null) {
+            return true;
+        }
 
-        } else if (node.isRoot()) {
-            root.addChild(node);
-            root.setId(node.getParentId());
-
-            result = true;
-
-        } else if (node.getParentId() != null
-                && root.getId() != null
-                && root.getId().equals(node.getParentId())){
+        if (node.getParentId().equals(root.getId())) {
             root.addChild(node);
 
             result = true;
@@ -116,12 +100,6 @@ public class TreeBuilder {
      * @return List<TreeNode>
      */
     private List<TreeNode> getNodeList(List<File> list) {
-        List<TreeNode> nodeList = new ArrayList<>();
-
-        for (File file : fileList) {
-            nodeList.add(new TreeNode(file));
-        }
-
-        return nodeList;
+        return list.stream().map(TreeNode::new).collect(Collectors.toList());
     }
 }

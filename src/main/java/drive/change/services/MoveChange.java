@@ -5,8 +5,6 @@ import drive.change.annotations.Move;
 import drive.change.model.CustomChange;
 import drive.change.services.apply.ChangeServiceInterface;
 import drive.change.services.update.ChangeUpdateInterface;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
