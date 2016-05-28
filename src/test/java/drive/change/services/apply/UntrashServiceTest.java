@@ -2,26 +2,25 @@ package drive.change.services.apply;
 
 import database.repository.FileRepository;
 import drive.change.model.CustomChange;
-import io.Delete;
-import io.Trashed;
-import org.junit.Test;
-
+import io.File;
 import org.junit.Before;
+import org.junit.Test;
 import org.neo4j.graphdb.Node;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Created by david on 2016-05-19.
  */
-public class TrashServiceTest {
+public class UntrashServiceTest {
 
     private FileRepository fileRepository;
-    private TrashService service;
+    private UntrashService service;
     private CustomChange structure;
-    private Trashed trashed;
+    private File file;
     private Node parentNode;
     private String name;
     private String path;
@@ -30,12 +29,12 @@ public class TrashServiceTest {
     public void setUp(){
         fileRepository = mock(FileRepository.class);
         structure = mock(CustomChange.class);
-        trashed = mock(Trashed.class);
+        file = mock(File.class);
         parentNode = mock(Node.class);
         name = "mockName";
         path = "/folder";
 
-        service = new TrashService(fileRepository, trashed);
+        service = new UntrashService(fileRepository, file);
         service.setStructure(structure);
     }
 
@@ -45,7 +44,7 @@ public class TrashServiceTest {
         when(structure.getOldParentNode()).thenReturn(parentNode);
         when(structure.getOldName()).thenReturn(name);
 
-        when(trashed.write("folder/mockName")).thenReturn(true);
+        when(file.write("folder/mockName")).thenReturn(true);
 
         assertTrue(service.execute());
     }
@@ -57,7 +56,7 @@ public class TrashServiceTest {
         when(structure.getOldParentNode()).thenReturn(parentNode);
         when(structure.getOldName()).thenReturn(name);
 
-        when(trashed.write("folder/mockName")).thenReturn(true);
+        when(file.write("folder/mockName")).thenReturn(true);
 
         assertTrue(service.execute());
     }
@@ -68,7 +67,7 @@ public class TrashServiceTest {
         when(structure.getOldParentNode()).thenReturn(parentNode);
         when(structure.getOldName()).thenReturn(name);
 
-        when(trashed.write("folder/mockName")).thenReturn(false);
+        when(file.write("folder/mockName")).thenReturn(false);
 
         assertFalse(service.execute());
     }

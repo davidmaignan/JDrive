@@ -19,6 +19,7 @@ import java.nio.file.StandardCopyOption;
  * David Maignan <davidmaignan@gmail.com>
  */
 public class MoveService implements ChangeServiceInterface {
+    private static Logger logger = LoggerFactory.getLogger(MoveService.class.getSimpleName());
     private CustomChange structure;
     private FileRepository fileRepository;
     private Move move;
@@ -42,12 +43,12 @@ public class MoveService implements ChangeServiceInterface {
     private String getOldPath(){
         return String.format("%s/%s",
                 fileRepository.getNodeAbsolutePath(structure.getOldParentNode()),
-                structure.getOldName());
+                structure.getOldName()).replaceFirst("^/", "");
     }
 
     private String getNewPath(){
         return String.format("%s/%s",
                 fileRepository.getNodeAbsolutePath(structure.getNewParentNode()),
-                structure.getNewName());
+                structure.getNewName()).replaceFirst("^/", "");
     }
 }

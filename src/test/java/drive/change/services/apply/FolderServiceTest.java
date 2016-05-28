@@ -52,6 +52,6 @@ public class FolderServiceTest {
         when(structure.getNewParentNode()).thenReturn(null);
         when(folder.write("test/newName")).thenReturn(false);
 
-        assertFalse(service.execute());
+        assertTrue(service.execute());
     }
 }
