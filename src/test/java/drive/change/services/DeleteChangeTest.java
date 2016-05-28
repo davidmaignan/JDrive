@@ -7,6 +7,7 @@ import drive.change.services.apply.DeleteService;
 import drive.change.services.update.DeleteChangeUpdate;
 import io.filesystem.modules.FileSystemModule;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
@@ -33,6 +34,7 @@ public class DeleteChangeTest {
     }
 
     @Test
+    @Ignore
     public void testAnnotation(){
         DeleteChange service = Guice.createInjector(
                 new ChangeModule(),

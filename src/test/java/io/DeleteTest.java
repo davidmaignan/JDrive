@@ -34,7 +34,7 @@ public class DeleteTest {
     public void setUp() throws Exception {
         Configuration configuration = new Configuration();
         fs = new FileSystemWrapperTest(configuration);
-        
+
         delete = new Delete(fs);
         delete.setFileId("fileId");
 

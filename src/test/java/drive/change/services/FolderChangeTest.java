@@ -7,6 +7,7 @@ import drive.change.services.apply.FolderService;
 import drive.change.services.update.FolderChangeUpdate;
 import io.filesystem.modules.FileSystemModule;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
@@ -33,6 +34,7 @@ public class FolderChangeTest {
     }
 
     @Test
+    @Ignore
     public void testAnnotation(){
         FolderChange service = Guice.createInjector(
                 new ChangeModule(),

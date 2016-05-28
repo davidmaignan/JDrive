@@ -7,6 +7,7 @@ import drive.change.services.apply.NewFileService;
 import drive.change.services.update.NewFileChangeUpdate;
 import io.filesystem.modules.FileSystemModule;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
@@ -33,6 +34,7 @@ public class NewFileChangeTest {
     }
 
     @Test
+    @Ignore
     public void testAnnotation(){
         NewFileChange service = Guice.createInjector(
                 new ChangeModule(),

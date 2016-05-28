@@ -7,6 +7,7 @@ import drive.change.services.apply.UntrashService;
 import drive.change.services.update.UntrashChangeUpdate;
 import io.filesystem.modules.FileSystemModule;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
@@ -33,6 +34,7 @@ public class UntrashChangeTest {
     }
 
     @Test
+    @Ignore
     public void testAnnotation(){
         UntrashChange service = Guice.createInjector(
                 new ChangeModule(),
