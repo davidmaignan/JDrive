@@ -4,11 +4,14 @@ import com.google.inject.Inject;
 import database.repository.FileRepository;
 import io.filesystem.FileSystemInterface;
 import io.filesystem.annotations.Real;
-import org.neo4j.graphdb.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
 
 /**
  * Created by David Maignan <davidmaignan@gmail.com> on 2016-05-12.

@@ -2,11 +2,11 @@ package database.repository;
 
 import com.google.api.services.drive.model.File;
 import com.google.inject.Inject;
+import configuration.Configuration;
 import database.DatabaseConfiguration;
 import database.Fields;
-import database.labels.FileLabel;
 import database.RelTypes;
-import configuration.Configuration;
+import database.labels.FileLabel;
 import model.tree.TreeNode;
 import org.neo4j.graphdb.*;
 import org.slf4j.Logger;

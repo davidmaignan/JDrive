@@ -5,28 +5,35 @@ import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.StartPageToken;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import configuration.*;
+import configuration.Configuration;
+import database.DatabaseModule;
+import database.repository.DatabaseService;
 import database.repository.FileRepository;
+import drive.api.ChangeService;
+import drive.api.FileService;
 import drive.change.model.CustomChange;
-import drive.change.services.ConverterService;
 import drive.change.model.ValidChange;
 import drive.change.services.ChangeFactoryService;
 import drive.change.services.ChangeInterface;
-import io.*;
-import drive.api.ChangeService;
-import drive.api.FileService;
-import database.DatabaseModule;
-import database.repository.DatabaseService;
+import drive.change.services.ConverterService;
+import io.Root;
+import io.WriterFactory;
+import io.WriterInterface;
 import io.filesystem.modules.FileSystemModule;
 import model.tree.TreeBuilder;
-import org.neo4j.graphdb.*;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Queue;
 
 /**
  * JDriveMain class

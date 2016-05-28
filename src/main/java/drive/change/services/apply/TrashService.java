@@ -3,7 +3,6 @@ package drive.change.services.apply;
 import com.google.inject.Inject;
 import database.repository.FileRepository;
 import drive.change.model.CustomChange;
-import io.Move;
 import io.Trashed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

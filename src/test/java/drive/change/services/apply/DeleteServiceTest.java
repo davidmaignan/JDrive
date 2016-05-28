@@ -3,18 +3,14 @@ package drive.change.services.apply;
 import database.repository.FileRepository;
 import drive.change.model.CustomChange;
 import io.Delete;
-import org.junit.Test;
-
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.graphdb.Node;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Created by david on 2016-05-19.

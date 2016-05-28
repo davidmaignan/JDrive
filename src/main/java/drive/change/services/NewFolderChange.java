@@ -1,13 +1,10 @@
 package drive.change.services;
 
 import com.google.inject.Inject;
-import drive.change.annotations.NewFile;
 import drive.change.annotations.NewFolder;
 import drive.change.model.CustomChange;
 import drive.change.services.apply.ChangeServiceInterface;
 import drive.change.services.update.ChangeUpdateInterface;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by david on 2016-05-26.

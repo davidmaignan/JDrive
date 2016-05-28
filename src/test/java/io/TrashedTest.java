@@ -2,14 +2,11 @@ package io;
 
 import com.google.common.collect.ImmutableList;
 import configuration.Configuration;
-import database.repository.FileRepository;
 import io.filesystem.FileSystemInterface;
 import io.filesystem.FileSystemWrapperTest;
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.graphdb.Node;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -18,7 +15,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 /**
  * Created by david on 2016-05-20.

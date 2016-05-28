@@ -1,23 +1,20 @@
 package model;
 
-import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.model.File;
-import com.google.gson.GsonBuilder;
-import fixtures.deserializer.DateTimeDeserializer;
 import fixtures.extensions.TestDatabaseExtensions;
+import model.tree.TreeBuilder;
 import model.tree.TreeNode;
 import org.junit.Before;
-import model.tree.TreeBuilder;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.io.FileReader;
+
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class TreeBuilderTest extends TestDatabaseExtensions {
     private static Logger logger = LoggerFactory.getLogger(TreeBuilderTest.class.getSimpleName());

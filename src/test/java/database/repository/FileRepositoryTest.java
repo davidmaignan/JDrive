@@ -2,32 +2,31 @@ package database.repository;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.model.File;
-//import com.google.api.services.drive.model.ParentReference;
-import com.google.gson.GsonBuilder;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import database.Fields;
 import configuration.Configuration;
+import database.Fields;
 import database.RelTypes;
 import database.labels.FileLabel;
-import fixtures.deserializer.DateTimeDeserializer;
-import fixtures.extensions.FixturesInterface;
 import fixtures.extensions.TestDatabaseExtensions;
+import model.tree.TreeBuilder;
 import model.types.MimeType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import model.tree.TreeBuilder;
 import org.junit.runner.RunWith;
-import org.neo4j.graphdb.*;
+import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.test.TestGraphDatabaseFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.*;
 
 import static org.junit.Assert.*;
+
+//import com.google.api.services.drive.model.ParentReference;
 
 /**
  * Created by David Maignan <davidmaignan@gmail.com> on 2015-12-31.

@@ -2,11 +2,11 @@ package drive.change.services;
 
 import drive.change.model.ChangeTypes;
 import drive.change.model.CustomChange;
+import org.junit.Test;
+
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import org.junit.Test;
 
 /**
  * Created by david on 2016-05-18.

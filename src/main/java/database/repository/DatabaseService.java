@@ -2,8 +2,8 @@ package database.repository;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import database.*;
 import configuration.Configuration;
+import database.*;
 import database.labels.ChangeLabel;
 import database.labels.FileLabel;
 import model.tree.TreeNode;
@@ -11,7 +11,8 @@ import org.neo4j.graphdb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Graph database apply - Implementation for Neo4j

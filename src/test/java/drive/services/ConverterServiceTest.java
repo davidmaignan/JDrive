@@ -2,15 +2,13 @@ package drive.services;
 
 import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.File;
-//import com.google.api.services.drive.model.ParentReference;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
-import database.labels.FileLabel;
 import database.repository.FileRepository;
+import drive.change.model.ChangeTypes;
 import drive.change.model.CustomChange;
 import drive.change.services.ConverterService;
-import drive.change.model.ChangeTypes;
 import model.types.MimeType;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,11 +17,11 @@ import org.neo4j.graphdb.Node;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+//import com.google.api.services.drive.model.ParentReference;
 
 /**
  * Created by David Maignan <davidmaignan@gmail.com> on 2016-05-04.

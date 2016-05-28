@@ -3,14 +3,12 @@ package drive.change.services;
 import com.google.inject.Guice;
 import drive.change.model.CustomChange;
 import drive.change.modules.ChangeModule;
-import drive.change.services.apply.FileService;
-import drive.change.services.apply.NewFileService;
 import drive.change.services.apply.NewFolderService;
-import drive.change.services.update.FileChangeUpdate;
 import drive.change.services.update.NewFolderChangeUpdate;
 import io.filesystem.modules.FileSystemModule;
 import org.junit.Before;
 import org.junit.Test;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;

@@ -1,10 +1,11 @@
 package model.tree;
 
-import java.util.*;
-
 import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.model.File;
 import model.types.MimeType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *  Tree structure to represent the DriveMimeTypes file structure

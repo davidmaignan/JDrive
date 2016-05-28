@@ -1,6 +1,5 @@
 package fixtures.deserializer;
 
-import com.google.api.client.util.DateTime;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
