@@ -55,7 +55,7 @@ public class FolderTest {
 
     @Test
     public void testWriteFolderRecursively() throws IOException {
-        assertTrue(folder.write("test/folder/"));
+        assertTrue(folder.write("test/folder"));
         //@todo check why not creating 2 folders
         assertEquals(1, getList().size());
     }
