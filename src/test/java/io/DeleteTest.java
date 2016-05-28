@@ -2,7 +2,6 @@ package io;
 
 import com.google.common.collect.ImmutableList;
 import configuration.Configuration;
-import database.repository.ChangeRepository;
 import io.filesystem.FileSystemInterface;
 import io.filesystem.FileSystemWrapperTest;
 import org.junit.Before;
@@ -28,7 +27,6 @@ public class DeleteTest {
     private static Logger logger = LoggerFactory.getLogger(DeleteTest.class.getSimpleName());
     private FileSystemInterface fs;
     private Delete delete;
-    private ChangeRepository changeRepository;
     private Node fileNode;
     private String path;
 
@@ -36,10 +34,7 @@ public class DeleteTest {
     public void setUp() throws Exception {
         Configuration configuration = new Configuration();
         fs = new FileSystemWrapperTest(configuration);
-
-        changeRepository = mock(ChangeRepository.class);
-        fileNode = mock(Node.class);
-
+        
         delete = new Delete(fs);
         delete.setFileId("fileId");
 
