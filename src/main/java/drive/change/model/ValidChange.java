@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  *  NB: If a case is not asset, it is not valid and then disregarded.
  *
  */
-public class ValidChange {
+public class ValidChange{
     private static Logger logger = LoggerFactory.getLogger(ValidChange.class);
 
     private Change change;
@@ -50,10 +50,14 @@ public class ValidChange {
         return fileNode;
     }
 
+    public void setFileNode(Node fileNode){
+        this.fileNode = fileNode;
+    }
+
     /**
      * Check if it's a new file.
      *
-     * NB: New files marked as trashed are ignored.
+     * NB: NewFile files marked as trashed are ignored.
      *
      * @return
      */

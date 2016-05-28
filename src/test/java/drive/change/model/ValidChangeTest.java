@@ -8,6 +8,7 @@ import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import database.repository.FileRepository;
 import fixtures.deserializer.DateTimeDeserializer;
+import fixtures.extensions.FixturesChangeInterface;
 import fixtures.extensions.FixturesInterface;
 import model.types.MimeType;
 import org.junit.Before;
@@ -34,7 +35,7 @@ import static org.mockito.Mockito.when;
  * Created by David Maignan <davidmaignan@gmail.com> on 2016-05-17.
  */
 @RunWith(DataProviderRunner.class)
-public class ValidChangeTest implements FixturesInterface<fixtures.model.Change>{
+public class ValidChangeTest implements FixturesChangeInterface<fixtures.model.Change> {
     private static Logger logger = LoggerFactory.getLogger(ValidChangeTest.class.getSimpleName());
     private ValidChange validChange;
     private FileRepository fileRepository;
@@ -50,11 +51,11 @@ public class ValidChangeTest implements FixturesInterface<fixtures.model.Change>
 
         validChange = new ValidChange(fileRepository);
 
-        list = getDataSet().stream().map(this::setChange).collect(Collectors.toList());
+        list = getChangeSet().stream().map(this::setChange).collect(Collectors.toList());
     }
 
     @Override
-    public List<fixtures.model.Change> getDataSet() throws IOException {
+    public List<fixtures.model.Change> getChangeSet() throws IOException {
         GsonBuilder gson = new GsonBuilder();
         gson.registerTypeAdapter(DateTime.class, new DateTimeDeserializer());
         fixtures.model.Change[] fileList = gson.create().fromJson(new FileReader(
@@ -92,6 +93,7 @@ public class ValidChangeTest implements FixturesInterface<fixtures.model.Change>
 
         return file;
     }
+
     @Test
     public void testValidDeleteFileThatExists() throws IOException {
         for(Change change : list){
@@ -123,7 +125,7 @@ public class ValidChangeTest implements FixturesInterface<fixtures.model.Change>
         validChange.execute(changeRemoved);
         assertFalse(validChange.isValid());
         assertFalse(validChange.isNewFile());
-        
+
         for(Change change : list){
             ValidChange validChange = new ValidChange(fileRepository);
             when(fileRepository.getNodeById(change.getFileId())).thenReturn(null);
