@@ -1,25 +1,21 @@
 package drive.change.services.update;
 
 import com.google.inject.Inject;
-import database.repository.ChangeRepository;
 import database.repository.FileRepository;
 import drive.change.model.CustomChange;
 
 public class FileChangeUpdate implements ChangeUpdateInterface{
     private CustomChange structure;
     private FileRepository fileRepository;
-    private ChangeRepository changeRepository;
 
     @Inject
-    public FileChangeUpdate(FileRepository fileRepository, ChangeRepository changeRepository){
+    public FileChangeUpdate(FileRepository fileRepository){
         this.fileRepository = fileRepository;
-        this.changeRepository = changeRepository;
     }
 
     @Override
     public boolean execute() {
-        return changeRepository.markAsProcessed(structure.getChangeNode())
-                && fileRepository.update(structure.getFileNode(), structure.getChange().getFile());
+        return fileRepository.update(structure.getFileNode(), structure.getChange().getFile());
     }
 
     @Override

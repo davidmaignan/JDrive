@@ -1,8 +1,9 @@
 package drive.change.services.apply;
 
+import com.google.inject.Inject;
+import database.repository.FileRepository;
 import drive.change.model.CustomChange;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.Delete;
 
 /**
  * Delete a file or folder locally when receiving a delete change from api
@@ -11,10 +12,18 @@ import org.slf4j.LoggerFactory;
  */
 public class DeleteService implements ChangeServiceInterface {
     private CustomChange structure;
+    private FileRepository fileRepository;
+    private Delete delete;
+
+    @Inject
+    public DeleteService(FileRepository fileRepository, Delete delete){
+        this.fileRepository = fileRepository;
+        this.delete = delete;
+    }
 
     @Override
     public boolean execute() {
-        return true;
+        return delete.write(getPath());
     }
 
     @Override
@@ -22,4 +31,10 @@ public class DeleteService implements ChangeServiceInterface {
         this.structure = structure;
     }
 
+    //@todo remove replaceFirst
+    private String getPath(){
+        return String.format("%s/%s",
+                fileRepository.getNodeAbsolutePath(structure.getOldParentNode()),
+                structure.getOldName()).replaceFirst("^/", "");
+    }
 }

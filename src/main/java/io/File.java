@@ -1,37 +1,33 @@
 package io;
 
 import com.google.inject.Inject;
-import database.repository.FileRepository;
-import drive.api.DriveService;
+import drive.api.FileService;
 import io.filesystem.FileSystemInterface;
 import io.filesystem.annotations.Real;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-import java.io.*;
-import java.nio.*;
-import java.nio.file.FileSystem;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.nio.file.StandardOpenOption.APPEND;
+import java.nio.file.StandardCopyOption;
 
 /**
  * Write a file from a treeNode
- * <p>
+ *
  * David Maignan <davidmaignan@gmail.com>
  */
 public class File implements WriterInterface {
     private static Logger logger = LoggerFactory.getLogger(File.class.getSimpleName());
-    private DriveService driveService;
+    private FileService fileService;
     private FileSystemInterface fileSystem;
     private String fileId;
 
     @Inject
-    public File(@Real FileSystemInterface fileSystem, DriveService driveService) {
+    public File(@Real FileSystemInterface fileSystem, FileService fileService) {
         this.fileSystem = fileSystem;
-        this.driveService = driveService;
+        this.fileService = fileService;
     }
     @Override
     public void setFileId(String fileId) {
@@ -46,25 +42,15 @@ public class File implements WriterInterface {
     @Override
     public boolean write(String pathString) {
         Path path = fileSystem.getRootPath().resolve(pathString);
-        try{
-            InputStream inputStream   = this.downloadFile(driveService, fileId);
-            OutputStream outputStream = new BufferedOutputStream(
-                    Files.newOutputStream(path, CREATE, APPEND));
 
-            if (inputStream == null) {
-                return false;
-            }
-
-            int r;
-
-            while ((r = inputStream.read()) != -1) {
-                outputStream.write((byte) r);
-            }
+        try(InputStream inputStream = fileService.downloadFile(this.fileId)) {
+            Files.copy(inputStream, path, StandardCopyOption.REPLACE_EXISTING);
 
             return true;
 
-        } catch (IOException exception){
-            exception.printStackTrace();
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+            e.printStackTrace();
         }
 
         return false;
@@ -73,14 +59,5 @@ public class File implements WriterInterface {
     @Override
     public boolean write(String oldPath, String newPath) {
         return false;
-    }
-
-    private InputStream downloadFile(DriveService service, String id) throws IOException {
-        try {
-            return driveService.getDrive().files().get(id).executeMediaAsInputStream();
-        } catch (IOException e) {
-            logger.error("Cannot get file from google drive api: " + id);
-            return null;
-        }
     }
 }

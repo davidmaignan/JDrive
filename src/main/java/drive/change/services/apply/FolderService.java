@@ -28,12 +28,6 @@ public class FolderService implements ChangeServiceInterface {
 
     @Override
     public boolean execute(){
-        return folder.write(getNewPath());
-    }
-
-    private String getNewPath(){
-        return String.format("%s/%s",
-                fileRepository.getNodeAbsolutePath(structure.getNewParentNode()),
-                structure.getNewName());
+        return true;
     }
 }

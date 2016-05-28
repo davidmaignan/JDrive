@@ -1,8 +1,6 @@
 package io;
 
 import com.google.inject.Guice;
-import com.google.inject.Injector;
-import database.DatabaseModule;
 import io.filesystem.modules.FileSystemModule;
 import model.types.MimeType;
 

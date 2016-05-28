@@ -3,13 +3,14 @@ package drive.api;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.ChangeList;
+import com.google.api.services.drive.model.StartPageToken;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * ChangeService - Retrieve the list of changes
@@ -17,37 +18,33 @@ import java.util.ArrayList;
  * David Maignan <davidmaignan@gmail.com>
  */
 public class ChangeService {
-
     private static Logger logger = LoggerFactory.getLogger(ChangeService.class);
-
     private DriveService driveService;
-
+    private String fields;
     public ChangeService(){}
 
     @Inject
     public ChangeService(DriveService driveService){
         this.driveService = driveService;
+        fields = "changes,kind,newStartPageToken,nextPageToken";
     }
 
     /**
      * Retrieve a list of Change resources.
      *
-     * @param startChangeId ID of the change to start retrieving subsequent changes from or {@code null}.
+     * @param startPageToken ID of the change to start retrieving subsequent changes from or {@code null}.
      *
      * @return List of Change resources.
      */
-    public List<Change> getAll(Long startChangeId) throws IOException {
-        List<Change> result = new ArrayList<Change>();
-        Drive.Changes.List request = driveService.getDrive().changes().list();
+    public List<Change> getAll(String startPageToken) throws IOException {
+        List<Change> result = new ArrayList<>();
 
-        if (startChangeId != null) {
-            request.setStartChangeId(startChangeId);
-        }
+        Drive.Changes.List request = driveService.getDrive().changes().list(startPageToken).setFields(fields);
+
         do {
             try {
                 ChangeList changes = request.execute();
-
-                result.addAll(changes.getItems());
+                result.addAll(changes.getChanges());
                 request.setPageToken(changes.getNextPageToken());
             } catch (IOException e) {
                 System.out.println("An error occurred: " + e);
@@ -59,17 +56,13 @@ public class ChangeService {
         return result;
     }
 
-    public Change get(String changeId) {
-        Change result = null;
-
+    public StartPageToken getStartPageToken(){
         try {
-            Change change = driveService.getDrive().changes().get(changeId).execute();
-
-            result = change;
-        } catch (IOException e) {
-            logger.error(e.getMessage());
+            return driveService.getDrive().changes().getStartPageToken().execute();
+        } catch (IOException exception){
+            logger.error("Cannot retrieve getStartPageToken");
         }
 
-        return result;
+        return null;
     }
 }

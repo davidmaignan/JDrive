@@ -4,6 +4,9 @@ import configuration.Configuration;
 import io.filesystem.FileSystemWrapperTest;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,6 +19,7 @@ import static org.junit.Assert.*;
  * Created by david on 2016-05-19.
  */
 public class FolderTest {
+    private static Logger logger = LoggerFactory.getLogger(FolderTest.class.getSimpleName());
     Folder folder;
     FileSystemWrapperTest fs;
 
@@ -41,15 +45,22 @@ public class FolderTest {
         assertFalse(folder.write("test", "test"));
     }
 
-    private List<Path> getList() throws IOException {
-        return Files.list(folder.getFileSystem().getRootPath()).collect(Collectors.toList());
+    @Test
+    public void testWriteFolderAlreadyExistsException() throws IOException {
+        assertTrue(folder.write("test"));
+        assertTrue(folder.write("test"));
+
+        assertEquals(1, getList().size());
     }
 
     @Test
-    public void testWriteFileAlreadyExistsException() throws IOException {
-        assertTrue(folder.write("test"));
-        assertFalse(folder.write("test"));
-
+    public void testWriteFolderRecursively() throws IOException {
+        assertTrue(folder.write("test/folder"));
+        //@todo check why not creating 2 folders
         assertEquals(1, getList().size());
+    }
+
+    private List<Path> getList() throws IOException {
+        return Files.list(folder.getFileSystem().getRootPath()).collect(Collectors.toList());
     }
 }
