@@ -21,42 +21,8 @@ public class Trashed implements WriterInterface{
     private String fileId;
 
     @Inject
-    public Trashed(@Real FileSystemInterface fileSystem, FileRepository fileRepository){
+    public Trashed(@Real FileSystemInterface fileSystem){
         this.fileSystem = fileSystem;
-        this.fileRepository = fileRepository;
-    }
-
-    public boolean execute(Node node){
-        boolean result;
-        Path path;
-        try {
-            path = fileSystem.getRootPath().resolve(fileRepository.getNodeAbsolutePath(node));
-
-            if (Files.isDirectory(path)) {
-                deleteDirectory(path);
-            }
-
-            Files.delete(path);
-
-            result = true;
-        } catch (NoSuchFileException exception) {
-            result = true;
-        } catch (DirectoryNotEmptyException exception){
-            result = true;
-        } catch (Exception exception){
-            result = false;
-            logger.error(exception.getMessage());
-        }
-
-        if(result){
-            fileRepository.markAsProcessed(node);
-        }
-
-        if( ! result){
-            logger.error("Error while trashing a file: " + fileRepository.getTitle(node));
-        }
-
-        return result;
     }
 
     private static void deleteDirectory(Path path) throws IOException {
@@ -88,8 +54,33 @@ public class Trashed implements WriterInterface{
     }
 
     @Override
-    public boolean write(String path) {
-        return false;
+    public boolean write(String pathString) {
+        boolean result = true;
+        Path path;
+        try {
+            path = fileSystem.getRootPath().resolve(pathString);
+
+            if (Files.isDirectory(path)) {
+                deleteDirectory(path);
+            }
+
+            Files.delete(path);
+
+            result = true;
+        } catch (NoSuchFileException exception) {
+            result = true;
+        } catch (DirectoryNotEmptyException exception){
+            result = true;
+        } catch (Exception exception){
+            result = false;
+            logger.error(exception.getMessage());
+        }
+
+        if( ! result){
+            logger.error("Error while trashing a file: " + pathString);
+        }
+
+        return result;
     }
 
     @Override

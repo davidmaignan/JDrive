@@ -6,31 +6,31 @@ import io.filesystem.annotations.Real;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.FileSystemAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class Folder implements WriterInterface{
+public class Root implements WriterInterface{
     private Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
 
     private FileSystemInterface fileSystem;
     private Path path;
     private String fileId;
+    private boolean alreadyExists;
 
     @Inject
-    public Folder(@Real FileSystemInterface fileSystem){
+    public Root(@Real FileSystemInterface fileSystem){
         this.fileSystem = fileSystem;
+        alreadyExists = false;
     }
 
     @Override
     public boolean write(String pathString) {
-        path = fileSystem.getRootPath().resolve(pathString);
+        path = fileSystem.getRootPath();
 
         try {
-            Files.createDirectories(path);
+            Files.createDirectory(path);
             return true;
         } catch (FileAlreadyExistsException exception) {
             return true;
@@ -39,6 +39,14 @@ public class Folder implements WriterInterface{
         }
 
         return false;
+    }
+
+    public boolean exists(){
+        return Files.exists(fileSystem.getRootPath());
+    }
+
+    public boolean createIfNotExists() {
+        return exists() || write("");
     }
 
     public FileSystemInterface getFileSystem(){

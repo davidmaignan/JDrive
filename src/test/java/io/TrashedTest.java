@@ -26,22 +26,19 @@ import static org.mockito.Mockito.*;
 public class TrashedTest {
     private FileSystemInterface fs;
     private Trashed trashed;
-    private FileRepository fileRepository;
-    private Node fileNode;
     private String path;
+    private String pathFile;
 
     @Before
     public void setUp() throws Exception {
         Configuration configuration = new Configuration();
         fs = new FileSystemWrapperTest(configuration);
 
-        fileRepository = mock(FileRepository.class);
-        fileNode = mock(Node.class);
-
-        trashed = new Trashed(fs, fileRepository);
+        trashed = new Trashed(fs);
         trashed.setFileId("fileId");
 
         path = "test";
+        pathFile = "file1.txt";
 
         init();
     }
@@ -50,41 +47,28 @@ public class TrashedTest {
         Path folder = fs.getRootPath().resolve(path);
         Files.createDirectories(fs.getRootPath());
         Files.createDirectory(folder);
-        Files.write(fs.getRootPath().resolve("file1.txt"), ImmutableList.of("Hello world"), StandardCharsets.UTF_8);
+        Files.write(fs.getRootPath().resolve(pathFile), ImmutableList.of("Hello world"), StandardCharsets.UTF_8);
     }
 
     @Test
-    public void testExecuteFolder() throws Exception {
-        when(fileRepository.getNodeAbsolutePath(fileNode)).thenReturn(path);
-        when(fileRepository.markAsProcessed(fileNode)).thenReturn(true);
-
-        assertTrue(trashed.execute(fileNode));
-        assertEquals(1, getList().size());
-    }
-
-    @Test
-    public void testExecuteFile() throws Exception {
-        when(fileRepository.getNodeAbsolutePath(fileNode)).thenReturn("file1.txt");
-        when(fileRepository.markAsProcessed(fileNode)).thenReturn(true);
-
-
-        assertTrue(trashed.execute(fileNode));
-        assertEquals(1, getList().size());
-    }
-
-    @Test
-    public void testExecuteFails() throws Exception {
-        when(fileRepository.getNodeAbsolutePath(fileNode)).thenReturn(null);
-
-        assertFalse(trashed.execute(fileNode));
+    public void testWriteFolder() throws Exception{
         assertEquals(2, getList().size());
-
-        verify(fileRepository, never()).markAsProcessed(fileNode);
+        assertTrue(trashed.write(path));
+        assertEquals(1, getList().size());
     }
 
     @Test
-    public void testWrite() throws Exception{
-        assertFalse(trashed.write("path"));
+    public void testWriteFile() throws Exception{
+        assertEquals(2, getList().size());
+        assertTrue(trashed.write(pathFile));
+        assertEquals(1, getList().size());
+    }
+
+    @Test
+    public void testWriteNotExist() throws Exception{
+        assertEquals(2, getList().size());
+        assertTrue(trashed.write("notExists"));
+        assertEquals(2, getList().size());
     }
 
     @Test

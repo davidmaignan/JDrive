@@ -1,10 +1,8 @@
 package io;
 
 import com.google.inject.Inject;
-import database.repository.ChangeRepository;
 import io.filesystem.FileSystemInterface;
 import io.filesystem.annotations.Real;
-import org.neo4j.graphdb.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.IOException;
@@ -17,19 +15,18 @@ public class Delete implements WriterInterface{
     private static Logger logger = LoggerFactory.getLogger(Delete.class);
 
     private FileSystemInterface fileSystem;
-    private ChangeRepository changeRepository;
 
     @Inject
-    public Delete(@Real FileSystemInterface fileSystem, ChangeRepository changeRepository){
+    public Delete(@Real FileSystemInterface fileSystem){
         this.fileSystem = fileSystem;
-        this.changeRepository = changeRepository;
     }
 
-    public boolean execute(Node node){
+    @Override
+    public boolean write(String pathString) {
         boolean result;
         Path path;
         try{
-            path = fileSystem.getRootPath().resolve(changeRepository.getNodeAbsolutePath(node));
+            path = fileSystem.getRootPath().resolve(pathString);
 
             if (Files.isDirectory(path)) {
                 deleteDirectory(path);
@@ -48,12 +45,8 @@ public class Delete implements WriterInterface{
             logger.error(exception.getMessage());
         }
 
-        if(result){
-            result = changeRepository.delete(node);
-        }
-
         if( ! result){
-            logger.error("Error while deleting node for file deleted: " + node);
+            logger.error("Error while deleting node for file deleted: " + pathString);
         }
 
         return result;
@@ -85,11 +78,6 @@ public class Delete implements WriterInterface{
         });
 
         Files.deleteIfExists(path);
-    }
-
-    @Override
-    public boolean write(String path) {
-        return false;
     }
 
     @Override
