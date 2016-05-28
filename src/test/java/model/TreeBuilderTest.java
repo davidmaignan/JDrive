@@ -64,30 +64,4 @@ public class TreeBuilderTest extends TestDatabaseExtensions {
         TreeNode file2 = treeBuilder.getRoot().getChildren().get(2).getChildren().get(2).getChildren().get(0);
         assertEquals("/folder/first/destination.csf", file2.getAbsolutePath());
     }
-
-    @Override
-    public List<fixtures.model.File> getDataSet() throws IOException {
-        GsonBuilder gson = new GsonBuilder();
-        gson.registerTypeAdapter(DateTime.class, new DateTimeDeserializer());
-        fixtures.model.File[] fileList = gson.create().fromJson(new FileReader(
-                this.getClass().getClassLoader().getResource("fixtures/files.json").getFile()),
-                fixtures.model.File[].class
-        );
-
-        return Arrays.asList(fileList);
-    }
-
-    private File setFile(fixtures.model.File f){
-        File file = new File();
-        file.setId(f.id);
-        file.setName(f.name);
-        file.setMimeType(f.mimeType);
-        file.setTrashed(f.trashed);
-        file.setParents(f.parents);
-        file.setVersion(f.version);
-        file.setCreatedTime(f.createdTime);
-        file.setModifiedTime(f.modifiedTime);
-
-        return file;
-    }
 }
