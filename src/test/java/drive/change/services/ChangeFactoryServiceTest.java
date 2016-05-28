@@ -2,6 +2,7 @@ package drive.change.services;
 
 import drive.change.model.ChangeTypes;
 import drive.change.model.CustomChange;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
@@ -13,6 +14,7 @@ import static org.mockito.Mockito.when;
  */
 public class ChangeFactoryServiceTest {
     @Test
+    @Ignore
     public void get() {
         CustomChange structure = mock(CustomChange.class);
 
