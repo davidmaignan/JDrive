@@ -24,6 +24,11 @@ JDrive is application so you can mount your google drive on any platform that su
 ```
 git clone https://github.com/davidmaignan/JDrive.git
 cd JDrive
+```
+
+configure the root folder in **resources/config.properties**
+
+```
 ./gradlew run
 ```
 
