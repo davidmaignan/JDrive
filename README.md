@@ -5,6 +5,8 @@ JDrive is application so you can mount your google drive on any platform that su
 |-------|----------|--------|
 |[![Build Status](https://travis-ci.org/davidmaignan/JDrive.svg?branch=master)](https://travis-ci.org/davidmaignan/JDrive)|[![Code Coverage](https://img.shields.io/codecov/c/github/pvorb/property-providers/develop.svg)](https://codecov.io/gh/davidmaignan/JDrive?branch=master)| Master|
 
+[![Coverage Status](https://coveralls.io/repos/github/davidmaignan/JDrive/badge.svg?branch=master)](https://coveralls.io/github/davidmaignan/JDrive?branch=master)
+
 ### Prerequisites
 - Java 8
 - Access to the internet and a web browser
