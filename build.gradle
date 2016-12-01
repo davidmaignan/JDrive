@@ -10,6 +10,9 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 version = '1.0'
 
+//startScripts.enabled = false
+//run.enabled = false
+
 applicationDefaultJvmArgs = ["-Dgreeting.language=en"]
 
 repositories {
@@ -83,6 +86,12 @@ run {
 }
 
 
+task INF5171(type: JavaExec) {
+    main = "inf5171.JDriveMain_INF5171"
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+
 jacoco {
     applyTo run
 }
@@ -96,7 +105,7 @@ jacocoTestReport {
     }
 }
 
-//task('clean') <<
+//inf5171('clean') <<
 //{
 //    println("Clean")
 //    delete "db"
