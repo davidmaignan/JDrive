@@ -19,14 +19,4 @@ public class WriterFactory {
 
         return Guice.createInjector(new FileSystemModule()).getInstance(Document.class);
     }
-
-    public static WriterInterface getWriterJmsf(String mimeType) {
-        if(mimeType.equals(MimeType.FOLDER)) {
-            return Guice.createInjector(new FileSystemJmsfModule()).getInstance(Folder.class);
-        } else if (! MimeType.all().contains(mimeType)) {
-            return Guice.createInjector(new FileSystemJmsfModule()).getInstance(File.class);
-        }
-
-        return Guice.createInjector(new FileSystemJmsfModule()).getInstance(Document.class);
-    }
 }
