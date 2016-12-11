@@ -1,7 +1,6 @@
 package io;
 
 import com.google.inject.Guice;
-import io.filesystem.modules.FileSystemJmsfModule;
 import io.filesystem.modules.FileSystemModule;
 import model.types.MimeType;
 
