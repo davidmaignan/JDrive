@@ -9,13 +9,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Tree File structure
+ * Tree File monitor
  *
  * David Maignan <davidmaignan@gmail.com>
  */
 public class TreeBuilder {
     private static Logger logger = LoggerFactory.getLogger(TreeBuilder.class.getSimpleName());
     private TreeNode root;
+
+
 
     public TreeBuilder(String rootId) {
         root = new TreeNode();
@@ -66,13 +68,56 @@ public class TreeBuilder {
         }
     }
 
+    public List<TreeNode> getNodes(){
+        return getNodes(this.getRoot());
+    }
+
+    private List<TreeNode> getNodes(TreeNode node){
+        List<TreeNode> result = new ArrayList<>();
+        result.add(node);
+
+        if(! node.getChildren().isEmpty()) {
+            for(TreeNode child : node.getChildren()){
+                result.addAll(getNodes(child));
+            }
+        }
+
+        return result;
+    }
+
     /**
      * Insert node recursively in a tree
      * @param root
      * @param node
      * @return boolean
      */
-    private boolean insertNode(TreeNode root, TreeNode node) {
+    public boolean insertNode(TreeNode root, TreeNode node) {
+        Boolean result = false;
+
+        if(node.getParentId() == null) {
+            return true;
+        }
+
+        if (node.getParentId().equals(root.getId())) {
+            root.addChild(node);
+
+            result = true;
+
+        } else if (root.getChildren().size() > 0) {
+            for(TreeNode n : root.getChildren()) {
+                result = insertNode(n, node) || result;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Insert node recursively in a tree
+     * @param node
+     * @return boolean
+     */
+    public boolean insertNode(TreeNode node) {
         Boolean result = false;
 
         if(node.getParentId() == null) {

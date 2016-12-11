@@ -60,22 +60,25 @@ public class JDriveMain {
      * @throws Throwable
      */
     public static void main(String[] args) {
-        try{
-            initJDrive();
-            initServices();
-            setUp();
-        }catch (Exception exception){
-            logger.error("Please check your configuration. You are missing something!");
-            System.exit(0);
-        }
 
-        try{
-            getLastChanges();
-        } catch (Exception exception) {
-            exception.printStackTrace();
-        }
+        System.out.println("Main HERE");
 
-        registerShutdownHook(dbService.getGraphDB());
+//        try{
+//            initJDrive();
+//            initServices();
+//            setUp();
+//        }catch (Exception exception){
+//            logger.error("Please check your configuration. You are missing something!");
+//            System.exit(0);
+//        }
+//
+//        try{
+//            getLastChanges();
+//        } catch (Exception exception) {
+//            exception.printStackTrace();
+//        }
+
+//        registerShutdownHook(dbService.getGraphDB());
     }
 
     private static void setUp(){
@@ -141,7 +144,7 @@ public class JDriveMain {
         }
 
 //        //Important: google drive does not return changes in right order.
-//        //Sort manually based on ChangeType and position (depth) of the file in the tree structure.
+//        //Sort manually based on ChangeType and position (depth) of the file in the tree monitor.
         Collections.sort(customChangeList);
 
         while(! customChangeList.isEmpty()){

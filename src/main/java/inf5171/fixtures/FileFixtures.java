@@ -15,6 +15,17 @@ import java.util.stream.Collectors;
  * Created by david on 2016-12-02.
  */
 public class FileFixtures {
+
+    private List<com.google.api.services.drive.model.File> fileList;
+
+    public FileFixtures(String filename) throws IOException {
+        fileList = getDataSet(filename);
+    }
+
+    public List<com.google.api.services.drive.model.File> getFileList() {
+        return fileList;
+    }
+
     public List<com.google.api.services.drive.model.File> getDataSet(String filename) throws IOException {
         GsonBuilder gson = new GsonBuilder();
         gson.registerTypeAdapter(DateTime.class, new DateTimeDeserializer());

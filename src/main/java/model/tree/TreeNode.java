@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *  Tree structure to represent the DriveMimeTypes file structure
+ *  Tree monitor to represent the DriveMimeTypes file monitor
  *
  * Created by David Maignan <davidmaignan@gmail.com> on 15-07-15.
  */
