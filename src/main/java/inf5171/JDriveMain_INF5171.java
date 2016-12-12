@@ -70,7 +70,7 @@ public class JDriveMain_INF5171 {
             for (int j = 0; j < 5; j++) {
                 Statistic statistic = new Statistic();
                 statistic.setDepth(i);
-                statistic.setNbThreads(j*7+1);
+                statistic.setNbThreads(j*10+1);
                 test(statistic);
                 statisticMap.get(methods[0]).add(statistic);
             }
