@@ -53,8 +53,8 @@ public class NewFileChangeTest {
 
         assertTrue(newFileChange.execute());
 
-//        verify(service, times(1)).setStructure(structure);
-//        verify(update, times(1)).setStructure(structure);
+//        verify(service, times(1)).setStructure(monitor);
+//        verify(update, times(1)).setStructure(monitor);
     }
 
     @Test
@@ -66,8 +66,8 @@ public class NewFileChangeTest {
         assertFalse(service.execute());
 
         verify(update, never()).execute();
-//        verify(service, times(1)).setStructure(structure);
-//        verify(update, times(1)).setStructure(structure);
+//        verify(service, times(1)).setStructure(monitor);
+//        verify(update, times(1)).setStructure(monitor);
     }
 
     @Test
@@ -80,7 +80,7 @@ public class NewFileChangeTest {
 
         assertFalse(newFileChange.execute());
 
-//        verify(service, times(1)).setStructure(structure);
-//        verify(update, times(1)).setStructure(structure);
+//        verify(service, times(1)).setStructure(monitor);
+//        verify(update, times(1)).setStructure(monitor);
     }
 }

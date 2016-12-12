@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 import java.util.stream.Collectors;
 
 /**
@@ -59,7 +60,7 @@ public class TreeBuilder {
     public static void printTree(TreeNode node) {
         logger.debug(node.toString());
 
-        List<TreeNode> children = node.getChildren();
+        Queue<TreeNode> children = node.getChildren();
 
         if(! children.isEmpty()) {
             for(TreeNode child : children){
@@ -70,6 +71,30 @@ public class TreeBuilder {
 
     public List<TreeNode> getNodes(){
         return getNodes(this.getRoot());
+    }
+
+    public int getTotalNodes(){
+        int total = 1;
+
+        if(root.getChildren().size() > 0){
+            for(TreeNode child : root.getChildren()){
+                total += getTotalNodes(child);
+            }
+        }
+
+        return total;
+    }
+
+    private int getTotalNodes(TreeNode node){
+        int total = 1;
+
+        if(root.getChildren().size() > 0){
+            for(TreeNode child : root.getChildren()){
+                total += getTotalNodes(child);
+            }
+        }
+
+        return total;
     }
 
     private List<TreeNode> getNodes(TreeNode node){
@@ -136,6 +161,17 @@ public class TreeBuilder {
         }
 
         return result;
+    }
+
+    public TreeNode insertFile(File file){
+        TreeNode node = new TreeNode(file);
+
+        if(insertNode(node)){
+            return node;
+        }
+
+        return null;
+
     }
 
     /**

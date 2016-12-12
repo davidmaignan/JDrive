@@ -15,6 +15,7 @@ public class MStructureMonitor<T> implements MStructure<T> {
     private final ReentrantLock lock;
     private final Condition notEmpty;
     private Boolean completed;
+    private static final int CAPACITY = 10;
 
     public MStructureMonitor(){
         queue = new ArrayDeque<T>();
@@ -23,6 +24,9 @@ public class MStructureMonitor<T> implements MStructure<T> {
         completed = false;
     }
 
+    public Queue<T> getQueue() {
+        return queue;
+    }
 
     @Override
     public Boolean push(T v) {
@@ -62,7 +66,8 @@ public class MStructureMonitor<T> implements MStructure<T> {
         lock.lock();
         T value = null;
         try {
-            while (queue.size() == 0) {
+            while (queue.size() == 0 && ! completed) {
+//                System.out.println("queue size: " + 0);
                 try {
                     notEmpty.await();
                 } catch (InterruptedException e) {

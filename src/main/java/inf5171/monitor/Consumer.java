@@ -29,20 +29,28 @@ public class Consumer implements Runnable {
 
     @Override
     public void run() {
-        while(! monitor.getCompleted() || monitor.size() > 0) {
+        while(uncompleted() || completedNotEmpty()) {
+            System.out.println(uncompleted() +":"+ completedNotEmpty()+ "");
             TreeNode node = monitor.shift();
-            if(! write(node, fs)){
+            if( ! write(node, fs)){
                 monitor.push(node);
+//                try {
+//                    sleep(100L);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
             } else {
                 total.getAndIncrement();
             }
-
-            try {
-                sleep(10L);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
+    }
+
+    private boolean completedNotEmpty(){
+        return monitor.getCompleted() && monitor.size() > 0;
+    }
+
+    private  boolean uncompleted(){
+        return ! monitor.getCompleted();
     }
 
     public AtomicInteger getTotal(){

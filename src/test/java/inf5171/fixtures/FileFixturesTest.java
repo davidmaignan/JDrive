@@ -2,6 +2,7 @@ package inf5171.fixtures;
 
 import model.tree.TreeBuilder;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import com.google.api.services.drive.model.File;
 
@@ -23,6 +24,8 @@ import static org.junit.Assert.*;
  * Created by david on 2016-12-02.
  */
 public class FileFixturesTest {
+
+
     private FileFixtures fileFixtures;
     private String filename = "fixtures/inf5171/files.json";
     private Pattern patterns[];
@@ -33,7 +36,7 @@ public class FileFixturesTest {
 
     @Before
     public void setUp() throws Exception {
-        fileFixtures = new FileFixtures();
+        fileFixtures = new FileFixtures(filename);
 
         patternList = new String[]{ "folder_([0-9])+", "file_([0-9])+"};
         patterns = new Pattern[patternList.length];
@@ -46,6 +49,18 @@ public class FileFixturesTest {
     }
 
     @Test
+    public void getFileList() throws Exception {
+        fileFixtures = new FileFixtures();
+
+
+        List<File> fileList = fileFixtures.getFileList();
+
+        assertEquals(23430 ,fileList.size());
+
+    }
+
+    @Test
+    @Ignore
     public void testPatternMatch(){
         String[] testList = new String[]{"root", "folder_0", "file_00", "folder_123", "file_4444"};
         String[] expected = new String[]{"", "root", "folder_0", "folder_12", "folder_444"};
@@ -56,8 +71,9 @@ public class FileFixturesTest {
     }
 
     @Test
+    @Ignore
     public void getDataSet() throws Exception {
-        List<File> fileList = fileFixtures.getDataSet(filename);
+        List<File> fileList = fileFixtures.getFileList();
 
         assertEquals(60, fileList.size());
 
@@ -67,8 +83,9 @@ public class FileFixturesTest {
     }
 
     @Test
+    @Ignore
     public void testStructure() throws IOException {
-        List<File> fileList = fileFixtures.getDataSet(filename);
+        List<File> fileList = fileFixtures.getFileList();
 
         treeBuilder.build(fileList);
 

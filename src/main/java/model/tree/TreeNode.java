@@ -6,6 +6,8 @@ import model.types.MimeType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
  *  Tree monitor to represent the DriveMimeTypes file monitor
@@ -17,7 +19,7 @@ public class TreeNode {
     private String id;
     private String parentId;
     private TreeNode parent;
-    private List<TreeNode> children;
+    private Queue<TreeNode> children;
     private String name;
     private boolean isFolder;
     private boolean isRoot;
@@ -35,7 +37,7 @@ public class TreeNode {
         this.name     = "";
         this.isFolder = true;
         this.isRoot   = true;
-        this.children = new ArrayList<>();
+        this.children = new ConcurrentLinkedDeque<>();
         this.mimeType = MimeType.FOLDER;
     }
 
@@ -49,7 +51,7 @@ public class TreeNode {
         this.parentId            = this.getParentId(file);
         this.isRoot              = false;
         this.name                = file.getName();
-        this.children            = new ArrayList<>();
+        this.children            = new ConcurrentLinkedDeque<>();
         this.modifiedDate        = file.getModifiedTime();
         this.createdDate         = file.getCreatedTime();
         this.isTrashed           = file.getTrashed();
@@ -109,7 +111,7 @@ public class TreeNode {
      * Get children of the node
      * @return
      */
-    public List<TreeNode> getChildren() {
+    public Queue<TreeNode> getChildren() {
         return children;
     }
 

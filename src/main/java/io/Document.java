@@ -38,7 +38,7 @@ public class Document implements WriterInterface {
             Files.write(path, ImmutableList.of(content), StandardCharsets.UTF_8);
             return true;
         } catch (IOException exception) {
-            logger.error(exception.getMessage());
+//            logger.error(exception.getMessage());
         }
 
 
