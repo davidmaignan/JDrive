@@ -66,13 +66,6 @@ public class FileFixtures {
 
                             fileList.add(createFile(sub_4, sub_3, MimeType.FOLDER));
                             Collections.addAll(fileList, generateFiles(sub_4));
-
-                            for (int n = 0; n < total; n++) {
-                                String sub_5 = sub_4 + m;
-
-                                fileList.add(createFile(sub_5, sub_4, MimeType.FOLDER));
-                                Collections.addAll(fileList, generateFiles(sub_5));
-                            }
                         }
                     }
                 }
