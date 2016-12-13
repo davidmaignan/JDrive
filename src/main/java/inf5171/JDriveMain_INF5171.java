@@ -47,26 +47,9 @@ public class JDriveMain_INF5171 {
         statisticMap.put(methods[0], new ArrayList<>());
         statisticMap.put(methods[1], new ArrayList<>());
 
-//        try {
-//            for (int i = 0; i < 3; i++) {
-//                versionSequentielle();
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//
-//        try {
-//            for (int i = 0; i < 5; i++) {
-//                versionProducerConsumer(5);
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//
-        for (int i = 1; i < 6; i++) {
+        // i = nombre de repertoires et fichiers par niveau
+        // j = nombre de threads
+        for (int i = 1; i < 8; i++) {
             for (int j = 0; j < 5; j++) {
                 Statistic statistic = new Statistic();
                 statistic.setDepth(i);
@@ -76,9 +59,9 @@ public class JDriveMain_INF5171 {
             }
         }
 
-        for (int i = 1; i < 6; i++) {
-            //2 iterations for sequential (for average)
-            for (int j = 0; j < 2; j++) {
+        for (int i = 1; i < 8; i++) {
+            //2 iterations for sequential avec 1 thread (moyenne)
+            for (int j = 0; j < 1; j++) {
                 Statistic statistic = new Statistic();
                 statistic.setDepth(i);
                 statistic.setNbThreads(1);
@@ -123,7 +106,7 @@ public class JDriveMain_INF5171 {
 
         MStructureMonitor<File> fileMonitor = new MStructureMonitor<>();
         Producer<File> fileProducer = new Producer<>(fileMonitor, fileList);
-        fileProducer.setThreshold(300);
+        fileProducer.setThreshold(1000);
 
         Thread producerTh = new Thread(fileProducer);
         producerTh.start();
@@ -141,7 +124,7 @@ public class JDriveMain_INF5171 {
                 .collect(Collectors.toSet());
 
         stats.setDuplicates(duplicates);
-        System.out.print("Completed\n");
+        System.out.print("Job done\n");
     }
 
 
