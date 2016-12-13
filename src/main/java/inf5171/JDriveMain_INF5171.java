@@ -4,7 +4,7 @@ import com.google.api.services.drive.model.File;
 import configuration.Configuration;
 import inf5171.fixtures.FileFixtures;
 import inf5171.fixtures.Statistic;
-import inf5171.fixtures.Sum;
+import inf5171.fixtures.NodeCounter;
 import inf5171.monitor.Consumer;
 import inf5171.monitor.MStructureMonitor;
 import inf5171.monitor.Producer;
@@ -49,7 +49,7 @@ public class JDriveMain_INF5171 {
         }
 
 
-        for (int i = 1; i < 6; i++) {
+        for (int i = 1; i < 7; i++) {
             //2 iterations for sequential avec 1 thread (moyenne)
             for (int j = 0; j < 2; j++) {
                 Statistic statistic = new Statistic();
@@ -62,7 +62,7 @@ public class JDriveMain_INF5171 {
 
         // i = nombre de repertoires et fichiers par niveau
         // j = nombre de threads
-        for (int i = 1; i < 6; i++) {
+        for (int i = 1; i < 7; i++) {
             for (int j = 0; j < 5; j++) {
                 Statistic statistic = new Statistic();
                 statistic.setDepth(i);
@@ -72,7 +72,7 @@ public class JDriveMain_INF5171 {
             }
         }
 
-        for (int i = 1; i < 6; i++) {
+        for (int i = 1; i < 7; i++) {
             for (int j = 0; j < 5; j++) {
                 Statistic statistic = new Statistic();
                 statistic.setDepth(i);
@@ -129,7 +129,7 @@ public class JDriveMain_INF5171 {
 
         stats.stopWatch();
 
-        stats.setTotalNodes(Sum.countNodes(treeBuilder.getRoot()));
+        stats.setTotalNodes(NodeCounter.countNodes(treeBuilder.getRoot()));
 
         Set<String> allItems = new HashSet<>();
         Set<TreeNode> duplicates = treeBuilder.getNodes().stream()
@@ -158,11 +158,10 @@ public class JDriveMain_INF5171 {
         Thread producerTh = new Thread(fileProducer);
         producerTh.start();
 
-        TreeConsumer treeConsumer = new TreeConsumer(fileMonitor, treeBuilder);
         Thread[] threadsTree = new Thread[stats.getNbThreads()];
 
         for (int i = 0; i < stats.getNbThreads(); i++) {
-            threadsTree[i] = new Thread(treeConsumer);
+            threadsTree[i] = new Thread(new TreeConsumer(fileMonitor, treeBuilder));
             threadsTree[i].start();
         }
 
@@ -172,7 +171,7 @@ public class JDriveMain_INF5171 {
         }
 
         stats.stopWatch();
-        stats.setTotalNodes(Sum.countNodes(treeBuilder.getRoot()));
+        stats.setTotalNodes(NodeCounter.countNodes(treeBuilder.getRoot()));
 
         Set<String> allItems = new HashSet<>();
         Set<TreeNode> duplicates = treeBuilder.getNodes().stream()
@@ -222,7 +221,7 @@ public class JDriveMain_INF5171 {
 //        }
 
         stats.stopWatch();
-        stats.setTotalNodes(Sum.countNodes(treeBuilder.getRoot()));
+        stats.setTotalNodes(NodeCounter.countNodes(treeBuilder.getRoot()));
 
         Set<String> allItems = new HashSet<>();
         Set<TreeNode> duplicates = treeBuilder.getNodes().stream()

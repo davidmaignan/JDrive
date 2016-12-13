@@ -1,7 +1,6 @@
 package inf5171.fixtures;
 
 import model.tree.TreeNode;
-import org.neo4j.cypher.internal.frontend.v2_3.ast.In;
 
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveTask;
@@ -9,12 +8,12 @@ import java.util.concurrent.RecursiveTask;
 /**
  * Created by david on 2016-12-12.
  */
-public class Sum extends RecursiveTask<Integer> {
+public class NodeCounter extends RecursiveTask<Integer> {
 
     private TreeNode node;
     private int total;
 
-    public Sum(TreeNode node){
+    public NodeCounter(TreeNode node){
         this.node = node;
     }
 
@@ -25,8 +24,8 @@ public class Sum extends RecursiveTask<Integer> {
 
         if(node.getChildren().size() > 0){
             for(TreeNode child : node.getChildren()){
-                Sum childSum =  new Sum(child);
-                total += childSum.compute();
+                NodeCounter childNodeCounter =  new NodeCounter(child);
+                total += childNodeCounter.compute();
             }
         }
 
@@ -34,6 +33,6 @@ public class Sum extends RecursiveTask<Integer> {
     }
 
     public static Integer countNodes(TreeNode root){
-        return ForkJoinPool.commonPool().invoke(new Sum(root));
+        return ForkJoinPool.commonPool().invoke(new NodeCounter(root));
     }
 }
