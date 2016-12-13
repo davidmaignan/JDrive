@@ -41,37 +41,50 @@ public class JDriveMain_INF5171 {
 
     public static void main(String args[]) throws IOException, InterruptedException {
 
-        methods = new String[]{"sequential", "prod/con"};
+        methods = new String[]{"sequential", "prod/con", "pool"};
         statisticMap = new HashMap<>();
 
-        statisticMap.put(methods[0], new ArrayList<>());
-        statisticMap.put(methods[1], new ArrayList<>());
+        for (int i = 0; i < methods.length; i++) {
+            statisticMap.put(methods[i], new ArrayList<>());
+        }
+
+
+        for (int i = 1; i < 6; i++) {
+            //2 iterations for sequential avec 1 thread (moyenne)
+            for (int j = 0; j < 2; j++) {
+                Statistic statistic = new Statistic();
+                statistic.setDepth(i);
+                statistic.setNbThreads(1);
+                test2(statistic);
+                statisticMap.get(methods[0]).add(statistic);
+            }
+        }
 
         // i = nombre de repertoires et fichiers par niveau
         // j = nombre de threads
-        for (int i = 1; i < 8; i++) {
+        for (int i = 1; i < 6; i++) {
             for (int j = 0; j < 5; j++) {
                 Statistic statistic = new Statistic();
                 statistic.setDepth(i);
                 statistic.setNbThreads(j*10+1);
                 test(statistic);
-                statisticMap.get(methods[0]).add(statistic);
-            }
-        }
-
-        for (int i = 1; i < 8; i++) {
-            //2 iterations for sequential avec 1 thread (moyenne)
-            for (int j = 0; j < 1; j++) {
-                Statistic statistic = new Statistic();
-                statistic.setDepth(i);
-                statistic.setNbThreads(1);
-                test2(statistic);
                 statisticMap.get(methods[1]).add(statistic);
             }
         }
 
-        System.out.println(printStatistic(statisticMap.get(methods[0])));
-        System.out.println(printStatistic(statisticMap.get(methods[1])));
+        for (int i = 1; i < 6; i++) {
+            for (int j = 0; j < 5; j++) {
+                Statistic statistic = new Statistic();
+                statistic.setDepth(i);
+                statistic.setNbThreads(j*10+1);
+                test3(statistic);
+                statisticMap.get(methods[2]).add(statistic);
+            }
+        }
+
+        for (int i = 0; i < methods.length; i++) {
+            System.out.println(printStatistic(statisticMap.get(methods[i])));
+        }
     }
 
     private static String printStatistic(List<Statistic> list){
@@ -167,7 +180,57 @@ public class JDriveMain_INF5171 {
                 .collect(Collectors.toSet());
 
         stats.setDuplicates(duplicates);
-        System.out.print("Completed\n");
+        System.out.print("Job done\n");
+    }
+
+    private static void test3(Statistic stats) throws IOException, InterruptedException {
+        FileFixtures fixtures = new FileFixtures(stats.getDepth());
+        List<File> fileList =  fixtures.getFileList();
+
+        stats.setTotalFiles(fileList.size());
+
+        stats.startWatch();
+
+        TreeBuilder treeBuilder = new TreeBuilder("root");
+
+        MStructureMonitor<File> fileMonitor = new MStructureMonitor<>();
+        Producer<File> fileProducer = new Producer<>(fileMonitor, fileList);
+        fileProducer.setThreshold(300);
+
+        Thread producerTh = new Thread(fileProducer);
+        producerTh.start();
+
+        TreeConsumer treeConsumer = new TreeConsumer(fileMonitor, treeBuilder);
+
+        ExecutorService pool = Executors.newCachedThreadPool();
+
+        for(int i = 0; i < stats.getNbThreads(); i++){
+            pool.execute(new TreeConsumer(fileMonitor, treeBuilder));
+        }
+//        Thread[] threadsTree = new Thread[stats.getNbThreads()];
+
+//        for (int i = 0; i < stats.getNbThreads(); i++) {
+//            threadsTree[i] = new Thread(treeConsumer);
+//            threadsTree[i].start();
+//        }
+
+        producerTh.join();
+        pool.shutdown();
+
+//        for (int i = 0; i < stats.getNbThreads(); i++) {
+//            threadsTree[i].join();
+//        }
+
+        stats.stopWatch();
+        stats.setTotalNodes(Sum.countNodes(treeBuilder.getRoot()));
+
+        Set<String> allItems = new HashSet<>();
+        Set<TreeNode> duplicates = treeBuilder.getNodes().stream()
+                .filter(n -> !allItems.add(n.getId()))
+                .collect(Collectors.toSet());
+
+        stats.setDuplicates(duplicates);
+        System.out.print("Job done\n");
     }
 
     private static void versionSequentielle() throws IOException, InterruptedException {
