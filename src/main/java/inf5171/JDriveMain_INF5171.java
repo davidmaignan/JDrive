@@ -119,7 +119,7 @@ public class JDriveMain_INF5171 {
 
         MStructureMonitor<File> fileMonitor = new MStructureMonitor<>();
         Producer<File> fileProducer = new Producer<>(fileMonitor, fileList);
-        fileProducer.setThreshold(1000);
+        fileProducer.setThreshold(300);
 
         Thread producerTh = new Thread(fileProducer);
         producerTh.start();
