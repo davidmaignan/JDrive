@@ -30,10 +30,11 @@ public class TreeConsumer implements Runnable{
 
                 if (file != null){
                     while(node == null){
+//                        System.out.println(file.getId());
                         node = treeBuilder.insertFile(file);
                         if(node == null) {
                             try {
-                                Thread.sleep(20L);
+                                Thread.sleep(50L);
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
