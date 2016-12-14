@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Created by david on 2016-12-11.
  */
-interface MStructure<T> {
+public interface MStructure<T> {
     /**
      * Obtient le contenu de la premiere cellule, mais suspend si vide
      * jusqu’a ce qu'un element soit ajouté

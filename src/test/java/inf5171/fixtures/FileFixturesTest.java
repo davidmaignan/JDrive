@@ -1,10 +1,14 @@
 package inf5171.fixtures;
 
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+import com.tngtech.java.junit.dataprovider.UseDataProvider;
 import model.tree.TreeBuilder;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import com.google.api.services.drive.model.File;
+import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.util.List;
@@ -23,16 +27,14 @@ import static org.junit.Assert.*;
  *
  * Created by david on 2016-12-02.
  */
+@RunWith(DataProviderRunner.class)
 public class FileFixturesTest {
-
-
     private FileFixtures fileFixtures;
     private String filename = "fixtures/inf5171/files.json";
     private Pattern patterns[];
     private String patternList[];
     private String rootName = "root";
     private TreeBuilder treeBuilder;
-
 
     @Before
     public void setUp() throws Exception {
@@ -48,19 +50,29 @@ public class FileFixturesTest {
         treeBuilder = new TreeBuilder(rootName);
     }
 
-    @Test
-    public void getFileList() throws Exception {
-        fileFixtures = new FileFixtures();
-
-
-        List<File> fileList = fileFixtures.getFileList();
-
-        assertEquals(23430 ,fileList.size());
-
+    @DataProvider
+    public static Object[][] depthFilesLoop(){
+        return new Object[][]{
+                {1, 30},
+                {2, 372},
+                {3, 2178},
+                {4, 8184},
+                {5, 23430},
+                {6, 55980},
+                {7, 117642},
+        };
     }
 
     @Test
-    @Ignore
+    @UseDataProvider("depthFilesLoop")
+    public void getFileList(int numberOfLoops, int numberOfFilesExpected) throws Exception {
+        fileFixtures = new FileFixtures(numberOfLoops);
+
+        List<File> fileList = fileFixtures.getFileList();
+        assertEquals(numberOfFilesExpected ,fileList.size());
+    }
+
+    @Test
     public void testPatternMatch(){
         String[] testList = new String[]{"root", "folder_0", "file_00", "folder_123", "file_4444"};
         String[] expected = new String[]{"", "root", "folder_0", "folder_12", "folder_444"};
@@ -71,7 +83,6 @@ public class FileFixturesTest {
     }
 
     @Test
-    @Ignore
     public void getDataSet() throws Exception {
         List<File> fileList = fileFixtures.getFileList();
 
@@ -83,13 +94,12 @@ public class FileFixturesTest {
     }
 
     @Test
-    @Ignore
     public void testStructure() throws IOException {
         List<File> fileList = fileFixtures.getFileList();
 
         treeBuilder.build(fileList);
 
-        System.out.println(treeBuilder.getRoot().getChildren().get(0).getChildren().get(0).getAbsolutePath());
+        System.out.println(treeBuilder.getRoot().getChildren().remove().getChildren().remove().getAbsolutePath());
     }
 
     private String parentExpected(String name){

@@ -3,11 +3,10 @@ package inf5171;
 import com.google.api.services.drive.model.File;
 import configuration.Configuration;
 import inf5171.fixtures.FileFixtures;
-import inf5171.fixtures.Statistic;
+import inf5171.measure.Statistic;
 import inf5171.fixtures.NodeCounter;
-import inf5171.monitor.Consumer;
 import inf5171.monitor.MStructureMonitor;
-import inf5171.monitor.Producer;
+import inf5171.monitor.file.FileProducer;
 import inf5171.monitor.tree.TreeConsumer;
 import io.Document;
 import io.Folder;
@@ -16,7 +15,6 @@ import io.filesystem.FileSystemWrapperTest;
 import model.tree.TreeBuilder;
 import model.tree.TreeNode;
 import model.types.MimeType;
-import org.apache.commons.lang3.time.StopWatch;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -24,18 +22,21 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import static java.lang.Thread.sleep;
 
 /**
  * Created by david on 2016-12-01.
+ *
+ * git clone -b inf5171 --single-branch https://github.com/davidmaignan/JDrive.git MAID10077306
+ *
+ * Build and run this main:  ./gradlew INF5171
+ *
  */
 public class JDriveMain_INF5171 {
-    private static FileSystemWrapperTest fs;
-    private static Configuration configuration;
+//    private static FileSystemWrapperTest fs;
+//    private static Configuration configuration;
     private static Map<String, List<Statistic>> statisticMap;
     private static String[] methods;
 
@@ -48,36 +49,38 @@ public class JDriveMain_INF5171 {
             statisticMap.put(methods[i], new ArrayList<>());
         }
 
-
-        for (int i = 1; i < 6; i++) {
+        for (int i = 1; i < 7; i++) {
             //2 iterations for sequential avec 1 thread (moyenne)
             for (int j = 0; j < 2; j++) {
                 Statistic statistic = new Statistic();
+                statistic.setType(methods[0]);
                 statistic.setDepth(i);
                 statistic.setNbThreads(1);
-                test2(statistic);
+                sequential(statistic);
                 statisticMap.get(methods[0]).add(statistic);
             }
         }
-
-        // i = nombre de repertoires et fichiers par niveau
-        // j = nombre de threads
-        for (int i = 1; i < 6; i++) {
+//
+//        // i = nombre de repertoires et fichiers par niveau
+//        // j = nombre de threads
+        for (int i = 1; i < 7; i++) {
             for (int j = 0; j < 5; j++) {
                 Statistic statistic = new Statistic();
+                statistic.setType(methods[1]);
                 statistic.setDepth(i);
                 statistic.setNbThreads(j*10+1);
-                test(statistic);
+                threadsArray(statistic);
                 statisticMap.get(methods[1]).add(statistic);
             }
         }
-
-        for (int i = 1; i < 6; i++) {
+//
+        for (int i = 1; i < 7; i++) {
             for (int j = 0; j < 5; j++) {
                 Statistic statistic = new Statistic();
+                statistic.setType(methods[2]);
                 statistic.setDepth(i);
                 statistic.setNbThreads(j*10+1);
-                test3(statistic);
+                cachedPool(statistic);
                 statisticMap.get(methods[2]).add(statistic);
             }
         }
@@ -93,7 +96,8 @@ public class JDriveMain_INF5171 {
         builder.append(String.format("%15s|", "nbThreads"));
         builder.append(String.format("%15s|", "nbFiles"));
         builder.append(String.format("%15s|", "nbNodes"));
-        builder.append(String.format("%15s|", "Time"));
+        builder.append(String.format("%15s|", "Stage 1"));
+        builder.append(String.format("%15s|", "Stage 2"));
         builder.append("\n");
 
 
@@ -101,14 +105,15 @@ public class JDriveMain_INF5171 {
             builder.append(String.format("%15s|", String.valueOf(stat.getNbThreads())));
             builder.append(String.format("%15s|", String.valueOf(stat.getTotalFiles())));
             builder.append(String.format("%15s|", String.valueOf(stat.getTotalNodes())));
-            builder.append(String.format("%15s|", String.valueOf(stat.getSeconds())));
+            builder.append(String.format("%15s|", String.valueOf(stat.getSeconds(0))));
+            builder.append(String.format("%15s|", String.valueOf(stat.getSeconds(1))));
             builder.append("\n");
         }
 
         return builder.toString();
     }
 
-    private static void test2(Statistic stats) throws IOException, InterruptedException {
+    private static void sequential(Statistic stats) throws IOException, InterruptedException {
         FileFixtures fixtures = new FileFixtures(stats.getDepth());
         List<File> fileList =  fixtures.getFileList();
 
@@ -118,7 +123,7 @@ public class JDriveMain_INF5171 {
         TreeBuilder treeBuilder = new TreeBuilder("root");
 
         MStructureMonitor<File> fileMonitor = new MStructureMonitor<>();
-        Producer<File> fileProducer = new Producer<>(fileMonitor, fileList);
+        FileProducer<File> fileProducer = new FileProducer<>(fileMonitor, fileList);
         fileProducer.setThreshold(300);
 
         Thread producerTh = new Thread(fileProducer);
@@ -137,11 +142,11 @@ public class JDriveMain_INF5171 {
                 .collect(Collectors.toSet());
 
         stats.setDuplicates(duplicates);
-        System.out.print("Job done\n");
+        System.out.print("Done\n");
     }
 
 
-    private static void test(Statistic stats) throws IOException, InterruptedException {
+    private static void threadsArray(Statistic stats) throws IOException, InterruptedException {
         FileFixtures fixtures = new FileFixtures(stats.getDepth());
         List<File> fileList =  fixtures.getFileList();
 
@@ -152,7 +157,7 @@ public class JDriveMain_INF5171 {
         TreeBuilder treeBuilder = new TreeBuilder("root");
 
         MStructureMonitor<File> fileMonitor = new MStructureMonitor<>();
-        Producer<File> fileProducer = new Producer<>(fileMonitor, fileList);
+        FileProducer<File> fileProducer = new FileProducer<>(fileMonitor, fileList);
         fileProducer.setThreshold(300);
 
         Thread producerTh = new Thread(fileProducer);
@@ -179,10 +184,10 @@ public class JDriveMain_INF5171 {
                 .collect(Collectors.toSet());
 
         stats.setDuplicates(duplicates);
-        System.out.print("Job done\n");
+        System.out.print("Done\n");
     }
 
-    private static void test3(Statistic stats) throws IOException, InterruptedException {
+    private static void cachedPool(Statistic stats) throws IOException, InterruptedException {
         FileFixtures fixtures = new FileFixtures(stats.getDepth());
         List<File> fileList =  fixtures.getFileList();
 
@@ -193,13 +198,11 @@ public class JDriveMain_INF5171 {
         TreeBuilder treeBuilder = new TreeBuilder("root");
 
         MStructureMonitor<File> fileMonitor = new MStructureMonitor<>();
-        Producer<File> fileProducer = new Producer<>(fileMonitor, fileList);
+        FileProducer<File> fileProducer = new FileProducer<>(fileMonitor, fileList);
         fileProducer.setThreshold(300);
 
         Thread producerTh = new Thread(fileProducer);
         producerTh.start();
-
-        TreeConsumer treeConsumer = new TreeConsumer(fileMonitor, treeBuilder);
 
         ExecutorService pool = Executors.newCachedThreadPool();
 
@@ -208,114 +211,128 @@ public class JDriveMain_INF5171 {
         }
 
         producerTh.join();
+
         pool.shutdown();
 
         stats.stopWatch();
-        stats.setTotalNodes(NodeCounter.countNodes(treeBuilder.getRoot()));
-
-        Set<String> allItems = new HashSet<>();
-        Set<TreeNode> duplicates = treeBuilder.getNodes().stream()
-                .filter(n -> !allItems.add(n.getId()))
-                .collect(Collectors.toSet());
-
-        stats.setDuplicates(duplicates);
-        System.out.print("Job done\n");
-    }
-
-    private static void versionSequentielle() throws IOException, InterruptedException {
-        StopWatch stopWatch = new StopWatch();
-        stopWatch.start();
-
-        configuration = new Configuration();
-        fs = new FileSystemWrapperTest(configuration);
-
-        TreeBuilder treeBuilder = new TreeBuilder("root");
-        treeBuilder.build(getFiles("fixtures/files.json"));
-
-        List<File> fileList = getFiles();
-
-        System.out.println("Total files: " + fileList.size());
-
-//        treeBuilder.build(getFiles());
-
-        List<TreeNode> listNodes = treeBuilder.getNodes();
-        System.out.println(listNodes.size() + "");
-
-        MStructureMonitor<TreeNode> monitor = new MStructureMonitor<>();
-        monitor.push(treeBuilder.getRoot());
-
-        Producer<TreeNode> producer = new Producer<>(monitor, listNodes);
-
-        Thread prodThread = new Thread(producer);
-        prodThread.start();
-
-        prodThread.join();
-
-        while(! monitor.getCompleted() || monitor.size() > 0) {
-            TreeNode node = monitor.shift();
-            if(! write(node, fs)){
-                monitor.push(node);
-            }
-        }
-
-        stopWatch.stop();
-        System.out.println(stopWatch.getTime());
-    }
-
-    private static void versionProducerConsumer(int nbThreads)
-            throws IOException, InterruptedException {
-
-        StopWatch stopWatch = new StopWatch();
-        stopWatch.start();
 
         Configuration configuration = new Configuration();
-        fs = new FileSystemWrapperTest(configuration);
+        FileSystemInterface fs = new FileSystemWrapperTest(configuration);
 
-        TreeBuilder treeBuilder = new TreeBuilder("root");
-        treeBuilder.build(getFiles("fixtures/files.json"));
+        stats.startWatch();
 
-        List<TreeNode> listNodes = treeBuilder.getNodes();
-        System.out.println(listNodes.size() + "");
-
-
-        MStructureMonitor<TreeNode> monitor = new MStructureMonitor<>();
-        monitor.push(treeBuilder.getRoot());
-
-        Producer<TreeNode> producer = new Producer<>(monitor, listNodes);
-
-        Thread prodThread = new Thread(producer);
-        prodThread.start();
-
-        Thread[] threads = new Thread[nbThreads];
-        Consumer[] consumers = new Consumer[nbThreads];
-
-        for (int i = 0; i < nbThreads; i++) {
-            consumers[i] = new Consumer(monitor, listNodes, fs);
-            threads[i] = new Thread(consumers[i]);
-            threads[i].start();
-        }
-
-        for (int i = 0; i < nbThreads; i++) {
-            threads[i].join();
-        }
-
-        prodThread.join();
-
-        stopWatch.stop();
-        System.out.println(stopWatch.getNanoTime() / 1.0E-9);
+//        Write Files in fs
+//        WriteTreeAction.compute(treeBuilder.getRoot(), fs);
 
         Path rootPath = fs.getPath(configuration.getRootFolder());
 
-        printFileSystem(rootPath);
+        stats.stopWatch();
 
-
-        int totalWrite = 0;
-        for (int i = 0; i < nbThreads; i++) {
-            totalWrite += consumers[i].getTotal().get();
-        }
-
-        System.out.println("Total write: " + totalWrite);
+//        stats.setTotalNodes(NodeCounter.countNodes(treeBuilder.getRoot()));
+//        stats.setTotalFilesWritten(FileCount.compute(fs, rootPath));
+//        Set<String> allItems = new HashSet<>();
+//        Set<TreeNode> duplicates = treeBuilder.getNodes().stream()
+//                .filter(n -> !allItems.add(n.getId()))
+//                .collect(Collectors.toSet());
+//
+//        stats.setDuplicates(duplicates);
+        System.out.print("Done\n");
     }
+
+//    private static void versionSequentielle() throws IOException, InterruptedException {
+//        StopWatch stopWatch = new StopWatch();
+//        stopWatch.start();
+//
+//        configuration = new Configuration();
+//        fs = new FileSystemWrapperTest(configuration);
+//
+//        TreeBuilder treeBuilder = new TreeBuilder("root");
+//        treeBuilder.build(getFiles("fixtures/files.json"));
+//
+//        List<File> fileList = getFiles();
+//
+//        System.out.println("Total files: " + fileList.size());
+//
+////        treeBuilder.build(getFiles());
+//
+//        List<TreeNode> listNodes = treeBuilder.getNodes();
+//        System.out.println(listNodes.size() + "");
+//
+//        MStructureMonitor<TreeNode> monitor = new MStructureMonitor<>();
+//        monitor.push(treeBuilder.getRoot());
+//
+//        FileProducer<TreeNode> producer = new FileProducer<>(monitor, listNodes);
+//
+//        Thread prodThread = new Thread(producer);
+//        prodThread.start();
+//
+//        prodThread.join();
+//
+//        while(! monitor.getCompleted() || monitor.size() > 0) {
+//            TreeNode node = monitor.shift();
+//            if(! write(node, fs)){
+//                monitor.push(node);
+//            }
+//        }
+//
+//        stopWatch.stop();
+//        System.out.println(stopWatch.getTime());
+//    }
+//
+//    private static void versionProducerConsumer(int nbThreads)
+//            throws IOException, InterruptedException {
+//
+//        StopWatch stopWatch = new StopWatch();
+//        stopWatch.start();
+//
+//        Configuration configuration = new Configuration();
+//        fs = new FileSystemWrapperTest(configuration);
+//
+//        TreeBuilder treeBuilder = new TreeBuilder("root");
+//        treeBuilder.build(getFiles("fixtures/files.json"));
+//
+//        List<TreeNode> listNodes = treeBuilder.getNodes();
+//        System.out.println(listNodes.size() + "");
+//
+//
+//        MStructureMonitor<TreeNode> monitor = new MStructureMonitor<>();
+//        monitor.push(treeBuilder.getRoot());
+//
+//        FileProducer<TreeNode> producer = new FileProducer<>(monitor, listNodes);
+//
+//        Thread prodThread = new Thread(producer);
+//        prodThread.start();
+//
+//        Thread[] threads = new Thread[nbThreads];
+//        Consumer[] consumers = new Consumer[nbThreads];
+//
+//        for (int i = 0; i < nbThreads; i++) {
+//            consumers[i] = new Consumer(monitor, listNodes, fs);
+//            threads[i] = new Thread(consumers[i]);
+//            threads[i].start();
+//        }
+//
+//        for (int i = 0; i < nbThreads; i++) {
+//            threads[i].join();
+//        }
+//
+//        prodThread.join();
+//
+//        stopWatch.stop();
+//        System.out.println(stopWatch.getNanoTime() / 1.0E-9);
+//
+//        Path rootPath = fs.getPath(configuration.getRootFolder());
+//
+//        printFileSystem(rootPath);
+//
+//
+//        int totalWrite = 0;
+//        for (int i = 0; i < nbThreads; i++) {
+//            totalWrite += consumers[i].getTotal().get();
+//        }
+//
+//        System.out.println("Total write: " + totalWrite);
+//    }
 
     private static void printFileSystem(Path path) throws IOException {
         Files.list(path).forEach(file -> {
@@ -354,93 +371,93 @@ public class JDriveMain_INF5171 {
         return fixtures.getFileList();
     }
 
-    private static void version2() throws IOException {
-        FileFixtures fixtures = new FileFixtures("fixtures/files.json");
-        List<File> files = fixtures.getFileList();
-
-
-        TreeBuilder treeBuilder = new TreeBuilder("root");
-        treeBuilder.build(files);
-
-        TreeBuilder.printTree(treeBuilder.getRoot());
-
-
-        System.out.println(files.size() + "");
-
-
-        List<TreeNode> listNodes = treeBuilder.getNodes();
-
-        System.out.println(listNodes.size() + "");
-
-
-        Configuration configuration = new Configuration();
-        fs = new FileSystemWrapperTest(configuration);
-
-
-        ForkJoinPool pool = new ForkJoinPool( 10 );
-
-        StopWatch stopWatch = new StopWatch();
-        stopWatch.start();
-
-        Future<?>[] futures = new Future[listNodes.size()];
-
-
-
-//        for (int i = 0; i < listNodes.size(); i++) {
-//            futures[i] = pool.submit(
-//                    ()-> write(TreeNode)
-//            );
-//        }
-
-//        for (int i = 0; i < listNodes.size(); i++) {
-//            try{
-//                futures[i].get();
-//            }catch (Exception e){
+//    private static void version2() throws IOException {
+//        FileFixtures fixtures = new FileFixtures("fixtures/files.json");
+//        List<File> files = fixtures.getFileList();
 //
-//            }
+//
+//        TreeBuilder treeBuilder = new TreeBuilder("root");
+//        treeBuilder.build(files);
+//
+//        TreeBuilder.printTree(treeBuilder.getRoot());
+//
+//
+//        System.out.println(files.size() + "");
+//
+//
+//        List<TreeNode> listNodes = treeBuilder.getNodes();
+//
+//        System.out.println(listNodes.size() + "");
+//
+//
+//        Configuration configuration = new Configuration();
+//        fs = new FileSystemWrapperTest(configuration);
+//
+//
+//        ForkJoinPool pool = new ForkJoinPool( 10 );
+//
+//        StopWatch stopWatch = new StopWatch();
+//        stopWatch.start();
+//
+//        Future<?>[] futures = new Future[listNodes.size()];
+//
+//
+//
+////        for (int i = 0; i < listNodes.size(); i++) {
+////            futures[i] = pool.submit(
+////                    ()-> write(TreeNode)
+////            );
+////        }
+//
+////        for (int i = 0; i < listNodes.size(); i++) {
+////            try{
+////                futures[i].get();
+////            }catch (Exception e){
+////
+////            }
+////        }
+//
+//        stopWatch.stop();
+//
+////        System.out.println(stopWatch.getNanoTime() / 1.0E-9);
+//
+//    }
+
+//    private static void version1(){
+//        ExecutorService pool = Executors.newFixedThreadPool(20);
+//
+//        int n = 10000;
+//
+//        StopWatch stopWatch = new StopWatch();
+//        stopWatch.start();
+//
+//        Thread threads[] = new Thread[n];
+//        for( int i = 0; i < n; i++ ) {
+//            int fi = i;
+//            threads[i] = new Thread(
+//                    () -> write(String.valueOf(fi)) );
+//            threads[i].start();
 //        }
-
-        stopWatch.stop();
-
+//
+//        for( int i = 0; i < n; i++ ) {
+//            try { threads[i].join(); } catch( Exception e ){};
+//        }
+//
+//        stopWatch.stop();
+//
 //        System.out.println(stopWatch.getNanoTime() / 1.0E-9);
-
-    }
-
-    private static void version1(){
-        ExecutorService pool = Executors.newFixedThreadPool(20);
-
-        int n = 10000;
-
-        StopWatch stopWatch = new StopWatch();
-        stopWatch.start();
-
-        Thread threads[] = new Thread[n];
-        for( int i = 0; i < n; i++ ) {
-            int fi = i;
-            threads[i] = new Thread(
-                    () -> write(String.valueOf(fi)) );
-            threads[i].start();
-        }
-
-        for( int i = 0; i < n; i++ ) {
-            try { threads[i].join(); } catch( Exception e ){};
-        }
-
-        stopWatch.stop();
-
-        System.out.println(stopWatch.getNanoTime() / 1.0E-9);
-
-    }
-
-    private static boolean write(String name){
-        try {
-            sleep((long)(Math.random() * 1000));
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        Folder folder = new Folder(fs);
-
-        folder.setFileId(name);
-        return folder.write(name);
-    }
+//
+//    }
+//
+//    private static boolean write(String name){
+//        try {
+//            sleep((long)(Math.random() * 1000));
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//        Folder folder = new Folder(fs);
+//
+//        folder.setFileId(name);
+//        return folder.write(name);
+//    }
 }

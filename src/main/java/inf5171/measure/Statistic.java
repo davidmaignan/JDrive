@@ -1,4 +1,4 @@
-package inf5171.fixtures;
+package inf5171.measure;
 
 import model.tree.TreeNode;
 import org.apache.commons.lang3.time.StopWatch;
@@ -10,10 +10,13 @@ import java.util.Set;
  * Created by david on 2016-12-12.
  */
 public class Statistic {
+    private String type;
     private int depth;
     private int totalFiles;
+    private int totalFilesWritten;
     private int nbThreads;
-    private long elapsedTime;
+    private long[] elapsedTime;
+    private int stage;
     private int totalNodes;
     private StopWatch stopWatch;
     private Set<TreeNode> duplicates;
@@ -21,6 +24,8 @@ public class Statistic {
     public Statistic(){
         stopWatch = new StopWatch();
         duplicates = new HashSet<>();
+        elapsedTime = new long[4];
+        stage = 0;
     }
 
     public Set<TreeNode> getDuplicates() {
@@ -40,7 +45,24 @@ public class Statistic {
     public void stopWatch(){
         stopWatch.stop();
 
-        elapsedTime = stopWatch.getNanoTime();
+        elapsedTime[stage] = stopWatch.getNanoTime();
+        stage++;
+    }
+
+    public int getTotalFilesWritten() {
+        return totalFilesWritten;
+    }
+
+    public void setTotalFilesWritten(int totalFileWritten) {
+        this.totalFilesWritten = totalFileWritten;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public int getDepth() {
@@ -67,12 +89,8 @@ public class Statistic {
         this.nbThreads = nbThreads;
     }
 
-    public long getElapsedTime() {
-        return elapsedTime;
-    }
-
-    public void setElapsedTime(long elapsedTime) {
-        this.elapsedTime = elapsedTime;
+    public long getElapsedTime(int stage) {
+        return elapsedTime[stage];
     }
 
     public int getTotalNodes() {
@@ -83,8 +101,8 @@ public class Statistic {
         this.totalNodes = totalNodes;
     }
 
-    public double getSeconds(){
-        return (double) elapsedTime / 1000000000.0;
+    public double getSeconds(int stage){
+        return (double) elapsedTime[stage] / 1000000000.0;
 
     }
 }

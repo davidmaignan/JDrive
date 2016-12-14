@@ -1,5 +1,6 @@
-package inf5171.monitor;
+package inf5171.monitor.file;
 
+import inf5171.monitor.MStructure;
 import model.tree.TreeNode;
 
 import java.util.Arrays;
@@ -10,7 +11,7 @@ import static java.lang.Thread.sleep;
 /**
  * Created by david on 2016-12-11.
  */
-public class Producer<T> implements Runnable {
+public class FileProducer<T> implements Runnable {
 
     private List<T> listNodes;
     private MStructure<T> monitor;
@@ -18,7 +19,7 @@ public class Producer<T> implements Runnable {
 
     private int threshold = 300;
 
-    public Producer(MStructure<T> monitor, List<T> list){
+    public FileProducer(MStructure<T> monitor, List<T> list){
         this.monitor = monitor;
         this.listNodes = list;
     }
@@ -33,7 +34,7 @@ public class Producer<T> implements Runnable {
 
     @Override
     public void run() {
-        output.out.print("Producer progression: -");
+        output.out.print("FileProducer progression: -");
         T[] list = (T[]) listNodes.toArray();
         int total = list.length;
         int index = 0;

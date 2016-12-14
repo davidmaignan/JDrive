@@ -15,7 +15,6 @@ public class MStructureMonitor<T> implements MStructure<T> {
     private final ReentrantLock lock;
     private final Condition notEmpty;
     private Boolean completed;
-    private static final int CAPACITY = 10;
 
     public MStructureMonitor(){
         queue = new ArrayDeque<T>();
