@@ -42,52 +42,52 @@ public class JDriveMain_INF5171 {
 
     public static void main(String args[]) throws IOException, InterruptedException {
 
-        methods = new String[]{"sequential", "prod/con", "pool"};
+        methods = new String[]{"sequential", "prod/con", "cachedPool"};
         statisticMap = new HashMap<>();
 
         for (int i = 0; i < methods.length; i++) {
             statisticMap.put(methods[i], new ArrayList<>());
         }
 
-//        for (int i = 1; i < 3; i++) {
-//            //2 iterations for sequential avec 1 thread (moyenne)
-//            for (int j = 0; j < 2; j++) {
-//                Measure measure = new Measure();
-//                measure.setType(methods[0]);
-//                measure.setDepth(i);
-//                measure.setNbThreads(1);
-//                sequential(measure);
-//                statisticMap.get(methods[0]).add(measure);
-//            }
-//        }
+        for (int i = 1; i < 7; i++) {
+            //2 iterations for sequential avec 1 thread (moyenne)
+            for (int j = 0; j < 2; j++) {
+                Measure measure = new Measure();
+                measure.setType(methods[0]);
+                measure.setDepth(i);
+                measure.setNbThreads(1);
+                sequential(measure);
+                statisticMap.get(methods[0]).add(measure);
+            }
+        }
 
         // i = nombre de repertoires et fichiers par niveau
         // j = nombre de threads
-        for (int i = 1; i < 5; i++) {
-            for (int j = 4; j < 5; j++) {
+        for (int i = 1; i < 7; i++) {
+            for (int j = 0; j < 5; j++) {
                 Measure measure = new Measure();
                 measure.setType(methods[1]);
                 measure.setDepth(i);
                 measure.setNbThreads(j*10+1);
                 threadsArray(measure);
-//                statisticMap.get(methods[1]).add(measure);
+                statisticMap.get(methods[1]).add(measure);
             }
         }
 
-        for (int i = 1; i < 5; i++) {
-            for (int j = 4; j < 5; j++) {
+        for (int i = 1; i < 7; i++) {
+            for (int j = 0; j < 5; j++) {
                 Measure measure = new Measure();
                 measure.setType(methods[2]);
                 measure.setDepth(i);
                 measure.setNbThreads(j*10+1);
                 cachedPool(measure);
-//                statisticMap.get(methods[2]).add(measure);
+                statisticMap.get(methods[2]).add(measure);
             }
         }
 
-//        for (int i = 0; i < methods.length; i++) {
-//            System.out.println(printStatistic(statisticMap.get(methods[i])));
-//        }
+        for (int i = 0; i < methods.length; i++) {
+            System.out.println(printStatistic(statisticMap.get(methods[i])));
+        }
     }
 
     private static String printStatistic(List<Measure> list){
@@ -118,10 +118,12 @@ public class JDriveMain_INF5171 {
         List<File> fileList =  fixtures.getFileList();
 
         stats.setTotalFiles(fileList.size());
+
+        printStatus(stats);
+
         stats.startWatch();
 
         TreeBuilder treeBuilder = new TreeBuilder("root");
-
         MStructureMonitor<File> fileMonitor = new MStructureMonitor<>();
         FileProducer<File> fileProducer = new FileProducer<>(fileMonitor, fileList);
         fileProducer.setThreshold(300);
@@ -134,7 +136,7 @@ public class JDriveMain_INF5171 {
 
         stats.stopWatch();
 
-//        stats.setTotalNodes(NodeCounter.countNodes(treeBuilder.getRoot()));
+        stats.setTotalNodes(NodeCounter.countNodes(treeBuilder.getRoot()));
 
         Set<String> allItems = new HashSet<>();
         Set<TreeNode> duplicates = treeBuilder.getNodes().stream()
@@ -145,16 +147,21 @@ public class JDriveMain_INF5171 {
         System.out.print("Done\n");
     }
 
+    private static void printStatus(Measure measure){
+        System.out.printf("Type: %-12s - TotalFiles: %-7d - NbThreads: %-3d ",
+                measure.getType(), measure.getTotalFiles(), measure.getNbThreads());
+    }
+
     private static void threadsArray(Measure stats) throws IOException, InterruptedException {
         FileList fixtures = new FileList(stats.getDepth());
         List<File> fileList =  fixtures.getFileList();
 
         stats.setTotalFiles(fileList.size());
 
+        printStatus(stats);
+
         stats.startWatch();
-
         TreeBuilder treeBuilder = new TreeBuilder("root");
-
         MStructureMonitor<File> fileMonitor = new MStructureMonitor<>();
         FileProducer<File> fileProducer = new FileProducer<>(fileMonitor, fileList);
         fileProducer.setThreshold(300);
@@ -192,10 +199,10 @@ public class JDriveMain_INF5171 {
 
         stats.setTotalFiles(fileList.size());
 
+        printStatus(stats);
+
         stats.startWatch();
-
         TreeBuilder treeBuilder = new TreeBuilder("root");
-
         MStructureMonitor<File> fileMonitor = new MStructureMonitor<>();
         FileProducer<File> fileProducer = new FileProducer<>(fileMonitor, fileList);
         fileProducer.setThreshold(300);

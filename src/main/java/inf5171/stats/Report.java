@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
  * Created by david on 2016-12-14.
  */
 public class Report {
-    private String[] keys = new String[]{"sequential", "prod/con", "pool"};
+    private String[] keys = new String[]{"sequential", "prod/con", "cachedPool"};
 
     private Map<String, List<Measure>> measures;
     private Measure sequential;

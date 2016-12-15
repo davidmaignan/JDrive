@@ -27,7 +27,7 @@ public class FileProducer<T> implements Runnable {
 
     @Override
     public void run() {
-        System.out.print("FileProducer progression: -");
+//        System.out.print("FileProducer progression: -");
         T[] list = (T[]) listNodes.toArray();
         int total = list.length;
         int index = 0;
@@ -44,10 +44,10 @@ public class FileProducer<T> implements Runnable {
 
             monitor.push(Arrays.asList(Arrays.copyOfRange(list, index, last)));
             index += threshold;
-            System.out.print("-");
+//            System.out.print("-");
         }
 
-        System.out.print(" producer completed!");
+//        System.out.print(" producer completed!");
 
         monitor.setCompleted(true);
     }
