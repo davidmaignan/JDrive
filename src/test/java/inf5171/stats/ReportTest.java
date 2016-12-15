@@ -4,7 +4,9 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
@@ -12,8 +14,7 @@ import static org.junit.Assert.*;
  * Created by david on 2016-12-15.
  */
 public class ReportTest {
-
-    private String[] keys = new String[]{"sequential", "prod/con", "pool"};
+    private String[] keys = new String[]{"sequential", "prod/con", "cachedPool"};
     private Report report;
 
     @Before
@@ -21,6 +22,30 @@ public class ReportTest {
         report = new Report(getDataSet());
 
     }
+
+    @Test
+    public void generateChart() throws Exception {
+        report.getListOfTotalFiles().stream().forEach( s -> {
+            report.generateChart(s);
+        });
+
+//        report.generateChart(10);
+    }
+
+    @Test
+    @Ignore
+    public void getListMeasuresByTotalFiles() throws Exception {
+        List<Measure> measureList = report.getListMeasuresByTotalFiles(1, 110);
+
+        Double[] expected = new Double[]{5.0,6.0,7.0,8.0,9.0};
+
+        for (int i = 0; i < measureList.size(); i++) {
+            assertEquals(110, measureList.get(i).getTotalFiles());
+            assertEquals(i, measureList.get(i).getNbThreads());
+            assertEquals(expected[i], Double.valueOf(measureList.get(i).getElapsedTime(0)));
+        }
+    }
+
 
     @Test
     @Ignore
@@ -39,6 +64,7 @@ public class ReportTest {
     }
 
     @Test
+    @Ignore
     public void getAverageSequential() throws Exception {
         assertEquals(new Double(7), report.getAverageSequentialByStage(10, 0));
     }
@@ -61,7 +87,7 @@ public class ReportTest {
                     measure.setTotalNodes(i * 100 + 10);
                     measure.setTotalFilesWritten(i * 10 + 10);
 
-                    measure.setElapsedTime(0, 5 + j * 1);
+                    measure.setElapsedTime(0, 5 + k);
 
                     result.get(keys[k]).add(measure);
                 }
@@ -70,5 +96,4 @@ public class ReportTest {
 
         return result;
     }
-
 }

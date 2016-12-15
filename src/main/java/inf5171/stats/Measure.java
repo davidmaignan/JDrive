@@ -97,7 +97,7 @@ public class Measure {
         this.nbThreads = nbThreads;
     }
 
-    public long getElapsedTime(int stage) {
+    public Long getElapsedTime(int stage) {
         return elapsedTime[stage];
     }
 
