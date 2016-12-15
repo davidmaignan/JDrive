@@ -7,6 +7,8 @@ import inf5171.stats.Measure;
 import inf5171.monitor.MStructureMonitor;
 import inf5171.monitor.producer.FileProducer;
 import inf5171.monitor.consumer.TreeConsumer;
+import inf5171.stats.Report;
+import inf5171.utils.FileCount;
 import inf5171.utils.NodeCounter;
 import io.Document;
 import io.Folder;
@@ -49,9 +51,9 @@ public class JDriveMain_INF5171 {
             statisticMap.put(methods[i], new ArrayList<>());
         }
 
-        for (int i = 1; i < 7; i++) {
+        for (int i = 1; i < 6; i++) {
             //2 iterations for sequential avec 1 thread (moyenne)
-            for (int j = 0; j < 2; j++) {
+            for (int j = 0; j < 1; j++) {
                 Measure measure = new Measure();
                 measure.setType(methods[0]);
                 measure.setDepth(i);
@@ -60,34 +62,39 @@ public class JDriveMain_INF5171 {
                 statisticMap.get(methods[0]).add(measure);
             }
         }
-
+//
         // i = nombre de repertoires et fichiers par niveau
         // j = nombre de threads
-        for (int i = 1; i < 7; i++) {
+        for (int i = 1; i < 6; i++) {
             for (int j = 0; j < 5; j++) {
                 Measure measure = new Measure();
                 measure.setType(methods[1]);
                 measure.setDepth(i);
-                measure.setNbThreads(j*10+1);
+                measure.setNbThreads(j*20+1);
                 threadsArray(measure);
                 statisticMap.get(methods[1]).add(measure);
             }
         }
 
-        for (int i = 1; i < 7; i++) {
+        for (int i = 1; i < 6; i++) {
             for (int j = 0; j < 5; j++) {
                 Measure measure = new Measure();
                 measure.setType(methods[2]);
                 measure.setDepth(i);
                 measure.setNbThreads(j*10+1);
-                cachedPool(measure);
+//                cachedPool(measure);
                 statisticMap.get(methods[2]).add(measure);
             }
         }
 
-        for (int i = 0; i < methods.length; i++) {
+        for (int i = 0; i < methods.length-1; i++) {
             System.out.println(printStatistic(statisticMap.get(methods[i])));
         }
+
+
+        Report report = new Report(statisticMap);
+
+        report.generateCharts();
     }
 
     private static String printStatistic(List<Measure> list){
@@ -106,7 +113,7 @@ public class JDriveMain_INF5171 {
             builder.append(String.format("%15s|", String.valueOf(stat.getTotalFiles())));
             builder.append(String.format("%15s|", String.valueOf(stat.getTotalNodes())));
             builder.append(String.format("%15s|", String.valueOf(stat.getSeconds(0))));
-            builder.append(String.format("%15s|", String.valueOf(stat.getSeconds(1))));
+            builder.append(String.format("%15s|", "."));
             builder.append("\n");
         }
 
@@ -219,29 +226,29 @@ public class JDriveMain_INF5171 {
         producerTh.join();
 
         pool.shutdown();
+        System.out.printf("Pool is shutdown: %b\n", pool.isShutdown());
 
         stats.stopWatch();
 
         Configuration configuration = new Configuration();
         FileSystemInterface fs = new FileSystemWrapperTest(configuration);
-
         //Stage 2 - Writing the files
-        stats.startWatch();
-
+//        stats.startWatch();
 //        Write Files in fs
 //        WriterAction.compute(treeBuilder.getRoot(), fs);
-
-        stats.stopWatch();
+//        stats.stopWatch();
 
 //        stats.setTotalNodes(NodeCounter.countNodes(treeBuilder.getRoot()));
-//        stats.setTotalFilesWritten(FileCount.compute(fs, rootPath));
+//        stats.setTotalFilesWritten(FileCount.compute(fs, fs.getRootPath()));
 //        Set<String> allItems = new HashSet<>();
 //        Set<TreeNode> duplicates = treeBuilder.getNodes().stream()
 //                .filter(n -> !allItems.add(n.getId()))
 //                .collect(Collectors.toSet());
-//
+
 //        stats.setDuplicates(duplicates);
         System.out.print("Done\n");
+
+
     }
 
 //    private static void versionSequentielle() throws IOException, InterruptedException {
