@@ -16,17 +16,17 @@ import java.util.stream.Collectors;
 /**
  * Created by david on 2016-12-02.
  */
-public class FileFixtures {
+public class FileList {
 
     private List<com.google.api.services.drive.model.File> fileList;
     private int total;
 
-    public FileFixtures(int total){
+    public FileList(int total){
         this.total = total;
         fileList = getDataSet();
     }
 
-    public FileFixtures(String filename) throws IOException {
+    public FileList(String filename) throws IOException {
         fileList = getDataSet(filename);
     }
 
@@ -79,7 +79,7 @@ public class FileFixtures {
         com.google.api.services.drive.model.File[] files = new com.google.api.services.drive.model.File[5];
 
         for (int i = 0; i < 5; i++) {
-            String filename = parent.replaceFirst("folder", "file")+ i;
+            String filename = parent.replaceFirst("folder", "producer")+ i;
             files[i] = createFile(filename, parent, MimeType.DOCUMENT);
         }
 
@@ -122,15 +122,15 @@ public class FileFixtures {
     public List<com.google.api.services.drive.model.File> getDataSet(String filename) throws IOException {
         GsonBuilder gson = new GsonBuilder();
         gson.registerTypeAdapter(DateTime.class, new DateTimeDeserializer());
-        inf5171.fixtures.File[] fileList = gson.create().fromJson(new FileReader(
+        File[] fileList = gson.create().fromJson(new FileReader(
                         this.getClass().getClassLoader().getResource(filename).getFile()),
-                inf5171.fixtures.File[].class
+                File[].class
         );
 
         return Arrays.stream(fileList).map(f -> setFile(f)).collect(Collectors.toList());
     }
 
-    private com.google.api.services.drive.model.File setFile(inf5171.fixtures.File f){
+    private com.google.api.services.drive.model.File setFile(File f){
         com.google.api.services.drive.model.File file = new com.google.api.services.drive.model.File();
         file.setId(f.id);
         file.setName(f.name);

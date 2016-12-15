@@ -9,7 +9,7 @@ public class MimeType {
     public static final String AUDIO = "application/vnd.google-apps.audio";
     public static final String DOCUMENT = "application/vnd.google-apps.document";
     public static final String DRAWING = "application/vnd.google-apps.drawing";
-    public static final String FILE = "application/vnd.google-apps.file";
+    public static final String FILE = "application/vnd.google-apps.producer";
     public static final String FOLDER = "application/vnd.google-apps.folder";
     public static final String FORM = "application/vnd.google-apps.form";
     public static final String FUSIONTABLE = "application/vnd.google-apps.fusiontable";

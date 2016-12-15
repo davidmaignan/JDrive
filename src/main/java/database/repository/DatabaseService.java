@@ -126,7 +126,7 @@ public class DatabaseService implements DatabaseServiceInterface {
     }
 
     /**
-     * Get parent for a file
+     * Get parent for a producer
      *
      * @param id String
      * @return Node
@@ -134,7 +134,7 @@ public class DatabaseService implements DatabaseServiceInterface {
     public Node getParent(String id) {
         Node resultNode = null;
 
-        String query = "match (file {%s: '%s'}) MATCH (folder)<-[:PARENT]-(file) return folder;";
+        String query = "match (producer {%s: '%s'}) MATCH (folder)<-[:PARENT]-(producer) return folder;";
         try (
                 Transaction tx = graphDB.beginTx();
                 Result result = graphDB.execute(String.format(query, Fields.ID, id))
@@ -161,7 +161,7 @@ public class DatabaseService implements DatabaseServiceInterface {
     public Node getNodeById(String value) {
         Node node = null;
 
-        String query = "match (file {%s:'%s'}) return file";
+        String query = "match (producer {%s:'%s'}) return producer";
 
         try (Transaction tx = graphDB.beginTx()) {
             Result result = graphDB.execute(String.format(query, Fields.ID, value));
@@ -169,7 +169,7 @@ public class DatabaseService implements DatabaseServiceInterface {
             tx.success();
 
             if(result.hasNext()) {
-                return (Node) result.next().get("file");
+                return (Node) result.next().get("producer");
             }
 
         } catch (Exception exception) {
@@ -190,7 +190,7 @@ public class DatabaseService implements DatabaseServiceInterface {
     public String getNodeAbsolutePath(Node node) {
         StringBuilder pathBuilder = new StringBuilder();
 
-        String query = "match (file {%s:'%s'}) match (file)-[r*]->(m {%s:%b}) return r";
+        String query = "match (producer {%s:'%s'}) match (producer)-[r*]->(m {%s:%b}) return r";
 
         try (Transaction tx = graphDB.beginTx())
         {
@@ -272,8 +272,8 @@ public class DatabaseService implements DatabaseServiceInterface {
     public Node update(String id, String property, String value) {
         Node resultNode = null;
 
-        String query = "match (file {%s: '%s'}) " +
-                "set file.%s = %s RETURN file";
+        String query = "match (producer {%s: '%s'}) " +
+                "set producer.%s = %s RETURN producer";
         try (
                 Transaction tx = graphDB.beginTx();
                 Result result = graphDB.execute(String.format(query, Fields.ID, id, property, value));

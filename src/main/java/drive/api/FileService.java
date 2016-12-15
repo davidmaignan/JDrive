@@ -61,7 +61,7 @@ public class FileService {
 //    files(createdTime,explicitlyTrashed,id,mimeType,modifiedTime,name,parents,size,trashed,version)
 
     /**
-     * Get file by id
+     * Get producer by id
      * @param fileId
      * @return File|null
      */
@@ -70,7 +70,7 @@ public class FileService {
             return driveService.getDrive().files().get(fileId).execute();
         } catch (IOException e) {
 
-            logger.error("Error: Cannot retrieve the file: " + fileId);
+            logger.error("Error: Cannot retrieve the producer: " + fileId);
         }
         return null;
     }
@@ -85,7 +85,7 @@ public class FileService {
         try {
             return driveService.getDrive().files().get(id).executeMediaAsInputStream();
         } catch (IOException e) {
-            logger.error("Cannot get file from google drive api: " + id);
+            logger.error("Cannot get producer from google drive api: " + id);
             return null;
         }
     }

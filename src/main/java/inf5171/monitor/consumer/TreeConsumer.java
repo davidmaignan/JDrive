@@ -1,4 +1,4 @@
-package inf5171.monitor.tree;
+package inf5171.monitor.consumer;
 
 import com.google.api.services.drive.model.File;
 import inf5171.monitor.MStructureMonitor;
@@ -23,14 +23,12 @@ public class TreeConsumer implements Runnable{
         while(uncompleted() || completedNotEmpty()) {
             File file = fileMonitor.shift();
 
-            if (file != null){
-//                System.out.println(file.getId());
-
                 TreeNode node = null;
 
                 if (file != null){
                     while(node == null){
-//                        System.out.println(file.getId());
+//                        System.out.println("CCC");
+//                        System.out.println(producer.getId());
                         node = treeBuilder.insertFile(file);
                         if(node == null) {
                             try {
@@ -40,31 +38,7 @@ public class TreeConsumer implements Runnable{
                             }
                         }
                     }
-
-//                    Version 2: on remet le fichier dans la queue
-//                    TreeNode node = treeBuilder.insertFile(file);
-//
-//                    if(node == null){
-//                        System.out.printf("File: %s - Node: \n", file.getId());
-//                        fileMonitor.push(file);
-//                    }
-
-//                System.out.printf("File: %s - Node: %s\n", file.getId(), node.getName());
-                } else {
-//                    System.out.println("File null");
                 }
-
-//                TreeNode node = treeBuilder.insertFile(file);
-//
-//                if(node == null){
-//                    System.out.printf("File: %s - Node: \n", file.getId());
-//                    fileMonitor.push(file);
-//                }
-
-//                System.out.printf("File: %s - Node: %s\n", file.getId(), node.getName());
-            } else {
-//                System.out.println("File null");
-            }
         }
     }
 

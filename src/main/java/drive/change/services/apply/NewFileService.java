@@ -33,7 +33,7 @@ public class NewFileService implements ChangeServiceInterface {
     public boolean execute() {
         Node newFileNode = fileRepository.createIfNotExists(this.structure.getChange().getFile());
 
-        //@todo refactor to split file creation and file writing content
+        //@todo refactor to split producer creation and producer writing content
         if(newFileNode != null){
             file.setFileId(this.structure.getChange().getFileId());
             structure.setFileNode(newFileNode);

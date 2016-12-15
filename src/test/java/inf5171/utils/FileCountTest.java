@@ -1,7 +1,8 @@
-package inf5171.fixtures;
+package inf5171.utils;
 
 import com.google.common.collect.ImmutableList;
 import configuration.Configuration;
+import inf5171.utils.FileCount;
 import io.filesystem.FileSystemInterface;
 import io.filesystem.FileSystemWrapperTest;
 import org.junit.Before;

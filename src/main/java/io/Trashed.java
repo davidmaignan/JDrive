@@ -80,7 +80,7 @@ public class Trashed implements WriterInterface{
         }
 
         if( ! result){
-            logger.error("Error while trashing a file: " + pathString);
+            logger.error("Error while trashing a producer: " + pathString);
         }
 
         return result;

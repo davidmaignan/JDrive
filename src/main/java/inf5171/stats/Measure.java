@@ -1,4 +1,4 @@
-package inf5171.measure;
+package inf5171.stats;
 
 import model.tree.TreeNode;
 import org.apache.commons.lang3.time.StopWatch;
@@ -9,7 +9,7 @@ import java.util.Set;
 /**
  * Created by david on 2016-12-12.
  */
-public class Statistic {
+public class Measure {
     private String type;
     private int depth;
     private int totalFiles;
@@ -21,7 +21,7 @@ public class Statistic {
     private StopWatch stopWatch;
     private Set<TreeNode> duplicates;
 
-    public Statistic(){
+    public Measure(){
         stopWatch = new StopWatch();
         duplicates = new HashSet<>();
         elapsedTime = new long[4];
@@ -40,6 +40,14 @@ public class Statistic {
         stopWatch.reset();
 
         stopWatch.start();
+    }
+
+    public int getStage(){
+        return stage;
+    }
+
+    public void setElapsedTime(int stage, long time){
+        elapsedTime[stage] = time;
     }
 
     public void stopWatch(){

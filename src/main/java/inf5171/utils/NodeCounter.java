@@ -1,7 +1,8 @@
-package inf5171.fixtures;
+package inf5171.utils;
 
 import model.tree.TreeNode;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveTask;
 
@@ -33,6 +34,12 @@ public class NodeCounter extends RecursiveTask<Integer> {
     }
 
     public static Integer countNodes(TreeNode root){
-        return ForkJoinPool.commonPool().invoke(new NodeCounter(root));
+        ForkJoinPool pool = new ForkJoinPool();
+
+        Integer result = pool.invoke(new NodeCounter(root));
+
+        pool.shutdown();
+
+        return result;
     }
 }

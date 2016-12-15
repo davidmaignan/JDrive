@@ -1,5 +1,6 @@
-package inf5171.monitor;
+package inf5171.monitor.consumer;
 
+import inf5171.monitor.MStructure;
 import io.Document;
 import io.File;
 import io.Folder;

@@ -32,7 +32,7 @@ public class ConverterService {
         fileNode = fileRepository.getNodeById(change.getFileId());
         customChange.setFileNode(fileNode);
 
-        //Case new file
+        //Case new producer
         if(fileNode == null){
             customChange.setNew(true);
             Node parentNode = fileRepository.getNodeById(change.getFile().getParents().get(0));

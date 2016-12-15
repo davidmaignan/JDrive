@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
  *
  * ValidChange checks that the change response is valid for:
  *
- *  - case 1: most cases (update, new file, trashed file ...) => change.getFile() must provide a File object
+ *  - case 1: most cases (update, new producer, trashed producer ...) => change.getFile() must provide a File object
  *  - case 2: change.getFile() return null => it's a deletion so change.getDeleted() == true
  *
  *  NB: If a case is not asset, it is not valid and then disregarded.
@@ -55,7 +55,7 @@ public class ValidChange{
     }
 
     /**
-     * Check if it's a new file.
+     * Check if it's a new producer.
      *
      * NB: NewFile files marked as trashed are ignored.
      *

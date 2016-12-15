@@ -23,7 +23,7 @@ public class Configuration {
         propertyList = new Properties();
 
         if (inputStream == null) {
-            throw  new FileNotFoundException("No property file found");
+            throw  new FileNotFoundException("No property producer found");
         }
 
         propertyList.load(inputStream);

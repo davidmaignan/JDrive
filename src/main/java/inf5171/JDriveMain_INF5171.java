@@ -2,12 +2,12 @@ package inf5171;
 
 import com.google.api.services.drive.model.File;
 import configuration.Configuration;
-import inf5171.fixtures.FileFixtures;
-import inf5171.measure.Statistic;
-import inf5171.fixtures.NodeCounter;
+import inf5171.fixtures.FileList;
+import inf5171.stats.Measure;
 import inf5171.monitor.MStructureMonitor;
-import inf5171.monitor.file.FileProducer;
-import inf5171.monitor.tree.TreeConsumer;
+import inf5171.monitor.producer.FileProducer;
+import inf5171.monitor.consumer.TreeConsumer;
+import inf5171.utils.NodeCounter;
 import io.Document;
 import io.Folder;
 import io.filesystem.FileSystemInterface;
@@ -37,7 +37,7 @@ import static java.lang.Thread.sleep;
 public class JDriveMain_INF5171 {
 //    private static FileSystemWrapperTest fs;
 //    private static Configuration configuration;
-    private static Map<String, List<Statistic>> statisticMap;
+    private static Map<String, List<Measure>> statisticMap;
     private static String[] methods;
 
     public static void main(String args[]) throws IOException, InterruptedException {
@@ -49,48 +49,48 @@ public class JDriveMain_INF5171 {
             statisticMap.put(methods[i], new ArrayList<>());
         }
 
-        for (int i = 3; i < 7; i++) {
-            //2 iterations for sequential avec 1 thread (moyenne)
-            for (int j = 0; j < 2; j++) {
-                Statistic statistic = new Statistic();
-                statistic.setType(methods[0]);
-                statistic.setDepth(i);
-                statistic.setNbThreads(1);
-                sequential(statistic);
-                statisticMap.get(methods[0]).add(statistic);
-            }
-        }
-//
-//        // i = nombre de repertoires et fichiers par niveau
-//        // j = nombre de threads
-        for (int i = 3; i < 7; i++) {
-            for (int j = 0; j < 5; j++) {
-                Statistic statistic = new Statistic();
-                statistic.setType(methods[1]);
-                statistic.setDepth(i);
-                statistic.setNbThreads(j*10+1);
-                threadsArray(statistic);
-                statisticMap.get(methods[1]).add(statistic);
-            }
-        }
-//
-        for (int i = 3; i < 7; i++) {
-            for (int j = 0; j < 5; j++) {
-                Statistic statistic = new Statistic();
-                statistic.setType(methods[2]);
-                statistic.setDepth(i);
-                statistic.setNbThreads(j*10+1);
-                cachedPool(statistic);
-                statisticMap.get(methods[2]).add(statistic);
+//        for (int i = 1; i < 3; i++) {
+//            //2 iterations for sequential avec 1 thread (moyenne)
+//            for (int j = 0; j < 2; j++) {
+//                Measure measure = new Measure();
+//                measure.setType(methods[0]);
+//                measure.setDepth(i);
+//                measure.setNbThreads(1);
+//                sequential(measure);
+//                statisticMap.get(methods[0]).add(measure);
+//            }
+//        }
+
+        // i = nombre de repertoires et fichiers par niveau
+        // j = nombre de threads
+        for (int i = 1; i < 5; i++) {
+            for (int j = 4; j < 5; j++) {
+                Measure measure = new Measure();
+                measure.setType(methods[1]);
+                measure.setDepth(i);
+                measure.setNbThreads(j*10+1);
+                threadsArray(measure);
+//                statisticMap.get(methods[1]).add(measure);
             }
         }
 
-        for (int i = 0; i < methods.length; i++) {
-            System.out.println(printStatistic(statisticMap.get(methods[i])));
+        for (int i = 1; i < 5; i++) {
+            for (int j = 4; j < 5; j++) {
+                Measure measure = new Measure();
+                measure.setType(methods[2]);
+                measure.setDepth(i);
+                measure.setNbThreads(j*10+1);
+                cachedPool(measure);
+//                statisticMap.get(methods[2]).add(measure);
+            }
         }
+
+//        for (int i = 0; i < methods.length; i++) {
+//            System.out.println(printStatistic(statisticMap.get(methods[i])));
+//        }
     }
 
-    private static String printStatistic(List<Statistic> list){
+    private static String printStatistic(List<Measure> list){
 
         StringBuilder builder = new StringBuilder();
         builder.append(String.format("%15s|", "nbThreads"));
@@ -101,7 +101,7 @@ public class JDriveMain_INF5171 {
         builder.append("\n");
 
 
-        for (Statistic stat: list) {
+        for (Measure stat: list) {
             builder.append(String.format("%15s|", String.valueOf(stat.getNbThreads())));
             builder.append(String.format("%15s|", String.valueOf(stat.getTotalFiles())));
             builder.append(String.format("%15s|", String.valueOf(stat.getTotalNodes())));
@@ -113,8 +113,8 @@ public class JDriveMain_INF5171 {
         return builder.toString();
     }
 
-    private static void sequential(Statistic stats) throws IOException, InterruptedException {
-        FileFixtures fixtures = new FileFixtures(stats.getDepth());
+    private static void sequential(Measure stats) throws IOException, InterruptedException {
+        FileList fixtures = new FileList(stats.getDepth());
         List<File> fileList =  fixtures.getFileList();
 
         stats.setTotalFiles(fileList.size());
@@ -134,7 +134,7 @@ public class JDriveMain_INF5171 {
 
         stats.stopWatch();
 
-        stats.setTotalNodes(NodeCounter.countNodes(treeBuilder.getRoot()));
+//        stats.setTotalNodes(NodeCounter.countNodes(treeBuilder.getRoot()));
 
         Set<String> allItems = new HashSet<>();
         Set<TreeNode> duplicates = treeBuilder.getNodes().stream()
@@ -145,8 +145,8 @@ public class JDriveMain_INF5171 {
         System.out.print("Done\n");
     }
 
-    private static void threadsArray(Statistic stats) throws IOException, InterruptedException {
-        FileFixtures fixtures = new FileFixtures(stats.getDepth());
+    private static void threadsArray(Measure stats) throws IOException, InterruptedException {
+        FileList fixtures = new FileList(stats.getDepth());
         List<File> fileList =  fixtures.getFileList();
 
         stats.setTotalFiles(fileList.size());
@@ -186,8 +186,8 @@ public class JDriveMain_INF5171 {
         System.out.print("Done\n");
     }
 
-    private static void cachedPool(Statistic stats) throws IOException, InterruptedException {
-        FileFixtures fixtures = new FileFixtures(stats.getDepth());
+    private static void cachedPool(Measure stats) throws IOException, InterruptedException {
+        FileList fixtures = new FileList(stats.getDepth());
         List<File> fileList =  fixtures.getFileList();
 
         stats.setTotalFiles(fileList.size());
@@ -218,12 +218,11 @@ public class JDriveMain_INF5171 {
         Configuration configuration = new Configuration();
         FileSystemInterface fs = new FileSystemWrapperTest(configuration);
 
+        //Stage 2 - Writing the files
         stats.startWatch();
 
 //        Write Files in fs
-//        WriteTreeAction.compute(treeBuilder.getRoot(), fs);
-
-        Path rootPath = fs.getPath(configuration.getRootFolder());
+//        WriterAction.compute(treeBuilder.getRoot(), fs);
 
         stats.stopWatch();
 
@@ -359,19 +358,19 @@ public class JDriveMain_INF5171 {
     }
 
     private static List<File> getFiles() throws IOException {
-        FileFixtures fixtures = new FileFixtures(5);
+        FileList fixtures = new FileList(5);
 
         return fixtures.getFileList();
     }
 
     private static List<File> getFiles(String filename) throws IOException {
-        FileFixtures fixtures = new FileFixtures(filename);
+        FileList fixtures = new FileList(filename);
 
         return fixtures.getFileList();
     }
 
 //    private static void version2() throws IOException {
-//        FileFixtures fixtures = new FileFixtures("fixtures/files.json");
+//        FileList fixtures = new FileList("fixtures/files.json");
 //        List<File> files = fixtures.getFileList();
 //
 //

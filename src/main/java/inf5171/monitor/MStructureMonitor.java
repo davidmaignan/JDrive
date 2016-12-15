@@ -10,7 +10,6 @@ import java.util.concurrent.locks.ReentrantLock;
  * Created by david on 2016-12-11.
  */
 public class MStructureMonitor<T> implements MStructure<T> {
-
     private final Queue<T> queue;
     private final ReentrantLock lock;
     private final Condition notEmpty;
@@ -66,7 +65,7 @@ public class MStructureMonitor<T> implements MStructure<T> {
         T value = null;
         try {
             while (queue.size() == 0 && ! completed) {
-//                System.out.println("queue size: " + 0);
+//                System.out.println("AAA");
                 try {
                     notEmpty.await();
                 } catch (InterruptedException e) {

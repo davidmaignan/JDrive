@@ -50,7 +50,7 @@ public class Delete implements WriterInterface{
         }
 
         if( ! result){
-            logger.error("Error while deleting node for file deleted: " + pathString);
+            logger.error("Error while deleting node for producer deleted: " + pathString);
         }
 
         return result;

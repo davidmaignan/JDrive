@@ -6,7 +6,7 @@ import drive.change.model.CustomChange;
 import io.Folder;
 
 /**
- * Create a file or folder from a change request
+ * Create a producer or folder from a change request
  *
  * David Maignan <davidmaignan@gmail.com>
  */

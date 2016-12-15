@@ -5,7 +5,6 @@ import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
 import model.tree.TreeBuilder;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import com.google.api.services.drive.model.File;
 import org.junit.runner.RunWith;
@@ -18,18 +17,18 @@ import java.util.regex.Pattern;
 import static org.junit.Assert.*;
 
 /**
- * Load fixtures from a json file
+ * Load fixtures from a json producer
  *
  * Structure:
  *  - root
- *    - (folder|file)_[0-9]{1}
- *      - (folder|file)_[0-9]{2,} (a new digit gets added
+ *    - (folder|producer)_[0-9]{1}
+ *      - (folder|producer)_[0-9]{2,} (a new digit gets added
  *
  * Created by david on 2016-12-02.
  */
 @RunWith(DataProviderRunner.class)
-public class FileFixturesTest {
-    private FileFixtures fileFixtures;
+public class FileListTest {
+    private FileList fileList;
     private String filename = "fixtures/inf5171/files.json";
     private Pattern patterns[];
     private String patternList[];
@@ -38,7 +37,7 @@ public class FileFixturesTest {
 
     @Before
     public void setUp() throws Exception {
-        fileFixtures = new FileFixtures(filename);
+        fileList = new FileList(filename);
 
         patternList = new String[]{ "folder_([0-9])+", "file_([0-9])+"};
         patterns = new Pattern[patternList.length];
@@ -66,9 +65,9 @@ public class FileFixturesTest {
     @Test
     @UseDataProvider("depthFilesLoop")
     public void getFileList(int numberOfLoops, int numberOfFilesExpected) throws Exception {
-        fileFixtures = new FileFixtures(numberOfLoops);
+        fileList = new FileList(numberOfLoops);
 
-        List<File> fileList = fileFixtures.getFileList();
+        List<File> fileList = this.fileList.getFileList();
         assertEquals(numberOfFilesExpected ,fileList.size());
     }
 
@@ -84,7 +83,7 @@ public class FileFixturesTest {
 
     @Test
     public void getDataSet() throws Exception {
-        List<File> fileList = fileFixtures.getFileList();
+        List<File> fileList = this.fileList.getFileList();
 
         assertEquals(60, fileList.size());
 
@@ -95,7 +94,7 @@ public class FileFixturesTest {
 
     @Test
     public void testStructure() throws IOException {
-        List<File> fileList = fileFixtures.getFileList();
+        List<File> fileList = this.fileList.getFileList();
 
         treeBuilder.build(fileList);
 

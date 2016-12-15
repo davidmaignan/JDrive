@@ -8,7 +8,7 @@ import drive.change.services.update.ChangeUpdateInterface;
 
 
 /**
- * Service to apply all the steps for a file change
+ * Service to apply all the steps for a producer change
  */
 public class FileChange implements ChangeInterface {
     private CustomChange structure;

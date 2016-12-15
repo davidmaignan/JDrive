@@ -144,7 +144,7 @@ public class JDriveMain {
         }
 
 //        //Important: google drive does not return changes in right order.
-//        //Sort manually based on ChangeType and position (depth) of the file in the tree monitor.
+//        //Sort manually based on ChangeType and position (depth) of the producer in the tree monitor.
         Collections.sort(customChangeList);
 
         while(! customChangeList.isEmpty()){
@@ -211,7 +211,7 @@ public class JDriveMain {
         File rootFile = fileService.getRoot();
 
         if(root == null){
-            logger.error("Cannot retrieve the root file from the api ");
+            logger.error("Cannot retrieve the root producer from the api ");
             System.exit(1);
         }
 

@@ -44,7 +44,7 @@ public class FileTest {
 
         fileId = "fileId";
         file.setFileId(fileId);
-        path = "file.txt";
+        path = "producer.txt";
 
         Files.createDirectories(fs.getRootPath());
 

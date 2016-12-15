@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Delete a file or folder locally when receiving a delete change from api
+ * Delete a producer or folder locally when receiving a delete change from api
  *
  * David Maignan <davidmaignan@gmail.com>
  */

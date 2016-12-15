@@ -1,18 +1,13 @@
-package inf5171.fixtures;
+package inf5171.utils;
 
-import model.tree.TreeBuilder;
 import model.tree.TreeNode;
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.graphdb.Node;
 
 import java.util.ArrayDeque;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Queue;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.matches;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 

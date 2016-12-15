@@ -49,7 +49,7 @@ public class MonitorService {
 
                     if (kind == ENTRY_MODIFY &&
                             fileName.toString().equals("DirectoryWatchDemo.java")) {
-                        System.out.println("My source file has changed!!!");
+                        System.out.println("My source producer has changed!!!");
                     }
                 }
 

@@ -10,7 +10,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
- *  Tree monitor to represent the DriveMimeTypes file monitor
+ *  Tree monitor to represent the DriveMimeTypes producer monitor
  *
  * Created by David Maignan <davidmaignan@gmail.com> on 15-07-15.
  */
@@ -42,7 +42,7 @@ public class TreeNode {
     }
 
     /**
-     * Constructor with file argument
+     * Constructor with producer argument
      *
      * @param file
      */

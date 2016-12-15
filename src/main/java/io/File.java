@@ -14,7 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
 /**
- * Write a file from a treeNode
+ * Write a producer from a treeNode
  *
  * David Maignan <davidmaignan@gmail.com>
  */

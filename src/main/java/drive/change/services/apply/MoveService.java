@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Move a file or directory in file system when receiving a change event from api
+ * Move a producer or directory in producer system when receiving a change event from api
  *
  * David Maignan <davidmaignan@gmail.com>
  */

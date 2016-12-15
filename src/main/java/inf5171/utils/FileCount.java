@@ -1,4 +1,4 @@
-package inf5171.fixtures;
+package inf5171.utils;
 
 import io.filesystem.FileSystemInterface;
 
@@ -32,7 +32,7 @@ public class FileCount extends RecursiveTask<Integer> {
                 try {
                     total += 1;
 
-//                    System.out.println(String.format("%s - %b", file, Files.isDirectory(file)));
+//                    System.out.println(String.format("%s - %b", producer, Files.isDirectory(producer)));
 
                     if(Files.isDirectory(file)){
                         FileCount fsc =  new FileCount(fs, file);
@@ -51,6 +51,9 @@ public class FileCount extends RecursiveTask<Integer> {
     }
 
     public static Integer compute(FileSystemInterface fs, Path path){
-        return ForkJoinPool.commonPool().invoke(new FileCount(fs, path));
+
+
+//        return ForkJoinPool.commonPool().invoke(new FileCount(fs, path));
+        return 0;
     }
 }

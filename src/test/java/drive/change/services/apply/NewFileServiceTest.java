@@ -33,7 +33,7 @@ public class NewFileServiceTest {
         fileIO = mock(File.class);
         fileNode = mock(Node.class);
         fileId = "fileId";
-        path = "mock/path/file";
+        path = "mock/path/producer";
 
         service = new NewFileService(fileRepository, fileIO);
         service.setStructure(structure);

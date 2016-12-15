@@ -1,7 +1,6 @@
-package inf5171.monitor.file;
+package inf5171.monitor.producer;
 
 import inf5171.monitor.MStructure;
-import model.tree.TreeNode;
 
 import java.util.Arrays;
 import java.util.List;
@@ -12,20 +11,14 @@ import static java.lang.Thread.sleep;
  * Created by david on 2016-12-11.
  */
 public class FileProducer<T> implements Runnable {
-
     private List<T> listNodes;
     private MStructure<T> monitor;
-    private static System output;
 
-    private int threshold = 300;
+    private int threshold = 300; // Number of files returned per request
 
     public FileProducer(MStructure<T> monitor, List<T> list){
         this.monitor = monitor;
         this.listNodes = list;
-    }
-
-    public void setOutput(System output){
-        this.output = output;
     }
 
     public void setThreshold(int threshold) {
@@ -34,14 +27,15 @@ public class FileProducer<T> implements Runnable {
 
     @Override
     public void run() {
-        output.out.print("FileProducer progression: -");
+        System.out.print("FileProducer progression: -");
         T[] list = (T[]) listNodes.toArray();
         int total = list.length;
         int index = 0;
 
         while(index < total){
+//            System.out.println("BBB");
             try {
-                sleep(100L);
+                sleep(100L);    // To simulate request to api and response.
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -53,7 +47,7 @@ public class FileProducer<T> implements Runnable {
             System.out.print("-");
         }
 
-        output.out.print(" producer completed!");
+        System.out.print(" producer completed!");
 
         monitor.setCompleted(true);
     }

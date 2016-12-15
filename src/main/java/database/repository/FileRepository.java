@@ -20,7 +20,7 @@ import java.util.Queue;
 /**
  * File repository.
  *
- * Files & Folders are saved as a 'file' node in the graph database
+ * Files & Folders are saved as a 'producer' node in the graph database
  * The link between them is defined as a parent RelTypes.PARENT
  * The owner (start node) of the relation is the child, the end node (the folder)
  * is the parent.
@@ -47,7 +47,7 @@ public class FileRepository extends DatabaseService {
     public long getDepth(Node node){
         long result = 0;
 
-        String query = "match (file:File {identifier: '%s'}) optional match (file)-[:PARENT*]->(m) return m.name";
+        String query = "match (producer:File {identifier: '%s'}) optional match (producer)-[:PARENT*]->(m) return m.name";
 
         try(Transaction tx = graphDB.beginTx()) {
             Result resultQuery = graphDB.execute(String.format(query, node.getProperty(Fields.ID)));
@@ -140,11 +140,11 @@ public class FileRepository extends DatabaseService {
         Node result = null;
         try(Transaction tx = graphDB.beginTx()) {
             Result queryResult = graphDB.execute(
-                    String.format("match (file:File {%s: %b}) return file", Fields.IS_ROOT, true)
+                    String.format("match (producer:File {%s: %b}) return producer", Fields.IS_ROOT, true)
             );
 
             if(queryResult.hasNext()){
-                result = (Node)queryResult.next().get("file");
+                result = (Node)queryResult.next().get("producer");
             }
 
             tx.success();
@@ -156,7 +156,7 @@ public class FileRepository extends DatabaseService {
     }
 
     /**
-     * Modifiy Parent relation when file/folder is moved to another directory
+     * Modifiy Parent relation when producer/folder is moved to another directory
      *
      * @param child
      * @param parent
@@ -284,8 +284,8 @@ public class FileRepository extends DatabaseService {
      * @return
      */
     public boolean markAsDeleted(String id) {
-        String query = "match (file:File {%s:'%s'})<-[:%s*]-(m) " +
-                "set file.deleted=true, m.deleted=true return file, m";
+        String query = "match (producer:File {%s:'%s'})<-[:%s*]-(m) " +
+                "set producer.deleted=true, m.deleted=true return producer, m";
 
         try(Transaction tx = graphDB.beginTx()) {
             query = String.format(query, Fields.ID, id, RelTypes.PARENT);
@@ -353,8 +353,8 @@ public class FileRepository extends DatabaseService {
     public Queue<Node> getUnprocessedQueue() {
         Queue<Node> queueResult = new ArrayDeque<>();
 
-        String query = "match (file:File {%s: %b}) optional match (file)<-[r:PARENT]-(m) " +
-                "with file, r order by r.id asc return distinct file";
+        String query = "match (producer:File {%s: %b}) optional match (producer)<-[r:PARENT]-(m) " +
+                "with producer, r order by r.id asc return distinct producer";
 
         try(Transaction tx = graphDB.beginTx()) {
             Result result = graphDB.execute(
@@ -362,7 +362,7 @@ public class FileRepository extends DatabaseService {
             );
 
             while (result.hasNext()) {
-                Node node = (Node)result.next().get("file");
+                Node node = (Node)result.next().get("producer");
                 queueResult.add(node);
             }
 
@@ -382,13 +382,13 @@ public class FileRepository extends DatabaseService {
     public List<Node> getTrashedList() {
         List<Node> list = new ArrayList<>();
 
-        String query = "match (file:File {%s: %b}) return distinct file";
+        String query = "match (producer:File {%s: %b}) return distinct producer";
 
         try(Transaction tx = graphDB.beginTx()) {
             Result result = graphDB.execute(String.format(query, Fields.TRASHED, true));
 
             while (result.hasNext()) {
-                Node node = (Node)result.next().get("file");
+                Node node = (Node)result.next().get("producer");
                 list.add(node);
             }
 
@@ -408,15 +408,15 @@ public class FileRepository extends DatabaseService {
     public Queue<Node> getTrashedQueue() {
         Queue<Node> queueResult = new ArrayDeque<>();
 
-        String query = "match (file:File {%s: %b, %s: %b}) optional match (file)<-[r:PARENT*]-(m:File {%s: %b})" +
-                " with file order by file.%s desc return distinct file;";
+        String query = "match (producer:File {%s: %b, %s: %b}) optional match (producer)<-[r:PARENT*]-(m:File {%s: %b})" +
+                " with producer order by producer.%s desc return distinct producer;";
 
         try(Transaction tx = graphDB.beginTx()) {
             Result result = graphDB.execute(String.format(query, Fields.TRASHED, true, Fields.PROCESSED, false,
                     Fields.IS_ROOT, true, Fields.CREATED_DATE));
 
             while (result.hasNext()) {
-                Node node = (Node)result.next().get("file");
+                Node node = (Node)result.next().get("producer");
                 queueResult.add(node);
             }
 
@@ -436,15 +436,15 @@ public class FileRepository extends DatabaseService {
     public Queue<Node> getDeletedQueue() {
         Queue<Node> queueResult = new ArrayDeque<>();
 
-        String query = "match (file:File {%s: %b, %s: %b}) optional match (file)<-[r:PARENT*]-(m:File {%s: %b})" +
-                " with file order by file.%s desc return distinct file;";
+        String query = "match (producer:File {%s: %b, %s: %b}) optional match (producer)<-[r:PARENT*]-(m:File {%s: %b})" +
+                " with producer order by producer.%s desc return distinct producer;";
 
         try(Transaction tx = graphDB.beginTx()) {
             Result result = graphDB.execute(String.format(query, Fields.DELETED, true, Fields.PROCESSED, false,
                     Fields.IS_ROOT, true, Fields.CREATED_DATE));
 
             while (result.hasNext()) {
-                Node node = (Node)result.next().get("file");
+                Node node = (Node)result.next().get("producer");
                 queueResult.add(node);
             }
 

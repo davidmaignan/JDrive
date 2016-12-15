@@ -16,7 +16,7 @@ public class Fields {
     public static final String CREATED_DATE   = "createdDate";
     public static final String MODIFIED_DATE  = "modifiedDate";
     public static final String MIME_TYPE      = "mimeType";
-    public static final String FILE           = "file";
+    public static final String FILE           = "producer";
     public static final String PARENT_ID      = "parentId";
     public static final String IS_ROOT        = "IsRoot";
     public static final String IS_TRASHED     = "isTrashed";

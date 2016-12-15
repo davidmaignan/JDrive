@@ -7,7 +7,7 @@ import io.Folder;
 import org.neo4j.graphdb.Node;
 
 /**
- * Create a file or folder from a change request
+ * Create a producer or folder from a change request
  *
  * David Maignan <davidmaignan@gmail.com>
  */
