@@ -8,8 +8,7 @@ import inf5171.monitor.MStructureMonitor;
 import inf5171.monitor.producer.FileProducer;
 import inf5171.monitor.consumer.TreeConsumer;
 import inf5171.stats.Report;
-import inf5171.utils.FileCount;
-import inf5171.utils.NodeCounter;
+import inf5171.utils.NodeCount;
 import io.Document;
 import io.Folder;
 import io.filesystem.FileSystemInterface;
@@ -17,7 +16,6 @@ import io.filesystem.FileSystemWrapperTest;
 import model.tree.TreeBuilder;
 import model.tree.TreeNode;
 import model.types.MimeType;
-import org.neo4j.cypher.internal.frontend.v2_3.ast.In;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -51,7 +49,7 @@ public class JDriveMain_INF5171 {
             statisticMap.put(methods[i], new ArrayList<>());
         }
 
-        for (int i = 1; i < 8; i++) {
+        for (int i = 1; i < 7; i++) {
             //2 iterations for sequential avec 1 thread (moyenne)
             for (int j = 0; j < 1; j++) {
                 Measure measure = new Measure();
@@ -65,7 +63,7 @@ public class JDriveMain_INF5171 {
 
 //         i = nombre de repertoires et fichiers par niveau
 //         j = nombre de threads
-        for (int i = 1; i < 8; i++) {
+        for (int i = 1; i < 7; i++) {
             for (int j = 0; j < 5; j++) {
                 Measure measure = new Measure();
                 measure.setType(methods[1]);
@@ -76,7 +74,7 @@ public class JDriveMain_INF5171 {
             }
         }
 
-        for (int i = 1; i < 8; i++) {
+        for (int i = 1; i < 7; i++) {
             for (int j = 0; j < 5; j++) {
                 Measure measure = new Measure();
                 measure.setType(methods[2]);
@@ -87,37 +85,9 @@ public class JDriveMain_INF5171 {
             }
         }
 
-        for (int i = 0; i < methods.length; i++) {
-            System.out.println(printStatistic(statisticMap.get(methods[i])));
-        }
-
-
-        Report report = new Report(statisticMap);
-
+        Report report = new Report(statisticMap, methods);
+        System.out.println(report.printStatistic());
         report.generateCharts();
-    }
-
-    private static String printStatistic(List<Measure> list){
-
-        StringBuilder builder = new StringBuilder();
-        builder.append(String.format("%15s|", "nbThreads"));
-        builder.append(String.format("%15s|", "nbFiles"));
-        builder.append(String.format("%15s|", "nbNodes"));
-        builder.append(String.format("%15s|", "Stage 1"));
-        builder.append(String.format("%15s|", "Stage 2"));
-        builder.append("\n");
-
-
-        for (Measure stat: list) {
-            builder.append(String.format("%15s|", String.valueOf(stat.getNbThreads())));
-            builder.append(String.format("%15s|", String.valueOf(stat.getTotalFiles())));
-            builder.append(String.format("%15s|", String.valueOf(stat.getTotalNodes())));
-            builder.append(String.format("%15s|", String.valueOf(stat.getSeconds(0))));
-            builder.append(String.format("%15s|", "."));
-            builder.append("\n");
-        }
-
-        return builder.toString();
     }
 
     private static void sequential(Measure stats) throws IOException, InterruptedException {
@@ -143,7 +113,7 @@ public class JDriveMain_INF5171 {
 
         stats.stopWatch();
 
-        stats.setTotalNodes(NodeCounter.countNodes(treeBuilder.getRoot()));
+        stats.setTotalNodes(NodeCount.countNodes(treeBuilder.getRoot()));
 
         Set<String> allItems = new HashSet<>();
         Set<TreeNode> duplicates = treeBuilder.getNodes().stream()
@@ -190,7 +160,7 @@ public class JDriveMain_INF5171 {
         }
 
         stats.stopWatch();
-        stats.setTotalNodes(NodeCounter.countNodes(treeBuilder.getRoot()));
+        stats.setTotalNodes(NodeCount.countNodes(treeBuilder.getRoot()));
 
         Set<String> allItems = new HashSet<>();
         Set<TreeNode> duplicates = treeBuilder.getNodes().stream()
@@ -261,7 +231,7 @@ public class JDriveMain_INF5171 {
 //        WriterAction.compute(treeBuilder.getRoot(), fs);
 //        stats.stopWatch();
 
-//        stats.setTotalNodes(NodeCounter.countNodes(treeBuilder.getRoot()));
+//        stats.setTotalNodes(NodeCount.countNodes(treeBuilder.getRoot()));
 //        stats.setTotalFilesWritten(FileCount.compute(fs, fs.getRootPath()));
 //        Set<String> allItems = new HashSet<>();
 //        Set<TreeNode> duplicates = treeBuilder.getNodes().stream()

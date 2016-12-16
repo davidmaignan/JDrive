@@ -14,8 +14,8 @@ import static org.mockito.Mockito.when;
 /**
  * Created by david on 2016-12-14.
  */
-public class NodeCounterTest {
-    private NodeCounter nodeCounter;
+public class NodeCountTest {
+    private NodeCount nodeCount;
     private TreeNode root;
     private Queue<TreeNode> childrenRoot;
     private Queue<TreeNode> childrenNode_3;
@@ -27,13 +27,13 @@ public class NodeCounterTest {
         childrenRoot = new ArrayDeque<>();
         childrenNode_3 = new ArrayDeque<>();
         emptyChildren = new ArrayDeque<>();
-        nodeCounter = new NodeCounter(root);
+        nodeCount = new NodeCount(root);
     }
 
     @Test
     public void computeEmptyTree() throws Exception {
         when(root.getChildren()).thenReturn(emptyChildren);
-        assertEquals(1, (int)nodeCounter.compute());
+        assertEquals(1, (int) nodeCount.compute());
     }
 
     @Test
@@ -57,7 +57,7 @@ public class NodeCounterTest {
 
         when(root.getChildren()).thenReturn(childrenRoot);
 
-        assertEquals(5, (int)nodeCounter.compute());
+        assertEquals(5, (int) nodeCount.compute());
     }
 
     @Test
@@ -81,7 +81,7 @@ public class NodeCounterTest {
 
         when(root.getChildren()).thenReturn(childrenRoot);
 
-        assertEquals(5, (int)NodeCounter.countNodes(root));
+        assertEquals(5, (int) NodeCount.countNodes(root));
     }
 
 }

@@ -19,8 +19,7 @@ public class ReportTest {
 
     @Before
     public void setUp() throws Exception {
-        report = new Report(getDataSet());
-
+        report = new Report(getDataSet(), keys);
     }
 
     @Test

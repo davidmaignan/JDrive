@@ -3,7 +3,6 @@ package inf5171.stats;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYSeries;
@@ -14,21 +13,47 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
  * Created by david on 2016-12-14.
  */
 public class Report {
-    private String[] methods = new String[]{"sequential", "prod/con", "cachedPool"};
+    private String[] methods;
 
     private final Map<String, List<Measure>> measures;
     private final int width = 640;
     private final int height = 480;
 
-    public Report(Map<String, List<Measure>> measures){
+    public Report(Map<String, List<Measure>> measures, String[] methods) {
         this.measures = measures;
+        this.methods = methods;
+    }
+
+    public String printStatistic(){
+
+        StringBuilder builder = new StringBuilder();
+        builder.append(String.format("%15s|", "nbThreads"));
+        builder.append(String.format("%15s|", "nbFiles"));
+        builder.append(String.format("%15s|", "nbNodes"));
+        builder.append(String.format("%15s|", "Stage 1"));
+        builder.append(String.format("%15s|", "Stage 2"));
+        builder.append("\n");
+
+        for (int i = 0; i < methods.length; i++) {
+            builder.append(methods[i]);
+            builder.append("\n");
+            for (Measure stat: measures.get(methods[i])) {
+                builder.append(String.format("%15s|", String.valueOf(stat.getNbThreads())));
+                builder.append(String.format("%15s|", String.valueOf(stat.getTotalFiles())));
+                builder.append(String.format("%15s|", String.valueOf(stat.getTotalNodes())));
+                builder.append(String.format("%15s|", String.valueOf(stat.getFormattedSeconds(0))));
+                builder.append(String.format("%15s|", "."));
+                builder.append("\n");
+            }
+        }
+
+        return builder.toString();
     }
 
     public List<Integer> getListOfTotalFiles(){
@@ -50,19 +75,6 @@ public class Report {
                 .filter(s -> s.getTotalFiles() == totalFiles )
                 .sorted((s1, s2) -> Integer.compare(s1.getNbThreads(), s2.getNbThreads()))
                 .collect(Collectors.toList());
-    }
-
-    public String printHeader(){
-        StringBuilder builder = new StringBuilder("");
-
-
-        return builder.toString();
-    }
-
-    public String printReport(int key){
-        StringBuilder builder = new StringBuilder("");
-
-        return builder.toString();
     }
 
     public void generateCharts(){
@@ -111,6 +123,7 @@ public class Report {
         plot.setDomainGridlinePaint(new Color(207, 215, 0xff));
         plot.setRangeGridlinePaint(new Color(0, 144, 255));
 
+
         chart.getXYPlot().getRangeAxis().setAutoRange(true);
 
         String reportName = "report_totalFile_" + totalFiles + ".jpg";
@@ -128,7 +141,7 @@ public class Report {
 
         List<Measure> measureList = getListMeasuresByTotalFiles(index, totalFiles);
         for (int i = 0; i < measureList.size(); i++) {
-            serie.add(i, measureList.get(i).getElapsedTime(0));
+            serie.add(i, measureList.get(i).getSeconds(0));
         }
 
         return serie;

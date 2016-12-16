@@ -3,6 +3,8 @@ package inf5171.stats;
 import model.tree.TreeNode;
 import org.apache.commons.lang3.time.StopWatch;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -111,6 +113,17 @@ public class Measure {
 
     public double getSeconds(int stage){
         return (double) elapsedTime[stage] / 1000000000.0;
+    }
 
+    public String getFormattedSeconds(int stage){
+        return getFormattedElapsedTime(getSeconds(stage));
+    }
+
+    public String getFormattedElapsedTime(double elapsedTime){
+        String pattern = "######.#####0";
+
+        DecimalFormat format = new DecimalFormat("0.0000000000");
+
+        return format.format(elapsedTime);
     }
 }

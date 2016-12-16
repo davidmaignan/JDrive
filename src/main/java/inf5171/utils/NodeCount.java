@@ -2,19 +2,18 @@ package inf5171.utils;
 
 import model.tree.TreeNode;
 
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveTask;
 
 /**
  * Created by david on 2016-12-12.
  */
-public class NodeCounter extends RecursiveTask<Integer> {
+public class NodeCount extends RecursiveTask<Integer> {
 
     private TreeNode node;
     private int total;
 
-    public NodeCounter(TreeNode node){
+    public NodeCount(TreeNode node){
         this.node = node;
     }
 
@@ -25,8 +24,8 @@ public class NodeCounter extends RecursiveTask<Integer> {
 
         if(node.getChildren().size() > 0){
             for(TreeNode child : node.getChildren()){
-                NodeCounter childNodeCounter =  new NodeCounter(child);
-                total += childNodeCounter.compute();
+                NodeCount childNodeCount =  new NodeCount(child);
+                total += childNodeCount.compute();
             }
         }
 
@@ -36,7 +35,7 @@ public class NodeCounter extends RecursiveTask<Integer> {
     public static Integer countNodes(TreeNode root){
         ForkJoinPool pool = new ForkJoinPool();
 
-        Integer result = pool.invoke(new NodeCounter(root));
+        Integer result = pool.invoke(new NodeCount(root));
 
         pool.shutdown();
 
