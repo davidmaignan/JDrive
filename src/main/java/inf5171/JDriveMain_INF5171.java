@@ -82,7 +82,7 @@ public class JDriveMain_INF5171 {
                 measure.setType(methods[2]);
                 measure.setDepth(i);
                 measure.setNbThreads(j*10+1);
-                cachedPool(measure);
+//                cachedPool(measure);
                 statisticMap.get(methods[2]).add(measure);
             }
         }
@@ -181,7 +181,7 @@ public class JDriveMain_INF5171 {
         Future<Integer>[] futures = new Future[stats.getNbThreads()];
 
         for (int i = 0; i < stats.getNbThreads(); i++) {
-            futures[i] = pool.submit(new TreeConsumer(fileMonitor, treeBuilder));
+            pool.execute(new TreeConsumer(fileMonitor, treeBuilder));
 //            threadsTree[i] = new Thread(new TreeConsumer(fileMonitor, treeBuilder));
 //            threadsTree[i].start();
         }
@@ -189,14 +189,14 @@ public class JDriveMain_INF5171 {
         producerTh.join();
         pool.shutdown();
 
-        for (int i = 0; i < stats.getNbThreads(); i++) {
-            try {
-//                System.out.println(futures[i].get());
-                futures[i].get();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
-        }
+//        for (int i = 0; i < stats.getNbThreads(); i++) {
+//            try {
+////                System.out.println(futures[i].get());
+//                futures[i].get();
+//            } catch (ExecutionException e) {
+//                e.printStackTrace();
+//            }
+//        }
 
 //        for (int i = 0; i < stats.getNbThreads(); i++) {
 //            threadsTree[i].join();
@@ -237,24 +237,24 @@ public class JDriveMain_INF5171 {
 
 //        TreeConsumer consumer = new TreeConsumer(fileMonitor, treeBuilder);
 
-        Future<Integer>[] futures = new Future[stats.getNbThreads()]; // unchecked cast
-
-        for(int i = 0; i < stats.getNbThreads(); i++){
-            futures[i] = pool.submit(new TreeConsumer(fileMonitor, treeBuilder));
-        }
-
-        pool.shutdown();
+//        Future<Integer>[] futures = new Future[stats.getNbThreads()]; // unchecked cast
+//
+//        for(int i = 0; i < stats.getNbThreads(); i++){
+//            futures[i] = pool.submit(new TreeConsumer(fileMonitor, treeBuilder));
+//        }
+//
+//        pool.shutdown();
 
         producerTh.join();
 
-        for (int i = 0; i < stats.getNbThreads(); i++) {
-            try {
-                futures[i].get();
-//                System.out.println(futures[i].get());
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
-        }
+//        for (int i = 0; i < stats.getNbThreads(); i++) {
+//            try {
+//                futures[i].get();
+////                System.out.println(futures[i].get());
+//            } catch (ExecutionException e) {
+//                e.printStackTrace();
+//            }
+//        }
 //
 //        if(pool.isShutdown()){
 //            pool.shutdownNow();

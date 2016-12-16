@@ -11,7 +11,7 @@ import java.util.concurrent.Callable;
 /**
  * Created by david on 2016-12-12.
  */
-public class TreeConsumer implements Callable<Integer>{
+public class TreeConsumer implements Callable<Integer>, Runnable{
 
     private final MStructureMonitor<File> fileMonitor;
     private final TreeBuilder treeBuilder;
@@ -58,5 +58,31 @@ public class TreeConsumer implements Callable<Integer>{
 
     private  boolean uncompleted(){
         return ! fileMonitor.getCompleted();
+    }
+
+    @Override
+    public void run() {
+        while(uncompleted() || completedNotEmpty()) {
+            File file = fileMonitor.shift();
+
+            TreeNode node = null;
+
+            if (file != null){
+                while(node == null){
+//                        System.out.println("CCC");
+//                        System.out.println(producer.getId());
+                    node = treeBuilder.insertFile(file);
+                    if(node == null) {
+                        try {
+                            Thread.sleep(50L);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+            }
+            total += 1;
+        }
     }
 }
