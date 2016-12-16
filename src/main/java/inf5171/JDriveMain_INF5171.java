@@ -91,6 +91,8 @@ public class JDriveMain_INF5171 {
 
         Report report = new Report(statisticMap, methods);
         System.out.println(report.printStatistic());
+
+        System.out.println("Generation des graphs");
         report.generateCharts();
     }
 

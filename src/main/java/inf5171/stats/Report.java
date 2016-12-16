@@ -67,7 +67,7 @@ public class Report {
     public Double getAverageSequentialByStage(int totalFiles, int stage){
         return measures.get(methods[0]).stream()
                 .filter(s -> s.getTotalFiles() == totalFiles)
-                .map(s -> s.getElapsedTime(stage)).mapToDouble(Long::new).average().getAsDouble();
+                .map(s -> s.getSeconds(stage)).mapToDouble(Double::new).average().getAsDouble();
     }
 
     public List<Measure> getListMeasuresByTotalFiles(int key, int totalFiles){
@@ -84,25 +84,18 @@ public class Report {
     }
 
     public void generateChart(int totalFiles) {
-        final XYSeries sequential = new XYSeries("Sequential");
+        XYSeries sequential = new XYSeries("Sequential");
 
         List<Integer> nbThreads= getListOfNbThreads();
 
         Double seqAvg = getAverageSequentialByStage(totalFiles, 0);
 
         for (int i = 0; i < nbThreads.size(); i++) {
-            sequential.add(i, seqAvg);
-        }
-
-        final XYSeries threadsVersion = new XYSeries("Tableau threads");
-
-        List<Measure> threadArray = getListMeasuresByTotalFiles(1, totalFiles);
-
-        for (int i = 0; i < nbThreads.size(); i++) {
-            threadsVersion.add(i, threadArray.get(i).getElapsedTime(0));
+            sequential.add(nbThreads.get(i), seqAvg);
         }
 
         XYSeriesCollection dataset = new XYSeriesCollection();
+
         dataset.addSeries(sequential);
         dataset.addSeries(getSerie(1, totalFiles));
         dataset.addSeries(getSerie(2, totalFiles));
@@ -110,7 +103,7 @@ public class Report {
         JFreeChart chart = ChartFactory.createXYLineChart(
                 "Nombre de fichiers: " + totalFiles,
                 "Nombre de threads",
-                "Temps (nanosecondes)",
+                "Temps (seconds)",
                 dataset,
                 PlotOrientation.VERTICAL,
                 true,
@@ -122,7 +115,6 @@ public class Report {
         plot.setBackgroundPaint(new Color(255, 255, 0xFF));
         plot.setDomainGridlinePaint(new Color(207, 215, 0xff));
         plot.setRangeGridlinePaint(new Color(0, 144, 255));
-
 
         chart.getXYPlot().getRangeAxis().setAutoRange(true);
 
@@ -137,11 +129,11 @@ public class Report {
     }
 
     private XYSeries getSerie(int index, int totalFiles){
-        final XYSeries serie = new XYSeries(methods[index]);
+        XYSeries serie = new XYSeries(methods[index]);
 
         List<Measure> measureList = getListMeasuresByTotalFiles(index, totalFiles);
         for (int i = 0; i < measureList.size(); i++) {
-            serie.add(i, measureList.get(i).getSeconds(0));
+            serie.add(measureList.get(i).getNbThreads(), measureList.get(i).getSeconds(0));
         }
 
         return serie;
