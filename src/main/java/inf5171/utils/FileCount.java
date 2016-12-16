@@ -31,9 +31,6 @@ public class FileCount extends RecursiveTask<Integer> {
             Files.list(path).forEach(file -> {
                 try {
                     total += 1;
-
-//                    System.out.println(String.format("%s - %b", producer, Files.isDirectory(producer)));
-
                     if(Files.isDirectory(file)){
                         FileCount fsc =  new FileCount(fs, file);
                         total += fsc.compute();
@@ -51,9 +48,6 @@ public class FileCount extends RecursiveTask<Integer> {
     }
 
     public static Integer compute(FileSystemInterface fs, Path path){
-
-
-//        return ForkJoinPool.commonPool().invoke(new FileCount(fs, path));
-        return 0;
+        return ForkJoinPool.commonPool().invoke(new FileCount(fs, path));
     }
 }
