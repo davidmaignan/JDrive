@@ -13,7 +13,7 @@ public class MStructureMonitor<T> implements MStructure<T> {
     private final Queue<T> queue;
     private final ReentrantLock lock;
     private final Condition notEmpty;
-    private Boolean completed;
+    private volatile Boolean completed;
 
     public MStructureMonitor(){
         queue = new ArrayDeque<T>();
@@ -83,12 +83,12 @@ public class MStructureMonitor<T> implements MStructure<T> {
     }
 
     @Override
-    public int size() {
+    public synchronized int size() {
         return queue.size();
     }
 
     @Override
-    public void setCompleted(Boolean completed) {
+    public synchronized void setCompleted(Boolean completed) {
         this.completed = completed;
     }
 

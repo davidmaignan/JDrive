@@ -17,13 +17,13 @@ import io.filesystem.FileSystemWrapperTest;
 import model.tree.TreeBuilder;
 import model.tree.TreeNode;
 import model.types.MimeType;
+import org.neo4j.cypher.internal.frontend.v2_3.ast.In;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 import static java.lang.Thread.sleep;
@@ -62,15 +62,15 @@ public class JDriveMain_INF5171 {
                 statisticMap.get(methods[0]).add(measure);
             }
         }
-//
-        // i = nombre de repertoires et fichiers par niveau
-        // j = nombre de threads
+
+//         i = nombre de repertoires et fichiers par niveau
+//         j = nombre de threads
         for (int i = 1; i < 6; i++) {
             for (int j = 0; j < 5; j++) {
                 Measure measure = new Measure();
                 measure.setType(methods[1]);
                 measure.setDepth(i);
-                measure.setNbThreads(j*20+1);
+                measure.setNbThreads(j*30+1);
                 threadsArray(measure);
                 statisticMap.get(methods[1]).add(measure);
             }
@@ -82,12 +82,12 @@ public class JDriveMain_INF5171 {
                 measure.setType(methods[2]);
                 measure.setDepth(i);
                 measure.setNbThreads(j*10+1);
-//                cachedPool(measure);
+                cachedPool(measure);
                 statisticMap.get(methods[2]).add(measure);
             }
         }
 
-        for (int i = 0; i < methods.length-1; i++) {
+        for (int i = 0; i < methods.length; i++) {
             System.out.println(printStatistic(statisticMap.get(methods[i])));
         }
 
@@ -176,17 +176,33 @@ public class JDriveMain_INF5171 {
         Thread producerTh = new Thread(fileProducer);
         producerTh.start();
 
-        Thread[] threadsTree = new Thread[stats.getNbThreads()];
+//        Thread[] threadsTree = new Thread[stats.getNbThreads()];
+        ForkJoinPool pool = new ForkJoinPool(stats.getNbThreads());
+        Future<Integer>[] futures = new Future[stats.getNbThreads()];
 
         for (int i = 0; i < stats.getNbThreads(); i++) {
-            threadsTree[i] = new Thread(new TreeConsumer(fileMonitor, treeBuilder));
-            threadsTree[i].start();
+            futures[i] = pool.submit(new TreeConsumer(fileMonitor, treeBuilder));
+//            threadsTree[i] = new Thread(new TreeConsumer(fileMonitor, treeBuilder));
+//            threadsTree[i].start();
         }
 
-        for (int i = 0; i < stats.getNbThreads(); i++) {
-            threadsTree[i].join();
-        }
         producerTh.join();
+        pool.shutdown();
+
+        for (int i = 0; i < stats.getNbThreads(); i++) {
+            try {
+//                System.out.println(futures[i].get());
+                futures[i].get();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+
+//        for (int i = 0; i < stats.getNbThreads(); i++) {
+//            threadsTree[i].join();
+//        }
+
+
 
         stats.stopWatch();
         stats.setTotalNodes(NodeCounter.countNodes(treeBuilder.getRoot()));
@@ -219,13 +235,30 @@ public class JDriveMain_INF5171 {
 
         ExecutorService pool = Executors.newCachedThreadPool();
 
+//        TreeConsumer consumer = new TreeConsumer(fileMonitor, treeBuilder);
+
+        Future<Integer>[] futures = new Future[stats.getNbThreads()]; // unchecked cast
+
         for(int i = 0; i < stats.getNbThreads(); i++){
-            pool.execute(new TreeConsumer(fileMonitor, treeBuilder));
+            futures[i] = pool.submit(new TreeConsumer(fileMonitor, treeBuilder));
         }
+
+        pool.shutdown();
 
         producerTh.join();
 
-        pool.shutdown();
+        for (int i = 0; i < stats.getNbThreads(); i++) {
+            try {
+                futures[i].get();
+//                System.out.println(futures[i].get());
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+//
+//        if(pool.isShutdown()){
+//            pool.shutdownNow();
+//        }
         System.out.printf("Pool is shutdown: %b\n", pool.isShutdown());
 
         stats.stopWatch();
