@@ -165,6 +165,8 @@ public class JDriveMain_INF5171 {
 
         stats.setTotalFiles(fileList.size());
 
+        printStatus(stats);
+
         stats.startWatch();
         TreeBuilder treeBuilder = new TreeBuilder("root");
         MStructureMonitor<File> fileMonitor = new MStructureMonitor<>();
