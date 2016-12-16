@@ -51,7 +51,7 @@ public class JDriveMain_INF5171 {
             statisticMap.put(methods[i], new ArrayList<>());
         }
 
-        for (int i = 1; i < 6; i++) {
+        for (int i = 1; i < 8; i++) {
             //2 iterations for sequential avec 1 thread (moyenne)
             for (int j = 0; j < 1; j++) {
                 Measure measure = new Measure();
@@ -65,7 +65,7 @@ public class JDriveMain_INF5171 {
 
 //         i = nombre de repertoires et fichiers par niveau
 //         j = nombre de threads
-        for (int i = 1; i < 6; i++) {
+        for (int i = 1; i < 8; i++) {
             for (int j = 0; j < 5; j++) {
                 Measure measure = new Measure();
                 measure.setType(methods[1]);
@@ -76,7 +76,7 @@ public class JDriveMain_INF5171 {
             }
         }
 
-        for (int i = 1; i < 6; i++) {
+        for (int i = 1; i < 8; i++) {
             for (int j = 0; j < 5; j++) {
                 Measure measure = new Measure();
                 measure.setType(methods[2]);
