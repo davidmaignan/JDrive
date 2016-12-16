@@ -28,3 +28,6 @@ logs/*.log
 
 #out
 out/
+
+#reports
+*.jpg
