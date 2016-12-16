@@ -82,7 +82,7 @@ public class JDriveMain_INF5171 {
                 measure.setType(methods[2]);
                 measure.setDepth(i);
                 measure.setNbThreads(j*10+1);
-//                cachedPool(measure);
+                cachedPool(measure);
                 statisticMap.get(methods[2]).add(measure);
             }
         }
@@ -165,8 +165,6 @@ public class JDriveMain_INF5171 {
 
         stats.setTotalFiles(fileList.size());
 
-        printStatus(stats);
-
         stats.startWatch();
         TreeBuilder treeBuilder = new TreeBuilder("root");
         MStructureMonitor<File> fileMonitor = new MStructureMonitor<>();
@@ -176,33 +174,18 @@ public class JDriveMain_INF5171 {
         Thread producerTh = new Thread(fileProducer);
         producerTh.start();
 
-//        Thread[] threadsTree = new Thread[stats.getNbThreads()];
-        ForkJoinPool pool = new ForkJoinPool(stats.getNbThreads());
-        Future<Integer>[] futures = new Future[stats.getNbThreads()];
+        Thread[] threadsTree = new Thread[stats.getNbThreads()];
 
         for (int i = 0; i < stats.getNbThreads(); i++) {
-            pool.execute(new TreeConsumer(fileMonitor, treeBuilder));
-//            threadsTree[i] = new Thread(new TreeConsumer(fileMonitor, treeBuilder));
-//            threadsTree[i].start();
+            threadsTree[i] = new Thread(new TreeConsumer(fileMonitor, treeBuilder));
+            threadsTree[i].start();
         }
 
         producerTh.join();
-        pool.shutdown();
 
-//        for (int i = 0; i < stats.getNbThreads(); i++) {
-//            try {
-////                System.out.println(futures[i].get());
-//                futures[i].get();
-//            } catch (ExecutionException e) {
-//                e.printStackTrace();
-//            }
-//        }
-
-//        for (int i = 0; i < stats.getNbThreads(); i++) {
-//            threadsTree[i].join();
-//        }
-
-
+        for (int i = 0; i < stats.getNbThreads(); i++) {
+            threadsTree[i].join();
+        }
 
         stats.stopWatch();
         stats.setTotalNodes(NodeCounter.countNodes(treeBuilder.getRoot()));
@@ -230,22 +213,16 @@ public class JDriveMain_INF5171 {
         FileProducer<File> fileProducer = new FileProducer<>(fileMonitor, fileList);
         fileProducer.setThreshold(300);
 
-        Thread producerTh = new Thread(fileProducer);
-        producerTh.start();
-
-        ExecutorService pool = Executors.newCachedThreadPool();
-
+//        Thread producerTh = new Thread(fileProducer);
+//        producerTh.start();
+//        ExecutorService pool = Executors.newCachedThreadPool();
 //        TreeConsumer consumer = new TreeConsumer(fileMonitor, treeBuilder);
-
 //        Future<Integer>[] futures = new Future[stats.getNbThreads()]; // unchecked cast
-//
 //        for(int i = 0; i < stats.getNbThreads(); i++){
 //            futures[i] = pool.submit(new TreeConsumer(fileMonitor, treeBuilder));
 //        }
-//
 //        pool.shutdown();
-
-        producerTh.join();
+//        producerTh.join();
 
 //        for (int i = 0; i < stats.getNbThreads(); i++) {
 //            try {
@@ -259,7 +236,18 @@ public class JDriveMain_INF5171 {
 //        if(pool.isShutdown()){
 //            pool.shutdownNow();
 //        }
-        System.out.printf("Pool is shutdown: %b\n", pool.isShutdown());
+
+        Thread producerTh = new Thread(fileProducer);
+        producerTh.start();
+
+        ForkJoinPool pool = new ForkJoinPool(stats.getNbThreads());
+
+        for (int i = 0; i < stats.getNbThreads(); i++) {
+            pool.execute(new TreeConsumer(fileMonitor, treeBuilder));
+        }
+
+        producerTh.join();
+        pool.shutdown();
 
         stats.stopWatch();
 
