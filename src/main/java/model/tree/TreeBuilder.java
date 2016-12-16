@@ -10,15 +10,13 @@ import java.util.Queue;
 import java.util.stream.Collectors;
 
 /**
- * Tree File monitor
+ * Tree File Structure
  *
  * David Maignan <davidmaignan@gmail.com>
  */
 public class TreeBuilder {
     private static Logger logger = LoggerFactory.getLogger(TreeBuilder.class.getSimpleName());
     private TreeNode root;
-
-
 
     public TreeBuilder(String rootId) {
         root = new TreeNode();

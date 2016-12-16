@@ -1,5 +1,6 @@
 package inf5171.monitor.producer;
 
+import com.google.api.services.drive.model.File;
 import inf5171.monitor.MStructure;
 
 import java.util.Arrays;
@@ -11,14 +12,17 @@ import static java.lang.Thread.sleep;
  * Created by david on 2016-12-11.
  */
 public class FileProducer<T> implements Runnable {
-    private List<T> listNodes;
+    private List<T> fileList;
     private MStructure<T> monitor;
 
     private int threshold = 300; // Number of files returned per request
 
-    public FileProducer(MStructure<T> monitor, List<T> list){
+    public FileProducer(MStructure<T> monitor){
         this.monitor = monitor;
-        this.listNodes = list;
+    }
+
+    public void setFileList(List<T> fileList){
+        this.fileList = fileList;
     }
 
     public void setThreshold(int threshold) {
@@ -27,15 +31,13 @@ public class FileProducer<T> implements Runnable {
 
     @Override
     public void run() {
-//        System.out.print("FileProducer progression: -");
-        T[] list = (T[]) listNodes.toArray();
+        T[] list = (T[]) fileList.toArray();
         int total = list.length;
         int index = 0;
 
         while(index < total){
-//            System.out.println("BBB");
             try {
-                sleep(100L);    // To simulate request to api and response.
+                sleep(100L);    // estimation assez optimiste du temps de réponse de l'api
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -44,10 +46,7 @@ public class FileProducer<T> implements Runnable {
 
             monitor.push(Arrays.asList(Arrays.copyOfRange(list, index, last)));
             index += threshold;
-//            System.out.print("-");
         }
-
-//        System.out.print(" producer completed!");
 
         monitor.setCompleted(true);
     }
