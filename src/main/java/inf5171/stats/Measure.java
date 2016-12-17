@@ -115,6 +115,10 @@ public class Measure {
         return (double) elapsedTime[stage] / 1000000000.0;
     }
 
+    public String getFormattedAcc(int stage, double sequentialValue){
+        return getFormattedElapsedTime(sequentialValue/ getSeconds(stage));
+    }
+
     public String getFormattedSeconds(int stage){
         return getFormattedElapsedTime(getSeconds(stage));
     }

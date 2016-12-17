@@ -36,19 +36,22 @@ public class Report {
         builder.append(String.format("%15s|", "nbThreads"));
         builder.append(String.format("%15s|", "nbFiles"));
         builder.append(String.format("%15s|", "nbNodes"));
-        builder.append(String.format("%15s|", "Stage 1"));
-        builder.append(String.format("%15s|", "Stage 2"));
+        builder.append(String.format("%15s|", "Tps (secs)"));
+        builder.append(String.format("%15s|", "Acceleration"));
         builder.append("\n");
 
         for (int i = 0; i < methods.length; i++) {
             builder.append(methods[i]);
             builder.append("\n");
             for (Measure stat: measures.get(methods[i])) {
+
+                double averageSequential = getAverageSequentialByStage(stat.getTotalFiles(), 0);
+
                 builder.append(String.format("%15s|", String.valueOf(stat.getNbThreads())));
                 builder.append(String.format("%15s|", String.valueOf(stat.getTotalFiles())));
                 builder.append(String.format("%15s|", String.valueOf(stat.getTotalNodes())));
                 builder.append(String.format("%15s|", String.valueOf(stat.getFormattedSeconds(0))));
-                builder.append(String.format("%15s|", "."));
+                builder.append(String.format("%15s|", String.valueOf(stat.getFormattedAcc(0, averageSequential))));
                 builder.append("\n");
             }
         }
@@ -79,11 +82,13 @@ public class Report {
 
     public void generateCharts(){
         getListOfTotalFiles().stream().forEach(
-                s -> generateChart(s)
+                s -> generateChart(s, "time_report_totalFile_", 1)
         );
     }
 
-    public void generateChart(int totalFiles) {
+
+
+    public void generateChart(int totalFiles, String fileName, double acc) {
         XYSeries sequential = new XYSeries("Sequential");
 
         List<Integer> nbThreads= getListOfNbThreads();
@@ -97,8 +102,8 @@ public class Report {
         XYSeriesCollection dataset = new XYSeriesCollection();
 
         dataset.addSeries(sequential);
-        dataset.addSeries(getSerie(1, totalFiles));
-        dataset.addSeries(getSerie(2, totalFiles));
+        dataset.addSeries(getSerie(1, totalFiles, acc));
+        dataset.addSeries(getSerie(2, totalFiles, acc));
 
         JFreeChart chart = ChartFactory.createXYLineChart(
                 "Nombre de fichiers: " + totalFiles,
@@ -118,7 +123,7 @@ public class Report {
 
         chart.getXYPlot().getRangeAxis().setAutoRange(true);
 
-        String reportName = "report_totalFile_" + totalFiles + ".jpg";
+        String reportName = fileName + totalFiles + ".jpg";
         File file = new File(reportName);
 
         try {
@@ -128,12 +133,12 @@ public class Report {
         }
     }
 
-    private XYSeries getSerie(int index, int totalFiles){
+    private XYSeries getSerie(int index, int totalFiles, double acc){
         XYSeries serie = new XYSeries(methods[index]);
 
         List<Measure> measureList = getListMeasuresByTotalFiles(index, totalFiles);
         for (int i = 0; i < measureList.size(); i++) {
-            serie.add(measureList.get(i).getNbThreads(), measureList.get(i).getSeconds(0));
+            serie.add(measureList.get(i).getNbThreads() / acc, measureList.get(i).getSeconds(0));
         }
 
         return serie;
