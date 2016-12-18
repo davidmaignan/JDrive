@@ -1,7 +1,6 @@
 package inf5171;
 
 import com.google.api.services.drive.model.File;
-import configuration.Configuration;
 import inf5171.fixtures.FileList;
 import inf5171.stats.Measure;
 import inf5171.monitor.MStructureMonitor;
@@ -12,13 +11,13 @@ import inf5171.utils.NodeCount;
 import io.Document;
 import io.Folder;
 import io.filesystem.FileSystemInterface;
-import io.filesystem.FileSystemWrapperTest;
 import model.tree.TreeBuilder;
 import model.tree.TreeNode;
 import model.types.MimeType;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -36,7 +35,7 @@ public class JDriveMain_INF5171 {
 //    private static Configuration configuration;
     private static Map<String, List<Measure>> statisticMap;
     private static String[] methods;
-    private static int fileIndex = 7;
+    private static int fileIndex = 5;
     private static int threadsIndex = 7;
     private static int thresholdIndex = 1000;
 
@@ -92,7 +91,9 @@ public class JDriveMain_INF5171 {
         Report report = new Report(statisticMap, methods);
         System.out.println(report.printStatistic());
 
+
         System.out.println("Generation des graphs");
+        Files.write(Paths.get("reports.txt"), report.printStatistic().getBytes());
         report.generateCharts();
     }
 

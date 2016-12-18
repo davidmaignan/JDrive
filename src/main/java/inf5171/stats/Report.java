@@ -82,18 +82,22 @@ public class Report {
 
     public void generateCharts(){
         getListOfTotalFiles().stream().forEach(
-                s -> generateChart(s, "time_report_totalFile_", 1)
+                s -> generateChart(s)
+        );
+
+        getListOfTotalFiles().stream().forEach(
+                s -> generateAccelerationCharts(s)
         );
     }
 
-
-
-    public void generateChart(int totalFiles, String fileName, double acc) {
+    public void generateAccelerationCharts(int totalFiles){
         XYSeries sequential = new XYSeries("Sequential");
 
         List<Integer> nbThreads= getListOfNbThreads();
 
         Double seqAvg = getAverageSequentialByStage(totalFiles, 0);
+
+        System.out.println(nbThreads.size());
 
         for (int i = 0; i < nbThreads.size(); i++) {
             sequential.add(nbThreads.get(i), seqAvg);
@@ -102,8 +106,8 @@ public class Report {
         XYSeriesCollection dataset = new XYSeriesCollection();
 
         dataset.addSeries(sequential);
-        dataset.addSeries(getSerie(1, totalFiles, acc));
-        dataset.addSeries(getSerie(2, totalFiles, acc));
+        dataset.addSeries(getSerie(1, totalFiles, seqAvg));
+        dataset.addSeries(getSerie(2, totalFiles, seqAvg));
 
         JFreeChart chart = ChartFactory.createXYLineChart(
                 "Nombre de fichiers: " + totalFiles,
@@ -123,7 +127,7 @@ public class Report {
 
         chart.getXYPlot().getRangeAxis().setAutoRange(true);
 
-        String reportName = fileName + totalFiles + ".jpg";
+        String reportName =  "acc_report_totalFile_" + totalFiles + ".jpg";
         File file = new File(reportName);
 
         try {
@@ -133,12 +137,69 @@ public class Report {
         }
     }
 
-    private XYSeries getSerie(int index, int totalFiles, double acc){
+
+    public void generateChart(int totalFiles) {
+        XYSeries sequential = new XYSeries("Sequential");
+
+        List<Integer> nbThreads= getListOfNbThreads();
+
+        Double seqAvg = getAverageSequentialByStage(totalFiles, 0);
+
+        for (int i = 0; i < nbThreads.size(); i++) {
+            sequential.add(nbThreads.get(i), seqAvg);
+        }
+
+        XYSeriesCollection dataset = new XYSeriesCollection();
+
+        dataset.addSeries(sequential);
+        dataset.addSeries(getSerie(1, totalFiles));
+        dataset.addSeries(getSerie(2, totalFiles));
+
+        JFreeChart chart = ChartFactory.createXYLineChart(
+                "Nombre de fichiers: " + totalFiles,
+                "Nombre de threads",
+                "Temps (seconds)",
+                dataset,
+                PlotOrientation.VERTICAL,
+                true,
+                false,
+                false
+        );
+
+        XYPlot plot = (XYPlot) chart.getPlot();
+        plot.setBackgroundPaint(new Color(255, 255, 0xFF));
+        plot.setDomainGridlinePaint(new Color(207, 215, 0xff));
+        plot.setRangeGridlinePaint(new Color(0, 144, 255));
+
+        chart.getXYPlot().getRangeAxis().setAutoRange(true);
+
+        String reportName =  "time_report_totalFile_" + totalFiles + ".jpg";
+        File file = new File(reportName);
+
+        try {
+            ChartUtilities.saveChartAsJPEG(file, chart, width, height);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private XYSeries getSerie(int index, int totalFiles){
         XYSeries serie = new XYSeries(methods[index]);
 
         List<Measure> measureList = getListMeasuresByTotalFiles(index, totalFiles);
         for (int i = 0; i < measureList.size(); i++) {
-            serie.add(measureList.get(i).getNbThreads() / acc, measureList.get(i).getSeconds(0));
+            serie.add(measureList.get(i).getNbThreads(), measureList.get(i).getSeconds(0));
+        }
+
+        return serie;
+    }
+
+    private XYSeries getSerie(int index, int totalFiles, double acceleration){
+        XYSeries serie = new XYSeries(methods[index]);
+
+        List<Measure> measureList = getListMeasuresByTotalFiles(index, totalFiles);
+        for (int i = 0; i < measureList.size(); i++) {
+            serie.add(measureList.get(i).getNbThreads(), acceleration / measureList.get(i).getSeconds(0));
         }
 
         return serie;
