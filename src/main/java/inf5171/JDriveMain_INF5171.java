@@ -2,10 +2,11 @@ package inf5171;
 
 import com.google.api.services.drive.model.File;
 import inf5171.fixtures.FileList;
+import inf5171.monitor.consumer.ForkJoinConsumer;
 import inf5171.stats.Measure;
 import inf5171.monitor.MStructureMonitor;
 import inf5171.monitor.producer.FileProducer;
-import inf5171.monitor.consumer.TreeConsumer;
+import inf5171.monitor.consumer.ThreadConsumer;
 import inf5171.stats.Report;
 import inf5171.utils.NodeCount;
 import io.Document;
@@ -14,6 +15,7 @@ import io.filesystem.FileSystemInterface;
 import model.tree.TreeBuilder;
 import model.tree.TreeNode;
 import model.types.MimeType;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,7 +37,8 @@ public class JDriveMain_INF5171 {
 //    private static Configuration configuration;
     private static Map<String, List<Measure>> statisticMap;
     private static String[] methods;
-    private static int fileIndex = 5;
+
+    private static int fileIndex = 4;
     private static int threadsIndex = 7;
     private static int thresholdIndex = 1000;
 
@@ -50,8 +53,8 @@ public class JDriveMain_INF5171 {
         for (int i = 0; i < methods.length; i++) {
             statisticMap.put(methods[i], new ArrayList<>());
         }
-
-        //Version sequentielle
+//
+//        //Version sequentielle
         for (int i = 1; i < fileIndex; i++) {
             //2 iterations for sequentialMethod avec 1 thread (pour calculer une moyenne)
             for (int j = 0; j < 2; j++) {
@@ -89,11 +92,12 @@ public class JDriveMain_INF5171 {
         }
 
         Report report = new Report(statisticMap, methods);
-        System.out.println(report.printStatistic());
 
+        String reportText = report.printStatistic();
+        System.out.println(reportText);
 
-        System.out.println("Generation des graphs");
-        Files.write(Paths.get("reports.txt"), report.printStatistic().getBytes());
+        System.out.println("Generation des graphs & rapports");
+        Files.write(Paths.get("reports.txt"), reportText.getBytes());
         report.generateCharts();
     }
 
@@ -115,7 +119,7 @@ public class JDriveMain_INF5171 {
         printStatus(stats);
         stats.startWatch();
 
-        //Version sequentielle - On produit tous les fichiers avant de continuer !
+        //Version sequentielle - On reçoit tous les fichiers avant de continuer !
         Thread producerTh = new Thread(fileProducer);
         producerTh.start();
         producerTh.join();
@@ -141,7 +145,7 @@ public class JDriveMain_INF5171 {
         Thread[] threadsTree = new Thread[stats.getNbThreads()];
 
         for (int i = 0; i < stats.getNbThreads(); i++) {
-            threadsTree[i] = new Thread(new TreeConsumer(fileMonitor, treeBuilder));
+            threadsTree[i] = new Thread(new ThreadConsumer(fileMonitor, treeBuilder));
             threadsTree[i].start();
         }
 
@@ -173,10 +177,22 @@ public class JDriveMain_INF5171 {
         Thread producerTh = new Thread(fileProducer);
         producerTh.start();
 
+        Future<Integer>[] futures = new Future[stats.getNbThreads()];
+
         ForkJoinPool pool = new ForkJoinPool(stats.getNbThreads());
         for (int i = 0; i < stats.getNbThreads(); i++) {
-            pool.execute(new TreeConsumer(fileMonitor, treeBuilder));
+            futures[i] = pool.submit(new ForkJoinConsumer(fileMonitor, treeBuilder));
         }
+
+        int result = 0;
+        for (int i = 0; i < futures.length; i++) {
+            try {
+                result += futures[i].get();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+
 
         producerTh.join();
         pool.shutdown();

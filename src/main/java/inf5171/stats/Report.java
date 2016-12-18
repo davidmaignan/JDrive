@@ -92,12 +92,8 @@ public class Report {
 
     public void generateAccelerationCharts(int totalFiles){
         XYSeries sequential = new XYSeries("Sequential");
-
         List<Integer> nbThreads= getListOfNbThreads();
-
         Double seqAvg = getAverageSequentialByStage(totalFiles, 0);
-
-        System.out.println(nbThreads.size());
 
         for (int i = 0; i < nbThreads.size(); i++) {
             sequential.add(nbThreads.get(i), seqAvg);

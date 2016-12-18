@@ -65,7 +65,6 @@ public class MStructureMonitor<T> implements MStructure<T> {
         T value = null;
         try {
             while (queue.size() == 0 && ! completed) {
-//                System.out.println("AAA");
                 try {
                     notEmpty.await();
                 } catch (InterruptedException e) {

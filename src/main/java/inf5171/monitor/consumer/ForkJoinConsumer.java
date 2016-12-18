@@ -4,20 +4,19 @@ import com.google.api.services.drive.model.File;
 import inf5171.monitor.MStructureMonitor;
 import model.tree.TreeBuilder;
 import model.tree.TreeNode;
-import org.neo4j.cypher.internal.frontend.v2_3.ast.In;
 
 import java.util.concurrent.Callable;
 
 /**
  * Created by david on 2016-12-12.
  */
-public class TreeConsumer implements Callable<Integer>, Runnable{
+public class ForkJoinConsumer implements Callable<Integer>{
 
     private final MStructureMonitor<File> fileMonitor;
     private final TreeBuilder treeBuilder;
     private Integer total;
 
-    public TreeConsumer(MStructureMonitor<File> fileMonitor, TreeBuilder treeBuilder){
+    public ForkJoinConsumer(MStructureMonitor<File> fileMonitor, TreeBuilder treeBuilder){
         this.fileMonitor = fileMonitor;
         this.treeBuilder = treeBuilder;
         this.total = new Integer(0);
@@ -33,8 +32,6 @@ public class TreeConsumer implements Callable<Integer>, Runnable{
 
                 if (file != null){
                     while(node == null){
-//                        System.out.println("CCC");
-//                        System.out.println(producer.getId());
                         node = treeBuilder.insertFile(file);
                         if(node == null) {
                             try {
@@ -58,31 +55,5 @@ public class TreeConsumer implements Callable<Integer>, Runnable{
 
     private  boolean uncompleted(){
         return ! fileMonitor.getCompleted();
-    }
-
-    @Override
-    public void run() {
-        while(uncompleted() || completedNotEmpty()) {
-            File file = fileMonitor.shift();
-
-            TreeNode node = null;
-
-            if (file != null){
-                while(node == null){
-//                        System.out.println("CCC");
-//                        System.out.println(producer.getId());
-                    node = treeBuilder.insertFile(file);
-                    if(node == null) {
-                        try {
-                            Thread.sleep(50L);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-
-            }
-            total += 1;
-        }
     }
 }
