@@ -38,7 +38,7 @@ public class JDriveMain_INF5171 {
     private static Map<String, List<Measure>> statisticMap;
     private static String[] methods;
 
-    private static int fileIndex = 4;
+    private static int fileIndex = 7;
     private static int threadsIndex = 7;
     private static int thresholdIndex = 1000;
 

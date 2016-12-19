@@ -96,7 +96,7 @@ public class Report {
         Double seqAvg = getAverageSequentialByStage(totalFiles, 0);
 
         for (int i = 0; i < nbThreads.size(); i++) {
-            sequential.add(nbThreads.get(i), seqAvg);
+            sequential.add(nbThreads.get(i), new Double(1));
         }
 
         XYSeriesCollection dataset = new XYSeriesCollection();
@@ -108,7 +108,7 @@ public class Report {
         JFreeChart chart = ChartFactory.createXYLineChart(
                 "Nombre de fichiers: " + totalFiles,
                 "Nombre de threads",
-                "Temps (seconds)",
+                "Acceleration",
                 dataset,
                 PlotOrientation.VERTICAL,
                 true,
@@ -122,6 +122,7 @@ public class Report {
         plot.setRangeGridlinePaint(new Color(0, 144, 255));
 
         chart.getXYPlot().getRangeAxis().setAutoRange(true);
+        chart.getXYPlot().getRangeAxis().setLowerBound(0.5);
 
         String reportName =  "acc_report_totalFile_" + totalFiles + ".jpg";
         File file = new File(reportName);
