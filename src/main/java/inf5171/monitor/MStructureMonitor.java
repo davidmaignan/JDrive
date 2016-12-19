@@ -82,12 +82,12 @@ public class MStructureMonitor<T> implements MStructure<T> {
     }
 
     @Override
-    public synchronized int size() {
+    public int size() {
         return queue.size();
     }
 
     @Override
-    public synchronized void setCompleted(Boolean completed) {
+    public void setCompleted(Boolean completed) {
         this.completed = completed;
     }
 

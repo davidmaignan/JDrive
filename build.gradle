@@ -92,6 +92,19 @@ task INF5171(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
 }
 
+task INF5171Test(type: Test, dependsOn: testClasses) {
+    filter {
+        includeTestsMatching "inf5171*"
+        includeTestsMatching "*Tree*"
+    }
+}
+
+tasks.withType(Test) {
+    testLogging {
+        events 'started', 'passed'
+    }
+}
+
 
 jacoco {
     applyTo run

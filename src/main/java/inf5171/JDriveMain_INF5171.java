@@ -27,18 +27,15 @@ import java.util.stream.Collectors;
 /**
  * Created by david on 2016-12-01.
  *
- * git clone -b inf5171 --single-branch https://github.com/davidmaignan/JDrive.git MAID10077306
  *
- * Build and run this main:  ./gradlew INF5171
+ * Build and run: ./gradlew INF5171
  *
  */
 public class JDriveMain_INF5171 {
-//    private static FileSystemWrapperTest fs;
-//    private static Configuration configuration;
     private static Map<String, List<Measure>> statisticMap;
     private static String[] methods;
 
-    private static int fileIndex = 7;
+    private static int fileIndex = 6;
     private static int threadsIndex = 7;
     private static int thresholdIndex = 1000;
 
@@ -53,8 +50,8 @@ public class JDriveMain_INF5171 {
         for (int i = 0; i < methods.length; i++) {
             statisticMap.put(methods[i], new ArrayList<>());
         }
-//
-//        //Version sequentielle
+
+        //Version sequentielle
         for (int i = 1; i < fileIndex; i++) {
             //2 iterations for sequentialMethod avec 1 thread (pour calculer une moyenne)
             for (int j = 0; j < 2; j++) {
@@ -184,15 +181,15 @@ public class JDriveMain_INF5171 {
             futures[i] = pool.submit(new ForkJoinConsumer(fileMonitor, treeBuilder));
         }
 
-        int result = 0;
+
+        int totalStepOvers = 0;
         for (int i = 0; i < futures.length; i++) {
             try {
-                result += futures[i].get();
+                totalStepOvers += futures[i].get();
             } catch (ExecutionException e) {
                 e.printStackTrace();
             }
         }
-
 
         producerTh.join();
         pool.shutdown();
@@ -201,22 +198,13 @@ public class JDriveMain_INF5171 {
 
         stats.setTotalNodes(NodeCount.countNodes(treeBuilder.getRoot()));
 
-//        Configuration configuration = new Configuration();
-//        FileSystemInterface fs = new FileSystemWrapperTest(configuration);
+        Set<String> allItems = new HashSet<>();
+        Set<TreeNode> duplicates = treeBuilder.getNodes().stream()
+                .filter(n -> !allItems.add(n.getId()))
+                .collect(Collectors.toSet());
 
-//        stats.startWatch();
-//        Write Files in fs
-//        WriterAction.compute(treeBuilder.getRoot(), fs);
-//        stats.stopWatch();
+        stats.setDuplicates(duplicates);
 
-
-//        stats.setTotalFilesWritten(FileCount.compute(fs, fs.getRootPath()));
-//        Set<String> allItems = new HashSet<>();
-//        Set<TreeNode> duplicates = treeBuilder.getNodes().stream()
-//                .filter(n -> !allItems.add(n.getId()))
-//                .collect(Collectors.toSet());
-
-//        stats.setDuplicates(duplicates);
         System.out.print("Done\n");
     }
 
